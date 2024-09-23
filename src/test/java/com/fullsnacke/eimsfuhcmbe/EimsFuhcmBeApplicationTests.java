@@ -1,4 +1,4 @@
-package com.fullsnack.eimsfuhcmbe;
+package com.fullsnacke.eimsfuhcmbe;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,4 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
-public class UserService {
+import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
+
+public interface UserService {
 }

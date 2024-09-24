@@ -2,10 +2,8 @@ package com.fullsnacke.eimsfuhcmbe.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -18,38 +16,39 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    Integer id;
 
     @Column(name = "fu_id", nullable = false, length = 10)
-    private String fuId;
+    String fuId;
 
     @Column(name = "first_name", nullable = false, length = 50)
-    private String firstName;
+    String firstName;
 
     @Column(name = "last_name", nullable = false, length = 50)
-    private String lastName;
+    String lastName;
 
     @Column(name = "email", nullable = false, length = 50)
-    private String email;
+    String email;
 
     @Column(name = "phone_number", length = 20)
-    private String phoneNumber;
+    String phoneNumber;
 
     @Column(name = "department", length = 50)
-    private String department;
+    String department;
 
     @ColumnDefault("b'1'")
     @Column(name = "gender")
-    private Boolean gender;
+    Boolean gender;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id")
     @JsonIgnore
-    private Role role;
+    Role role;
 
 }

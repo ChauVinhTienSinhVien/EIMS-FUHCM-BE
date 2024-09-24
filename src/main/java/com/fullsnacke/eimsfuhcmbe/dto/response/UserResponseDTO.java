@@ -4,31 +4,30 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fullsnacke.eimsfuhcmbe.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponseDTO {
     @NotNull
-    private String fuId;
+    String fuId;
     @NotNull
-    private String firstName;
+    String firstName;
 
     @NotNull
-    private String lastName;
+    String lastName;
 
     @NotNull
     @Email
-    private String email;
-    private String phoneNumber;
-    private String department;
-    private Boolean gender;
+    String email;
+    String phoneNumber;
+    String department;
+    Boolean gender;
 
     @JsonIgnore
-    private Role role;
+    Role role;
 }

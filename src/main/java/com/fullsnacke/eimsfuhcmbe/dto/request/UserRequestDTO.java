@@ -4,10 +4,8 @@ import com.fullsnacke.eimsfuhcmbe.entity.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -18,23 +16,24 @@ import java.io.Serializable;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRequestDTO implements Serializable {
 
 
     @NotNull
-    private String fuId;
+    String fuId;
     @NotNull
-    private String firstName;
+    String firstName;
 
     @NotNull
-    private String lastName;
+    String lastName;
 
     @NotNull
     @Email
-    private String email;
-    private String phoneNumber;
-    private String department;
-    private Boolean gender;
-    private Role role;
+    String email;
+    String phoneNumber;
+    String department;
+    Boolean gender;
+    Role role;
 
 }

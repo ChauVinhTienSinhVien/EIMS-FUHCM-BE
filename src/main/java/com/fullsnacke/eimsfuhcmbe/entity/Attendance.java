@@ -1,56 +1,32 @@
 package com.fullsnacke.eimsfuhcmbe.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
 @Entity
 @Table(name = "attendance")
+@Setter
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Attendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    Integer id;
 
     @Column(name = "check_in")
-    private Instant checkIn;
+    Instant checkIn;
 
     @Column(name = "check_out")
-    private Instant checkOut;
+    Instant checkOut;
 
     @Column(name = "status", nullable = false)
-    private Integer status;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Instant getCheckIn() {
-        return checkIn;
-    }
-
-    public void setCheckIn(Instant checkIn) {
-        this.checkIn = checkIn;
-    }
-
-    public Instant getCheckOut() {
-        return checkOut;
-    }
-
-    public void setCheckOut(Instant checkOut) {
-        this.checkOut = checkOut;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
+    Integer status;
 
 }

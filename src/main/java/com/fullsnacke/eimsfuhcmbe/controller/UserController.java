@@ -69,4 +69,14 @@ public class UserController {
         }
     }
 
+    @DeleteMapping("/{fuId}")
+    public ResponseEntity<?> deleteUserByFuId(@PathVariable("fuId") String fuId){
+        try{
+            userServiceImpl.deleteUser(fuId);
+            return ResponseEntity.noContent().build();
+        }catch (UserNotFoundException exception){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

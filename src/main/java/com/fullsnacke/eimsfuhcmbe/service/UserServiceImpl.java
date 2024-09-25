@@ -45,4 +45,13 @@ public class UserServiceImpl implements UserService{
 
         return userRepository.save(userInDb);
     }
+
+    public void deleteUser(String fuId){
+        User userInDb = userRepository.findByFuId(fuId);
+
+        if(userInDb == null){
+            throw new UserNotFoundException("No User found with given fuId:" + fuId);
+        }
+        userRepository.delete(userInDb);
+    }
 }

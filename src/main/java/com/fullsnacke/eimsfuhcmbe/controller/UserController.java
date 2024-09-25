@@ -19,8 +19,8 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private UserServiceImpl userServiceImpl;
-    private ModelMapper modelMapper;
+    private final UserServiceImpl userServiceImpl;
+    private final ModelMapper modelMapper;
 
     public UserController(UserServiceImpl userServiceImpl, ModelMapper modelMapper) {
         this.userServiceImpl = userServiceImpl;

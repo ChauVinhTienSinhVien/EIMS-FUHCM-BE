@@ -18,7 +18,7 @@ public class Semester {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    Integer id;
+    int id;
 
     @Column(name = "name", nullable = false, length = 50)
     String name;

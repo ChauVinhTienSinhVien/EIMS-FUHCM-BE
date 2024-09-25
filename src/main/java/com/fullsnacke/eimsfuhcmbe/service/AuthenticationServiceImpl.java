@@ -19,9 +19,13 @@ public class AuthenticationServiceImpl extends DefaultOAuth2UserService implemen
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
         String email = oAuth2User.getAttribute("email");
+        if(email == null){
+            throw new RuntimeException("Email not found.");
+        }
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Your account is not permitted to log in to the system."));
+        System.out.println("Authenticated user: " + user.getEmail());
         return oAuth2User;
     }
 }

@@ -1,6 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.exception.OAuth2AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -20,11 +21,16 @@ public class AuthenticationServiceImpl extends DefaultOAuth2UserService implemen
 
         String email = oAuth2User.getAttribute("email");
         if(email == null){
-            throw new RuntimeException("Email not found.");
+            throw new OAuth2AuthenticationProcessException("Email not found from Google.", 401);
+        }
+
+        boolean emailVerified = Boolean.TRUE.equals(oAuth2User.getAttribute("email_verified"));
+        if(!emailVerified){
+            throw new OAuth2AuthenticationProcessException("Email does not exist", 401);
         }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Your account is not permitted to log in to the system."));
+                .orElseThrow(() -> new OAuth2AuthenticationProcessException("Your email is not permitted to log in to the system.", 403));
         System.out.println("Authenticated user: " + user.getEmail());
         return oAuth2User;
     }

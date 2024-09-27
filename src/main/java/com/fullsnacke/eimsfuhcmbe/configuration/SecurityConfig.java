@@ -14,17 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     private String[] PUBLIC_ENDPOINT = {
-            "/",
-//            "/error",
-//            "/favicon.ico",
-//            "/**/*.png",
-//            "/**/*.gif",
-//            "/**/*.svg",
-//            "/**/*.jpg",
-//            "/**/*.html",
-//            "/**/*.css",
-//            "/**/*.js",
-//            "/auth/**"
+
     };
     @Autowired
     private AuthenticationServiceImpl authenticationServiceImpl;
@@ -37,8 +27,14 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_ENDPOINT).permitAll()
+                        .requestMatchers("/api/lecturer/**").hasRole("LECTURER")
+                        .requestMatchers("/api/staff/**").hasRole("STAFF")
+                        .requestMatchers("/api/manager/**").hasRole("MANAGER")
                         .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo

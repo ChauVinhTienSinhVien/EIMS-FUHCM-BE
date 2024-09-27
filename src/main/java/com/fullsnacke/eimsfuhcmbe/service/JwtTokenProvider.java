@@ -19,25 +19,29 @@ public class JwtTokenProvider {
     @Value("${jwt.secretKey}")
     private String secretKey;
 
-    public String generateToken(String email) {
+    @Value("${jwt.expirationInMs}")
+    private long expirationInMs;
+
+    public String generateToken(String email, String role) {
 
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(email)
                 .issuer("EIMS-FUHCM")
+                .claim("role", role)
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plusMillis(expirationInMs).toEpochMilli()
                 ))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 
-        JWSObject jwsObject = new JWSObject(header, payload);//Đối tượng JWT chứa phần header và phần payload (chứa claims đã tạo).
+        JWSObject jwsObject = new JWSObject(header, payload);
 
         try {
-            jwsObject.sign(new MACSigner(secretKey.getBytes())/*thuat toan để sign, có khoá để kí và khoá giải mã là như nhau*/);
+            jwsObject.sign(new MACSigner(secretKey.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             log.error("Cannot create token ", e);

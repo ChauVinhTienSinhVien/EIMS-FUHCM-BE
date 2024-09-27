@@ -3,7 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RoomRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Room;
-import com.fullsnacke.eimsfuhcmbe.exception.room.RoomNotFoundException;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.room.RoomNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.service.RoomServiceImpl;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;

@@ -29,11 +29,6 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public void deleteSubject(int id) {
-
-    }
-
-    @Override
     public Subject updateSubject(Subject subject, String code) {
         Subject subjectInDB = subjectRepository.findByCode(code);
         if (subjectInDB == null) {

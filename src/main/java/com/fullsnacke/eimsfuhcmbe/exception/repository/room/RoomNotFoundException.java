@@ -1,4 +1,4 @@
-package com.fullsnacke.eimsfuhcmbe.exception.room;
+package com.fullsnacke.eimsfuhcmbe.exception.repository.room;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

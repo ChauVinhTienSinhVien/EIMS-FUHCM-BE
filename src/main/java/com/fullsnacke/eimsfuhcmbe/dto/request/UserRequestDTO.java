@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.dto.request;
 import com.fullsnacke.eimsfuhcmbe.entity.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -18,17 +19,16 @@ import java.io.Serializable;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRequestDTO implements Serializable {
-
-
-    @NotNull
+    @NotBlank(message = "fuId must not be blank")
     String fuId;
-    @NotNull
+
+    @NotBlank(message = "firstName must not be blank")
     String firstName;
 
-    @NotNull
+    @NotBlank(message = "lastName must not be blank")
     String lastName;
 
-    @NotNull
+    @NotBlank(message = "email must not be blank")
     @Email
     String email;
     String phoneNumber;

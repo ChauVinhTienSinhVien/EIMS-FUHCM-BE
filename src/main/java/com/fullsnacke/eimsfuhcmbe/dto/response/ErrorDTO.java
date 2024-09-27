@@ -1,4 +1,3 @@
-
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
 import lombok.Getter;

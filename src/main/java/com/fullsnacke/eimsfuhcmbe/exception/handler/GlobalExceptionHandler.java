@@ -58,4 +58,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(errorDTO, headers, status);
     }
+
 }

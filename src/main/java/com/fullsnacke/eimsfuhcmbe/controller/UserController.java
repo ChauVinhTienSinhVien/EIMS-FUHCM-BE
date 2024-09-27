@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UserRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.user.UserNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -18,8 +19,8 @@ import java.util.List;
 @RequestMapping("/users")
 public class UserController {
 
-    private UserServiceImpl userServiceImpl;
-    private ModelMapper modelMapper;
+    private final UserServiceImpl userServiceImpl;
+    private final ModelMapper modelMapper;
 
     public UserController(UserServiceImpl userServiceImpl, ModelMapper modelMapper) {
         this.userServiceImpl = userServiceImpl;
@@ -37,11 +38,24 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> addUser(@RequestBody @Valid UserRequestDTO userRequestDTO){
+    public ResponseEntity<UserResponseDTO> addUser(@RequestBody @Valid UserRequestDTO userRequestDTO){
         User user = modelMapper.map(userRequestDTO, User.class);
         User addedUser = userServiceImpl.add(user);
         URI uri = URI.create("/users" + user.getFuId());
-        return ResponseEntity.created(uri).body(addedUser);
+        UserResponseDTO userResponseDTO = modelMapper.map(addedUser, UserResponseDTO.class);
+        return ResponseEntity.created(uri).body(userResponseDTO);
+    }
+
+    @PutMapping("/{fuId}")
+    public ResponseEntity<UserResponseDTO> updateUserByFuId(@RequestBody @Valid UserRequestDTO userRequestDTO){
+        User user = modelMapper.map(userRequestDTO, User.class);
+        try{
+            User updatedUser = userServiceImpl.updateUser(user);
+            UserResponseDTO userResponseDTO = modelMapper.map(updatedUser, UserResponseDTO.class);
+            return ResponseEntity.ok(userResponseDTO);
+        }catch (UserNotFoundException exception){
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/{fuId}")
@@ -52,6 +66,16 @@ public class UserController {
         }else{
             UserResponseDTO userResponseDTO = modelMapper.map(user, UserResponseDTO.class);
             return ResponseEntity.ok(userResponseDTO);
+        }
+    }
+
+    @DeleteMapping("/{fuId}")
+    public ResponseEntity<?> deleteUserByFuId(@PathVariable("fuId") String fuId){
+        try{
+            userServiceImpl.deleteUser(fuId);
+            return ResponseEntity.noContent().build();
+        }catch (UserNotFoundException exception){
+            return ResponseEntity.notFound().build();
         }
     }
 

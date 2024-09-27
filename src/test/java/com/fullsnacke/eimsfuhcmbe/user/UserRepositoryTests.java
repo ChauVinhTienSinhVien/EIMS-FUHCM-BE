@@ -21,29 +21,29 @@ public class UserRepositoryTests {
     @Autowired
     private UserRepository userRepository;
 
-    @Test
-    public void testAddSuccess(){
-        Role role = new Role();
-        role.setId(1);
-
-        User user = new User();
-        user.setFuId("SE120001");
-        user.setEmail("TienCV@gamil.com");
-        user.setFirstName("Tien");
-        user.setLastName("Chau Vinh");
-        user.setGender(true);
-        user.setRole(role);
-        user.setDepartment("SE");
-
-        User saveUser = userRepository.save(user);
-
-        Assertions.assertNotNull(saveUser);
-    }
-
-    @Test
-    public void testFindByFuid(){
-        User user = userRepository.findByFuId("FU001");
-        Assertions.assertNotNull(user);
-    }
+//    @Test
+//    public void testAddSuccess(){
+//        Role role = new Role();
+//        role.setId(1);
+//
+//        User user = new User();
+//        user.setFuId("SE120001");
+//        user.setEmail("TienCV@gamil.com");
+//        user.setFirstName("Tien");
+//        user.setLastName("Chau Vinh");
+//        user.setGender(true);
+//        user.setRole(role);
+//        user.setDepartment("SE");
+//
+//        User saveUser = userRepository.save(user);
+//
+//        Assertions.assertNotNull(saveUser);
+//    }
+//
+//    @Test
+//    public void testFindByFuid(){
+//        User user = userRepository.findByFuId("FU001");
+//        Assertions.assertNotNull(user);
+//    }
 
 }

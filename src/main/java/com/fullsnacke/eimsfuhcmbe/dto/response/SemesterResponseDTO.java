@@ -1,10 +1,9 @@
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.Instant;
+import java.util.Date;
 
 @Setter
 @Getter
@@ -13,10 +12,11 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SemesterResponseDTO {
 
-    int i;
+
+    int id;
     String name;
 
-    Instant startAt;
-    Instant endAt;
+    Date startAt;
+    Date endAt;
 
 }

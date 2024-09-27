@@ -8,7 +8,7 @@ public interface RoomService {
 
     List<Room> getAllRoom();
     Room createRoom(Room room);
-    Room updateRoom(Room room);
+    Room updateRoom(Room room, int id);
     void deleteRoom(Room room);
     Room findByRoomName(String roomName);
 

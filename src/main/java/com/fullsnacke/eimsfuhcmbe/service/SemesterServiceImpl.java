@@ -1,12 +1,13 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.dto.request.SemesterRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.semester.SemesterNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SemesterServiceImpl implements SemesterService {
@@ -30,12 +31,19 @@ public class SemesterServiceImpl implements SemesterService {
     }
 
     @Override
-    public Semester updateSemester(Semester semester) {
-        return null;
+    public Semester updateSemester(Semester semester, int id) {
+
+        Semester semesterInDB = semesterRepository.findById(id).orElse(null);
+        if (semesterInDB == null)
+            throw new SemesterNotFoundException("Semester not found");
+        semesterInDB.setName(semester.getName());
+        semesterInDB.setEndAt(semester.getEndAt());
+        semesterInDB.setStartAt(semester.getStartAt());
+        return semesterRepository.save(semesterInDB);
     }
 
     @Override
-    public List<Semester> findSemesterByNameLike(String name) {
-        return semesterRepository.findSemesterByNameLike(name);
+    public Semester findSemesterByName(String name) {
+        return semesterRepository.findSemesterByName(name);
     }
 }

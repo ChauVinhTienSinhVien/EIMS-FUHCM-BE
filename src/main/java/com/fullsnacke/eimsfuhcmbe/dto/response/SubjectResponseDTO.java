@@ -1,10 +1,8 @@
-package com.fullsnacke.eimsfuhcmbe.dto.request;
+package com.fullsnacke.eimsfuhcmbe.dto.response;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Date;
 
 @Setter
 @Getter
@@ -12,11 +10,12 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SemesterRequestDTO {
+public class SubjectResponseDTO {
 
-    @NotNull(message = "Semester name is required")
+    String code;
+
     String name;
 
-    Date startAt;
-    Date endAt;
+    int semesterId;
+
 }

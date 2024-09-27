@@ -2,10 +2,8 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.SemesterRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.SemesterResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.entity.Room;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
-import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.semester.SemesterNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.service.SemesterServiceImpl;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -38,32 +36,35 @@ public class SemesterController {
     }
 
     @PostMapping
-    public ResponseEntity<Semester> createSemester(@RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
+    public ResponseEntity<SemesterResponseDTO> createSemester(@RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
         Semester semester = modelMapper.map(semesterRequestDTO, Semester.class);
         Semester createdSemester  = semesterServiceImpl.createSemester(semester);
         URI uri = URI.create("/semesters/" + createdSemester.getId());
-        return ResponseEntity.created(uri).body(createdSemester);
+        SemesterResponseDTO semesterResponseDTO = modelMapper.map(createdSemester, SemesterResponseDTO.class);
+        return ResponseEntity.created(uri).body(semesterResponseDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Semester> updateSemester(@PathVariable("name") int id, @RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
-        Semester semester = modelMapper.map(semesterRequestDTO, Semester.class);
-        semester.setId(id);
-        Semester updatedSemester = semesterServiceImpl.updateSemester(semester);
-        if (updatedSemester == null) {
+    public ResponseEntity<SemesterResponseDTO> updateSemester(@PathVariable("id") int id, @RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
+        Semester semesterUpdate = modelMapper.map(semesterRequestDTO, Semester.class);
+        try {
+            Semester updatedSemester = semesterServiceImpl.updateSemester(semesterUpdate, id);
+            SemesterResponseDTO semesterResponseDTO = modelMapper.map(updatedSemester, SemesterResponseDTO.class);
+            return ResponseEntity.ok(semesterResponseDTO);
+        } catch (SemesterNotFoundException exception) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(updatedSemester);
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<List<Semester>> findSemesterByNameLike(@PathVariable("name") String name){
-        List<Semester> semesterList = semesterServiceImpl.findSemesterByNameLike(name);
-        if(semesterList == null) {
+    public ResponseEntity<SemesterResponseDTO> findSemesterByName(@PathVariable("name") String name){
+        Semester semester = semesterServiceImpl.findSemesterByName(name);
+        if(semester == null) {
             return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok(semesterList);
         }
+        SemesterResponseDTO semesterResponseDTO = modelMapper.map(semester, SemesterResponseDTO.class);
+        return ResponseEntity.ok(semesterResponseDTO);
+
     }
 
 }

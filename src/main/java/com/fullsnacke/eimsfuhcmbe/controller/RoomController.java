@@ -1,7 +1,9 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.RoomRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Room;
+import com.fullsnacke.eimsfuhcmbe.exception.room.RoomNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.service.RoomServiceImpl;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -34,31 +36,34 @@ public class RoomController {
     }
 
     @PostMapping
-    public ResponseEntity<Room> createRoom(@RequestBody @Valid RoomRequestDTO roomRequestDTO) {
+    public ResponseEntity<RoomResponseDTO> createRoom(@RequestBody @Valid RoomRequestDTO roomRequestDTO) {
         Room room = modelMapper.map(roomRequestDTO, Room.class);
         Room createdRoom = roomServiceImpl.createRoom(room);
         URI uri = URI.create("/rooms/" + createdRoom.getId());
-        return ResponseEntity.created(uri).body(createdRoom);
+        RoomResponseDTO roomResponseDTO = modelMapper.map(createdRoom, RoomResponseDTO.class);
+        return ResponseEntity.created(uri).body(roomResponseDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Room> updateRoom(@PathVariable("id") int id, @RequestBody @Valid RoomRequestDTO roomRequestDTO) {
+    public ResponseEntity<RoomResponseDTO> updateRoom(@PathVariable("id") int id, @RequestBody @Valid RoomRequestDTO roomRequestDTO) {
         Room room = modelMapper.map(roomRequestDTO, Room.class);
-        room.setId(id);
-        Room updatedRoom = roomServiceImpl.updateRoom(room);
-        if (updatedRoom == null) {
+        try {
+            Room updatedRoom = roomServiceImpl.updateRoom(room, id);
+            RoomResponseDTO roomResponseDTO = modelMapper.map(updatedRoom, RoomResponseDTO.class);
+            return ResponseEntity.ok(roomResponseDTO);
+        } catch (RoomNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(updatedRoom);
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<Room> findByRoomName(@PathVariable("name") String name) {
+    public ResponseEntity<RoomResponseDTO> findByRoomName(@PathVariable("name") String name) {
         Room room = roomServiceImpl.findByRoomName(name);
         if (room == null) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(room);
+        RoomResponseDTO roomResponseDTO = modelMapper.map(room, RoomResponseDTO.class);
+        return ResponseEntity.ok(roomResponseDTO);
 
     }
 

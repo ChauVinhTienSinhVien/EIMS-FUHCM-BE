@@ -4,19 +4,18 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
-
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SemesterRequestDTO {
+public class SubjectRequestDTO {
 
-    @NotNull(message = "Semester name is required")
+    @NotNull(message = "Subject code is required")
+    String code;
+
     String name;
 
-    Date startAt;
-    Date endAt;
+    int semesterId;
 }

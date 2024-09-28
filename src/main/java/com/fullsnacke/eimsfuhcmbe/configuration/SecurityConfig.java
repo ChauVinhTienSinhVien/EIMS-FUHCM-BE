@@ -14,7 +14,9 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
     private String[] PUBLIC_ENDPOINT = {
-
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
     };
     @Autowired
     private AuthenticationServiceImpl authenticationServiceImpl;
@@ -27,6 +29,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(PUBLIC_ENDPOINT).permitAll()
                         .requestMatchers("/api/lecturer/**").hasRole("LECTURER")
                         .requestMatchers("/api/staff/**").hasRole("STAFF")
                         .requestMatchers("/api/manager/**").hasRole("MANAGER")

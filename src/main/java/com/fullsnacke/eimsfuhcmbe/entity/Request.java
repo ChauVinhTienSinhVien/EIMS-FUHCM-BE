@@ -25,11 +25,19 @@ public class Request {
     @JoinColumn(name = "exam_slot_id", nullable = false)
     ExamSlot examSlot;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "created_by", nullable = false)
+    User createdBy;
+
     @Column(name = "reason")
     String reason;
 
     @Column(name = "status", nullable = false)
     Integer status;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "updated_by", nullable = false)
+    User updatedBy;
 
     @Column(name = "request_type", nullable = false, length = 50)
     String requestType;

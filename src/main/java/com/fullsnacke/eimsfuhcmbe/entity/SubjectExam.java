@@ -18,6 +18,14 @@ public class SubjectExam {
     @Column(name = "id", nullable = false)
     Integer id;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "subject_id", nullable = false)
+    Subject subjectId;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "staff_id", nullable = false)
+    User staffId;
+
     @Column(name = "duration", nullable = false)
     Integer duration;
 

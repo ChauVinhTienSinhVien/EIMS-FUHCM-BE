@@ -21,9 +21,9 @@ public class Subject {
     @Column(name = "code", nullable = false, length = 50)
     String code;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
-    int semesterId;
+    Semester semesterId;
 
     @Column(name = "name", nullable = false, length = 100)
     String name;

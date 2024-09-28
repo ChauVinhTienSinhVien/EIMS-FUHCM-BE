@@ -1,6 +1,8 @@
 package com.fullsnacke.eimsfuhcmbe.exception.handler;
 
+import com.fullsnacke.eimsfuhcmbe.dto.response.ApiResponse;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ErrorDTO;
+import com.fullsnacke.eimsfuhcmbe.exception.OAuth2AuthenticationProcessException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -57,6 +59,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         });
 
         return new ResponseEntity<>(errorDTO, headers, status);
+    }
+
+    @ExceptionHandler(value = OAuth2AuthenticationProcessException.class)
+    ResponseEntity<ApiResponse> handlingOAuth2AuthenticationProcessException(OAuth2AuthenticationProcessException exception){
+        ApiResponse apiResponse = new ApiResponse();
+
+        apiResponse.setCode(exception.getErrorCode());
+        apiResponse.setMessage(exception.getMessage());
+
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 
 }

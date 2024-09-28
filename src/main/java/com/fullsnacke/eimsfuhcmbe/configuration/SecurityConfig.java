@@ -15,7 +15,25 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     private String[] PUBLIC_ENDPOINT = {
 
+<<<<<<< Updated upstream
     };
+=======
+    private String[] PUBLIC_ENDPOINTS = {
+            "/",
+            "/error",
+            "/favicon.ico",
+            "/**/*.png",
+            "/**/*.gif",
+            "/**/*.svg",
+            "/**/*.jpg",
+            "/**/*.html",
+            "/**/*.css",
+            "/**/*.js",
+            "/auth/**",
+//            "/oauth2/**"
+    };
+
+>>>>>>> Stashed changes
     @Autowired
     private AuthenticationServiceImpl authenticationServiceImpl;
 
@@ -27,9 +45,13 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+<<<<<<< Updated upstream
                         .requestMatchers("/api/lecturer/**").hasRole("LECTURER")
                         .requestMatchers("/api/staff/**").hasRole("STAFF")
                         .requestMatchers("/api/manager/**").hasRole("MANAGER")
+=======
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+>>>>>>> Stashed changes
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -37,9 +59,10 @@ public class SecurityConfig {
                         .permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(authenticationServiceImpl))
-                        .successHandler(successHandler)
+                                .userInfoEndpoint(userInfo -> userInfo
+                                        .userService(authenticationServiceImpl))
+                                .successHandler(successHandler)
+//                        .failureHandler();
                 );
         return http.build();
     }

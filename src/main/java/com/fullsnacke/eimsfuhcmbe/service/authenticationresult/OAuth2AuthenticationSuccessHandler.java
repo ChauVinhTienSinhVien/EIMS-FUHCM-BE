@@ -2,7 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.service.authenticationresult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
-import com.fullsnacke.eimsfuhcmbe.service.JwtTokenProvider;
+import com.fullsnacke.eimsfuhcmbe.service.JwtTokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,7 +24,7 @@ import java.util.Map;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Autowired
-    private JwtTokenProvider jwtTokenProvider;
+    private JwtTokenService jwtTokenProvider;
 
     @Autowired
     private UserRepository userRepository;

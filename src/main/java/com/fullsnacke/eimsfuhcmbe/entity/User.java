@@ -50,7 +50,6 @@ public class User {
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id")
-    @JsonIgnore
     Role role;
 
 }

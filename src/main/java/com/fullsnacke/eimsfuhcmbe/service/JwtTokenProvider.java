@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -22,14 +23,14 @@ public class JwtTokenProvider {
     @Value("${jwt.expirationInMs}")
     private long expirationInMs;
 
-    public String generateToken(String email, String role) {
+    public String generateToken(User user) {
 
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(email)
+                .subject(user.getEmail())
                 .issuer("EIMS-FUHCM")
-                .claim("role", role)
+                .claim("scope", user.getRole().getName())
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plusMillis(expirationInMs).toEpochMilli()

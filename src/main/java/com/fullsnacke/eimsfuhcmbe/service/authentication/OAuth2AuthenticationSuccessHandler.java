@@ -1,6 +1,7 @@
-package com.fullsnacke.eimsfuhcmbe.service.authenticationresult;
+package com.fullsnacke.eimsfuhcmbe.service.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.JwtTokenProvider;
 import jakarta.servlet.ServletException;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
@@ -32,13 +34,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
-        OAuth2User user = authToken.getPrincipal();
+        OAuth2User oAuth2User = authToken.getPrincipal();
 
-        String email = user.getAttribute("email");
+        String email = oAuth2User.getAttribute("email");
 
-        String role = userRepository.findByEmail(email).get().getRole().getName();
+        User user = userRepository.findByEmail(email).get();
 
-        String token = jwtTokenProvider.generateToken(email,role);
+        String role = user.getRole().getName();
+        String token = jwtTokenProvider.generateToken(user);
 
         Map<String, String> responeBody = new HashMap<>();
         responeBody.put("email", email);
@@ -47,6 +50,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         ResponseEntity<Map<String, String>> responseEntity = new ResponseEntity<>(responeBody, HttpStatus.OK);
 
+        System.out.println("Home ne: OAuth2AuthenticationSuccessHandler");
         response.getWriter().write(new ObjectMapper().writeValueAsString(responseEntity.getBody()));
+        response.flushBuffer();
+//        response.sendRedirect("/" + role + "/home");
     }
 }

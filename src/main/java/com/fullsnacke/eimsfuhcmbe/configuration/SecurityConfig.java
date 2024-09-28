@@ -1,7 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.configuration;
 
-import com.fullsnacke.eimsfuhcmbe.service.AuthenticationServiceImpl;
-import com.fullsnacke.eimsfuhcmbe.service.authenticationresult.OAuth2AuthenticationSuccessHandler;
+import com.fullsnacke.eimsfuhcmbe.service.authentication.CustomOAuth2UserServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.service.authentication.OAuth2AuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +17,10 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
+
     };
     @Autowired
-    private AuthenticationServiceImpl authenticationServiceImpl;
+    private CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
 
     @Autowired
     private OAuth2AuthenticationSuccessHandler successHandler;
@@ -38,10 +39,11 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
+                        .successHandler(successHandler)
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(authenticationServiceImpl))
+                                .userService(customOAuth2UserServiceImpl))
                         .successHandler(successHandler)
                 );
         return http.build();

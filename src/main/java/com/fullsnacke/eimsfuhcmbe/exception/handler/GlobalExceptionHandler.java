@@ -2,8 +2,8 @@ package com.fullsnacke.eimsfuhcmbe.exception.handler;
 
 import com.fullsnacke.eimsfuhcmbe.dto.response.ApiResponse;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ErrorDTO;
-import com.fullsnacke.eimsfuhcmbe.exception.OAuth2AuthenticationProcessException;
-import jakarta.servlet.ServletRequest;
+import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,14 +61,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorDTO, headers, status);
     }
 
-    @ExceptionHandler(value = OAuth2AuthenticationProcessException.class)
-    ResponseEntity<ApiResponse> handlingOAuth2AuthenticationProcessException(OAuth2AuthenticationProcessException exception){
-        ApiResponse apiResponse = new ApiResponse();
-
-        apiResponse.setCode(exception.getErrorCode());
-        apiResponse.setMessage(exception.getMessage());
-
-        return ResponseEntity.badRequest().body(apiResponse);
+    //NGAN
+    @ExceptionHandler(value = AuthenticationProcessException.class)
+    ResponseEntity<ApiResponse> handlingOAuth2AuthenticationProcessException(AuthenticationProcessException exception){
+        ErrorCode errorCode = exception.getErrorCode();
+        System.out.println("Not found have been here");
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getStatusCode().value())
+                        .message(errorCode.getMessage())
+                        .build());
     }
+    //NGAN
+//    @ExceptionHandler(value = NoResourceFoundException.class)
+//    private void handlingNoResourceFoundException(NoResourceFoundException exception){
+//        ErrorCode errorCode = ErrorCode.LOGIN_PAGE_NOT_FOUND;
+//
+//        return ResponseEntity
+//                .status(errorCode.getStatusCode())
+//                .body(ApiResponse.builder()
+//                        .code(errorCode.getStatusCode().value())
+//                        .message(errorCode.getMessage())
+//                        .build());
+//    }
+
+
 
 }

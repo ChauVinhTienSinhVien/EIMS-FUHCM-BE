@@ -21,9 +21,20 @@ public class ExamSlot {
     @Column(name = "id", nullable = false)
     Integer id;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "subject_exam_id", nullable = false)
+    SubjectExam subjectExam;
+
     @Column(name = "status", nullable = false)
     Integer status;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "created_by", nullable = false)
+    User createdBy;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "updated_by", nullable = false)
+    User updated_by;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     Instant createdAt;

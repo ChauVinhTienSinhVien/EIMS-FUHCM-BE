@@ -27,4 +27,7 @@ public class Config {
     @Column(name = "unit", length = 50)
     private String unit;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semesterId;
 }

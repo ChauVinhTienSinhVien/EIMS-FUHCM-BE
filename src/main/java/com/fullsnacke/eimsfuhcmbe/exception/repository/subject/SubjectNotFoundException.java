@@ -8,7 +8,5 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SubjectNotFoundException extends RuntimeException {
-
     private String message;
-
 }

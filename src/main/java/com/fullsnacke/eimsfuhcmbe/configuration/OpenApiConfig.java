@@ -10,6 +10,8 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI OpenAPI(){
-        return new OpenAPI().info(new Info().title("API-service document"));
+        return new OpenAPI().info(new Info().title("API-service document")
+                .version("v1.0.0")
+                .description("This is a document for EISM_FUHCM API-service"));
     }
 }

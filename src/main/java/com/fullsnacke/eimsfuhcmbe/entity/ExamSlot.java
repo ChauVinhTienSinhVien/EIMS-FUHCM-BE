@@ -24,8 +24,8 @@ public class ExamSlot {
     @Column(name = "status", nullable = false)
     Integer status;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at", nullable = false)
+
+    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     Instant createdAt;
 
     @Column(name = "updated_at")

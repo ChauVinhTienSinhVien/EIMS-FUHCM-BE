@@ -18,7 +18,7 @@ public class InvigilatorAssignment {
     @Column(name = "id", nullable = false)
     Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "exam_slot_id", nullable = false)
     ExamSlot examSlot;
 

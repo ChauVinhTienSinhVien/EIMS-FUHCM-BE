@@ -21,7 +21,7 @@ public class Request {
     @Column(name = "id", nullable = false)
     Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "exam_slot_id", nullable = false)
     ExamSlot examSlot;
 
@@ -34,8 +34,7 @@ public class Request {
     @Column(name = "request_type", nullable = false, length = 50)
     String requestType;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at")
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     Instant createdAt;
 
     @Column(name = "updated_at")

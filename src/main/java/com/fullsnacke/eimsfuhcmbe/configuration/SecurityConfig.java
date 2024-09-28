@@ -13,8 +13,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private String[] PUBLIC_ENDPOINT = {
-
+    private final String[] PUBLIC_ENDPOINT = {
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
     };
     @Autowired
     private AuthenticationServiceImpl authenticationServiceImpl;
@@ -30,6 +32,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/lecturer/**").hasRole("LECTURER")
                         .requestMatchers("/api/staff/**").hasRole("STAFF")
                         .requestMatchers("/api/manager/**").hasRole("MANAGER")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers(PUBLIC_ENDPOINT).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

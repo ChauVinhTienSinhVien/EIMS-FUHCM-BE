@@ -30,9 +30,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINT).permitAll()
-                        .requestMatchers("/api/lecturer/**").hasRole("LECTURER")
-                        .requestMatchers("/api/staff/**").hasRole("STAFF")
-                        .requestMatchers("/api/manager/**").hasRole("MANAGER")
+                        .requestMatchers("/api/lecturers/**").hasRole("LECTURER")
+                        .requestMatchers("/api/staffs/**").hasRole("STAFF")
+                        .requestMatchers("/api/managers/**").hasRole("MANAGER")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

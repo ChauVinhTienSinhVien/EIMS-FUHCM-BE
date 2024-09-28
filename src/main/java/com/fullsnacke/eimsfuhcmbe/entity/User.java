@@ -31,10 +31,13 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 50)
     String lastName;
 
-    @Column(name = "email", nullable = false, length = 50)
+    @Column(name = "email", nullable = false, length = 50, unique = true)
     String email;
 
-    @Column(name = "phone_number", length = 20)
+    @Column(name = "password", length = 128)
+    String password;
+
+    @Column(name = "phone_number", length = 20, unique = true)
     String phoneNumber;
 
     @Column(name = "department", length = 50)

@@ -54,26 +54,51 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
         response.setHeader("Authorization", "Bearer " + token);
         String role = user.getRole().getName();
 
-
-//        // Set response content type and status
-//        response.setStatus(HttpServletResponse.SC_OK);
-//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-//
-//        // Create a simple JSON response containing only the token
-//        Map<String, String> responseBody = new HashMap<>();
-//        responseBody.put("email", email);
-//        responseBody.put("token", token);
-//        responseBody.put("role", role);
-//
-//        // Write the token in the response body
-//        response.getWriter().write(new ObjectMapper().writeValueAsString(responseBody));
-//        response.flushBuffer();
-
-//        hoặc là responsebody hoặc là getRedirect :<
         // Determine redirect URL based on the user's role
         String redirectUrl = "http://localhost:5173/home";
 
         // Perform the redirect based on the user's role
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+
+
+//        OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
+//        OAuth2User oAuth2User = authToken.getPrincipal();
+//
+//        String email = oAuth2User.getAttribute("email");
+//
+//        Optional<User> userOptional = userRepository.findByEmail(email);
+//        if (!userOptional.isPresent()) {
+//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+//            return;
+//        }
+//        User user = userOptional.get();
+//
+//        String token = jwtTokenProvider.generateToken(user);
+//        String role = user.getRole().getName();
+//
+//        // Create a JSON response
+//        Map<String, String> responseBody = new HashMap<>();
+//        responseBody.put("token", token);
+//        responseBody.put("role", role);
+//        responseBody.put("email", email);
+//
+//        // Convert the map to JSON
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String jsonResponse = objectMapper.writeValueAsString(responseBody);
+//
+//        // Set response headers
+//        response.setContentType("application/json");
+//        response.setCharacterEncoding("UTF-8");
+//        response.setHeader("Authorization", "Bearer " + token);
+//        response.setHeader("Access-Control-Expose-Headers", "Authorization");
+//
+//        // Write JSON response
+//        response.getWriter().write(jsonResponse);
+//        response.getWriter().flush();
+//
+//        // Redirect
+//        String redirectUrl = "http://localhost:5173/home";
+//        response.setHeader("Location", redirectUrl);
+//        response.setStatus(HttpServletResponse.SC_TEMPORARY_REDIRECT);
     }
 }

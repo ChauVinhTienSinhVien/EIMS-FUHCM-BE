@@ -9,11 +9,14 @@ import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -79,4 +82,9 @@ public class UserController {
         }
     }
 
+    @GetMapping("/userInfo")
+    public Map<String, Object> user(@AuthenticationPrincipal
+    OAuth2User principal){
+        return principal.getAttributes();
+    }
 }

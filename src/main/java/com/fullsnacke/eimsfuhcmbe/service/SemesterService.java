@@ -12,5 +12,6 @@ public interface SemesterService {
     Semester createSemester(Semester semester);
     Semester updateSemester(Semester semester, int id);
     Semester findSemesterByName(String name);
-
+    Semester findSemesterById(int id);
+    void deleteSemesterById(int id);
 }

@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SubjectResponseDTO {
 
+    int id;
     String code;
 
     String name;

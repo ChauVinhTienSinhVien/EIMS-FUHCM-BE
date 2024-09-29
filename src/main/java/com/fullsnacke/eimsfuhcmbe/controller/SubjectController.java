@@ -2,10 +2,13 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.SubjectRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.SubjectResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
+import com.fullsnacke.eimsfuhcmbe.service.SemesterServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.SubjectServiceImpl;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +21,8 @@ public class SubjectController {
 
     private SubjectServiceImpl subjectServiceImpl;
     private ModelMapper modelMapper;
+    @Autowired
+    private SemesterServiceImpl semesterServiceImpl;
 
 
     public SubjectController(SubjectServiceImpl subjectServiceImpl, ModelMapper modelMapper) {
@@ -39,29 +44,58 @@ public class SubjectController {
     }
 
     @PostMapping
-    public ResponseEntity<SubjectResponseDTO> createSubject(@RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
-        Subject subject = modelMapper.map(subjectRequestDTO, Subject.class);
+    public ResponseEntity<?> createSubject(@RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
+        Subject subject = new Subject();
+        subject.setName(subjectRequestDTO.getName());
+        subject.setCode(subjectRequestDTO.getCode());
+
+
+        Semester semester = semesterServiceImpl.findSemesterById(subjectRequestDTO.getSemesterId());
+        if (semester == null) {
+            return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
+        }
+
+        subject.setSemester(semester);
+
+        // kiểm tra subject đã tồn tại chưa?
+
         Subject createdSubject = subjectServiceImpl.createSubject(subject);
         URI uri = URI.create("/subjects/" + createdSubject.getCode());
+
         SubjectResponseDTO subjectResponseDTO = modelMapper.map(createdSubject, SubjectResponseDTO.class);
+        subjectResponseDTO.setSemesterId(createdSubject.getSemester().getId());
+
         return ResponseEntity.created(uri).body(subjectResponseDTO);
     }
 
-    @PutMapping("/{code}")
-    public ResponseEntity<SubjectResponseDTO> updateSubject(@PathVariable("code") String code, @RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
-        Subject subject = modelMapper.map(subjectRequestDTO, Subject.class);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateSubject(@PathVariable("id") int id, @RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
         try {
-            Subject updatedSubject = subjectServiceImpl.updateSubject(subject, code);
+
+            Subject subject = new Subject();
+            subject.setName(subjectRequestDTO.getName());
+            subject.setCode(subjectRequestDTO.getCode());
+
+            Semester semester = semesterServiceImpl.findSemesterById(subjectRequestDTO.getSemesterId());
+            if (semester == null) {
+                return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
+            } // tạo exception mới?
+
+            subject.setSemester(semester);
+
+            Subject updatedSubject = subjectServiceImpl.updateSubject(subject, id);
+
             SubjectResponseDTO subjectResponseDTO = modelMapper.map(updatedSubject, SubjectResponseDTO.class);
+            subjectResponseDTO.setSemesterId(updatedSubject.getSemester().getId());
             return ResponseEntity.ok(subjectResponseDTO);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
 
-    @GetMapping("/{code}")
-    public ResponseEntity<SubjectResponseDTO> findBySubjectCode(@PathVariable("code") String code) {
-        Subject subject = subjectServiceImpl.findByCode(code);
+    @GetMapping("/{id}")
+    public ResponseEntity<SubjectResponseDTO> findBySubjectCode(@PathVariable("id") int id) {
+        Subject subject = subjectServiceImpl.findSubjectById(id);
         if (subject == null) {
             return ResponseEntity.notFound().build();
         }

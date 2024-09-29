@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SubjectServiceImpl implements SubjectService {
@@ -29,18 +30,28 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public Subject updateSubject(Subject subject, String code) {
-        Subject subjectInDB = subjectRepository.findByCode(code);
+    public Subject updateSubject(Subject subject, int id) {
+        Subject subjectInDB = subjectRepository.findById(id).orElse(null);
         if (subjectInDB == null) {
             throw new SubjectNotFoundException("Subject not found");
         }
         subjectInDB.setName(subject.getName());
-        subjectInDB.setSemesterId(subject.getSemesterId());
+        subjectInDB.setSemester(subject.getSemester());
         return subjectRepository.save(subjectInDB);
     }
 
     @Override
-    public Subject findByCode(String code) {
-        return subjectRepository.findByCode(code);
+    public Subject findSubjectById(int id) {
+        return subjectRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void deleteSubject(int id) {
+        Optional<Subject> optionalSubject = subjectRepository.findById(id);
+        if (optionalSubject.isPresent()) {
+            subjectRepository.delete(optionalSubject.get());
+        } else {
+            throw new SubjectNotFoundException("Subject not found with ID: " + id);
+        }
     }
 }

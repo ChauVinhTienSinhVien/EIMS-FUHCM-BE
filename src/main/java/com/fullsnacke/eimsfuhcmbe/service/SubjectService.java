@@ -8,7 +8,8 @@ public interface SubjectService {
 
     List<Subject> getAllSubjects();
     Subject createSubject(Subject subject);
-    Subject updateSubject(Subject subject, String code);
-    Subject findByCode(String code);
+    Subject updateSubject(Subject subject, int id);
+    Subject findSubjectById(int id);
+    void deleteSubject(int id);
 
 }

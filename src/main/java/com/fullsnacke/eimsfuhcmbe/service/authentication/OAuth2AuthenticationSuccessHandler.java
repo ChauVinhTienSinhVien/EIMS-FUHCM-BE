@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service.authentication;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.JwtTokenProvider;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -17,6 +19,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
@@ -34,27 +39,41 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
         String email = oAuth2User.getAttribute("email");
 
-        User user = userRepository.findByEmail(email).get();
+        // Fetch the user from the repository using their email
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (!userOptional.isPresent()) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
+            return;
+        }
+        User user = userOptional.get();
 
-        String role = user.getRole().getName();
+        // Generate JWT token for the user
         String token = jwtTokenProvider.generateToken(user);
-        System.out.println(token);
 
-//        Map<String, String> responeBody = new HashMap<>();
-//        responeBody.put("email", email);
-//        responeBody.put("token", token);
-//        responeBody.put("role", role);
+        // Add the token to the response header
+        response.setHeader("Authorization", "Bearer " + token);
+        String role = user.getRole().getName();
+
+
+//        // Set response content type and status
+//        response.setStatus(HttpServletResponse.SC_OK);
+//        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 //
-//        ResponseEntity<Map<String, String>> responseEntity = new ResponseEntity<>(responeBody, HttpStatus.OK);
+//        // Create a simple JSON response containing only the token
+//        Map<String, String> responseBody = new HashMap<>();
+//        responseBody.put("email", email);
+//        responseBody.put("token", token);
+//        responseBody.put("role", role);
 //
-//        System.out.println("Home ne: OAuth2AuthenticationSuccessHandler");
-//        response.getWriter().write(new ObjectMapper().writeValueAsString(responseEntity.getBody()));
+//        // Write the token in the response body
+//        response.getWriter().write(new ObjectMapper().writeValueAsString(responseBody));
 //        response.flushBuffer();
-        response.setStatus(HttpStatus.OK.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
+//        hoặc là responsebody hoặc là getRedirect :<
+        // Determine redirect URL based on the user's role
         String redirectUrl = "http://localhost:5173/" + role.toLowerCase() + "/dashboard";
-        response.addHeader("Authorization", "Bearer " + token);
+
+        // Perform the redirect based on the user's role
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }

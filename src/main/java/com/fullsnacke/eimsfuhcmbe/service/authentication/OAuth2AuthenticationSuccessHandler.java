@@ -54,7 +54,7 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
         response.setHeader("Authorization", "Bearer " + token);
         String role = user.getRole().getName();
 
-        // Determine redirect URL based on the user's role
+        // Redirect URL
         String redirectUrl = "http://localhost:5173/home";
 
         // Perform the redirect based on the user's role

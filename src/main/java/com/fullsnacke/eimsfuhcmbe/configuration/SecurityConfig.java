@@ -58,7 +58,6 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserServiceImpl))
                         .successHandler(successHandler)
                         .failureUrl("http://localhost:5173")
-
                 );
         return http.build();
     }

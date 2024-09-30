@@ -1,13 +1,19 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.UserRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ApiResponse;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
+import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.user.UserNotFoundException;
+import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -17,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -24,10 +31,13 @@ public class UserController {
 
     private final UserServiceImpl userServiceImpl;
     private final ModelMapper modelMapper;
+    private final UserRepository userRepository;
 
-    public UserController(UserServiceImpl userServiceImpl, ModelMapper modelMapper) {
+    public UserController(UserServiceImpl userServiceImpl, ModelMapper modelMapper,
+                          UserRepository userRepository) {
         this.userServiceImpl = userServiceImpl;
         this.modelMapper = modelMapper;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -83,8 +93,10 @@ public class UserController {
     }
 
     @GetMapping("/userInfo")
-    public Map<String, Object> user(@AuthenticationPrincipal
-    OAuth2User principal){
-        return principal.getAttributes();
+    public ResponseEntity<UserResponseDTO> getUserInfo(@AuthenticationPrincipal
+    OAuth2User oAuth2User){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(userServiceImpl.getMyInfo(oAuth2User));
     }
 }

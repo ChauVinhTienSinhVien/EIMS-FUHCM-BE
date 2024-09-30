@@ -8,9 +8,8 @@ import org.springframework.http.HttpStatusCode;
 public enum ErrorCode{
     EMAIL_NOT_VERIFIED("Email not found.", HttpStatus.BAD_REQUEST),
     EMAIL_NOT_FOUND("Your email is not permitted to log in to the system.", HttpStatus.FORBIDDEN),
-    LOGIN_PAGE_NOT_FOUND("Login page not found.", HttpStatus.NOT_FOUND),
-    LOGIN_FAILED("Login failed.", HttpStatus.UNAUTHORIZED),
-
+    UNAUTHENTICATED("Login failed.", HttpStatus.UNAUTHORIZED),
+    USER_NOT_FOUND("User not found", HttpStatus.NOT_FOUND)
     ;
 
     private String message;

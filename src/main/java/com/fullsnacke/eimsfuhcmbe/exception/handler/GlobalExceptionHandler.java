@@ -73,19 +73,4 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         .message(errorCode.getMessage())
                         .build());
     }
-    //NGAN
-//    @ExceptionHandler(value = NoResourceFoundException.class)
-//    private void handlingNoResourceFoundException(NoResourceFoundException exception){
-//        ErrorCode errorCode = ErrorCode.LOGIN_PAGE_NOT_FOUND;
-//
-//        return ResponseEntity
-//                .status(errorCode.getStatusCode())
-//                .body(ApiResponse.builder()
-//                        .code(errorCode.getStatusCode().value())
-//                        .message(errorCode.getMessage())
-//                        .build());
-//    }
-
-
-
 }

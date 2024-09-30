@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.dto.request;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

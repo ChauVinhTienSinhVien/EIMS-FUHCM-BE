@@ -51,6 +51,9 @@ public class SubjectController {
 
 
         Semester semester = semesterServiceImpl.findSemesterById(subjectRequestDTO.getSemesterId());
+
+        System.out.println("Semester: " + semester);
+
         if (semester == null) {
             return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
         }

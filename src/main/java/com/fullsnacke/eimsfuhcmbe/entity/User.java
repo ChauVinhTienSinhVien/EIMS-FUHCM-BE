@@ -47,6 +47,7 @@ public class User {
     @Column(name = "gender")
     Boolean gender;
 
+
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id")

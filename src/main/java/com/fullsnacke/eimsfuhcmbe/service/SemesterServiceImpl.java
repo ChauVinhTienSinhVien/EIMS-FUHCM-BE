@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SemesterServiceImpl implements SemesterService {
@@ -46,4 +47,22 @@ public class SemesterServiceImpl implements SemesterService {
     public Semester findSemesterByName(String name) {
         return semesterRepository.findSemesterByName(name);
     }
+
+    @Override
+    public Semester findSemesterById(int id) {
+        return semesterRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void deleteSemesterById(int id) {
+        Optional<Semester> optionalSemester = semesterRepository.findById(id);
+
+        if (optionalSemester.isPresent()) {
+            semesterRepository.delete(optionalSemester.get());
+        } else {
+            throw new SemesterNotFoundException("Semester not found with ID: " + id);
+        }
+    }
+
+
 }

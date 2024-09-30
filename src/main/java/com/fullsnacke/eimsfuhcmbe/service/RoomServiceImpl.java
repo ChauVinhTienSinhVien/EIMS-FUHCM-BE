@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class RoomServiceImpl implements RoomService {
@@ -42,8 +43,13 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public void deleteRoom(Room room) {
-        roomRepository.delete(room);
+    public void deleteRoom(int id) {
+        Optional<Room> optionalRoom = roomRepository.findById(id);
+        if (optionalRoom.isPresent()) {
+            roomRepository.delete(optionalRoom.get());
+        } else {
+            throw new EntityNotFoundException("Room not found with ID: " + id);
+        }
     }
 
     @Override

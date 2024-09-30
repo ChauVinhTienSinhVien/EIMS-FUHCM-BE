@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -11,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "subjects")
 public class Subject {
     @Id
@@ -20,6 +22,7 @@ public class Subject {
 
     @Column(name = "code", nullable = false, length = 50, unique = true)
     String code;
+
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)

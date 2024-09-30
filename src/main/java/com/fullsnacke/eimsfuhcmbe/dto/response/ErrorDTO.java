@@ -1,6 +1,5 @@
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +11,6 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@Builder
 public class ErrorDTO {
     private Date timestamp;
     private int status;

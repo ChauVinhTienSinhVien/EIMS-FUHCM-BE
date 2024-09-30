@@ -8,7 +8,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.io.Serializable;
 
 @Entity
 @Table(name = "users")
@@ -32,10 +31,13 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 50)
     String lastName;
 
-    @Column(name = "email", nullable = false, length = 50)
+    @Column(name = "email", nullable = false, length = 50, unique = true)
     String email;
 
-    @Column(name = "phone_number", length = 20)
+    @Column(name = "password", length = 128)
+    String password;
+
+    @Column(name = "phone_number", length = 20, unique = true)
     String phoneNumber;
 
     @Column(name = "department", length = 50)
@@ -45,10 +47,10 @@ public class User {
     @Column(name = "gender")
     Boolean gender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id")
-    @JsonIgnore
     Role role;
 
 }

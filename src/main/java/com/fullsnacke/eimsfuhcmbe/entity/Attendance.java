@@ -29,4 +29,11 @@ public class Attendance {
     @Column(name = "status", nullable = false)
     Integer status;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    User user;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "exam_slot_room_id", nullable = false)
+    ExamSlotRoom examSlotRoom;
 }

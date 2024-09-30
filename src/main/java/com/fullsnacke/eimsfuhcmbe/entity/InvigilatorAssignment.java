@@ -18,9 +18,13 @@ public class InvigilatorAssignment {
     @Column(name = "id", nullable = false)
     Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "exam_slot_id", nullable = false)
     ExamSlot examSlot;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "invigilator_id", nullable = false)
+    User invigilator;
 
     @Column(name = "role", nullable = false, length = 50)
     String role;

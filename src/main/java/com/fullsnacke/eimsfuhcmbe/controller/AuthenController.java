@@ -1,6 +1,8 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.authentication.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -8,10 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/v1/oauth")
@@ -19,6 +20,8 @@ public class AuthenController {
 
     @Autowired
     AuthenticationService authenticationService;
+    @Autowired
+    private UserServiceImpl userServiceImpl;
 
     @PostMapping("/login")
     public ResponseEntity LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
@@ -32,6 +35,15 @@ public class AuthenController {
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.ok().build();
+    }
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/user/info")
+    public ResponseEntity getUserInfo(Principal principal) {
+
+        System.out.println(principal.toString());
+        System.out.println("principle Name: " + principal.getName());
+        //User user = userServiceImpl.getUserByFuId(Long.valueOf(principal.getName()));
+        return ResponseEntity.ok().body(principal);
     }
 
 }

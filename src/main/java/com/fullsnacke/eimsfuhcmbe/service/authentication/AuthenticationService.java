@@ -1,74 +1,76 @@
 package com.fullsnacke.eimsfuhcmbe.service.authentication;
 
-import com.fullsnacke.eimsfuhcmbe.dto.request.AuthenticationRequest;
-import com.fullsnacke.eimsfuhcmbe.dto.request.IntrospectRequest;
-import com.fullsnacke.eimsfuhcmbe.dto.response.AuthenticationResponse;
-import com.fullsnacke.eimsfuhcmbe.dto.response.IntrospectResponse;
-import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
-import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.configuration.JWTUtils;
+import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
-import com.fullsnacke.eimsfuhcmbe.service.JwtTokenProvider;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.SignedJWT;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.util.Date;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
 
-    JwtTokenProvider jwtTokenProvider;
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final JWTUtils jwtUtils;
+    private final GoogleIdTokenVerifier verifier;
 
-    @NonFinal
-    @Value("${jwt.secretKey}")
-    private String SECRET_KEY;
-
-    //check login voi email va password
-//    public AuthenticationResponse authenticate(AuthenticationRequest request) {
-//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//
-//        var user = userRepository.findByEmail(request.getEmail())
-//                .orElseThrow(() -> new AuthenticationProcessException(ErrorCode.LOGIN_FAILED));
-//        boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
-//        if(!authenticated)
-//            throw new AuthenticationProcessException(ErrorCode.LOGIN_FAILED);
-//
-//        var token = jwtTokenProvider.generateToken(user);
-//
-//        return AuthenticationResponse.builder()
-//                .token(token)
-//                .authenticated(authenticated)
-//                .build();
-//    }
-
-    //ktr xem token con han su dung khong
-    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
-        var token = request.getToken();
-
-        JWSVerifier verifier = new MACVerifier(SECRET_KEY.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
-
-        return IntrospectResponse.builder()
-                .valid(verified && expiryTime.after(new Date()))
+    public AuthenticationService(@Value("${spring.security.oauth2.client.registration.google.client-id}") String clientId, UserRepository userRepository,
+                          JWTUtils jwtUtils) {
+        this.userRepository = userRepository;
+        this.jwtUtils = jwtUtils;
+        NetHttpTransport transport = new NetHttpTransport();
+        JsonFactory jsonFactory = new JacksonFactory();
+        verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                .setAudience(Collections.singletonList(clientId))
                 .build();
+    }
+
+
+    public String loginOAuthGoogle(IdTokenRequestDto requestBody) {
+        User user = verifyIDToken(requestBody.getIdToken());
+
+        if (user == null) {
+            throw new IllegalArgumentException();
+        }
+
+        User isIntheDB = userRepository.findByEmail(user.getEmail()).orElse(null);
+
+        if (isIntheDB == null) {
+            throw  new IllegalArgumentException();
+        }
+
+        return jwtUtils.createToken(isIntheDB, false);
+    }
+
+    private User verifyIDToken(String idToken) {
+        try {
+            GoogleIdToken idTokenObj = verifier.verify(idToken);
+            if (idTokenObj == null) {
+                return null;
+            }
+
+            GoogleIdToken.Payload payload = idTokenObj.getPayload();
+            String firstName = (String) payload.get("given_name");
+            String lastName = (String) payload.get("family_name");
+            String email = payload.getEmail();
+
+
+            return new User().builder()
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .email(email)
+                    .build();
+        } catch (GeneralSecurityException | IOException e) {
+            return null;
+        }
     }
 }

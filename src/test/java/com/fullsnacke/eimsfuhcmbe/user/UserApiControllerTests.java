@@ -1,10 +1,9 @@
 package com.fullsnacke.eimsfuhcmbe.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fullsnacke.eimsfuhcmbe.configuration.AppConfig;
+import com.fullsnacke.eimsfuhcmbe.configuration.WebConfig;
 import com.fullsnacke.eimsfuhcmbe.controller.UserController;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UserRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
-@ContextConfiguration(classes = AppConfig.class)
+@ContextConfiguration(classes = WebConfig.class)
 public class UserApiControllerTests {
     private static final String END_POINT_PATH = "/users";
 

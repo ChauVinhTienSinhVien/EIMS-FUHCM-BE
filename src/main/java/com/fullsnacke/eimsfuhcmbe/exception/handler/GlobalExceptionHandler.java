@@ -4,6 +4,9 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ApiResponse;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ErrorDTO;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
+
+import jakarta.servlet.ServletRequest;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +63,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(errorDTO, headers, status);
     }
-
+  
     //NGAN
     @ExceptionHandler(value = AuthenticationProcessException.class)
     ResponseEntity<ApiResponse> handlingOAuth2AuthenticationProcessException(AuthenticationProcessException exception){
@@ -73,4 +76,5 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         .message(errorCode.getMessage())
                         .build());
     }
+
 }

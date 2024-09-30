@@ -21,9 +21,13 @@ public class Request {
     @Column(name = "id", nullable = false)
     Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "exam_slot_id", nullable = false)
     ExamSlot examSlot;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "created_by", nullable = false)
+    User createdBy;
 
     @Column(name = "reason")
     String reason;
@@ -31,11 +35,14 @@ public class Request {
     @Column(name = "status", nullable = false)
     Integer status;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "updated_by", nullable = false)
+    User updatedBy;
+
     @Column(name = "request_type", nullable = false, length = 50)
     String requestType;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
-    @Column(name = "created_at")
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     Instant createdAt;
 
     @Column(name = "updated_at")

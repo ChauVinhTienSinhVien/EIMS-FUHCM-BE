@@ -21,7 +21,7 @@ import javax.crypto.spec.SecretKeySpec;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
+  
     @Value("${jwt.secretKey}")
     private String SECRET_KEY;
 
@@ -29,8 +29,8 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-
     };
+  
     @Autowired
     private CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
 
@@ -41,6 +41,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        // Thêm Cross-Origin-Opener-Policy để cho phép giao tiếp
+                        .addHeaderWriter((request, response) -> {
+                            response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+                            response.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+                            response.setHeader("Cross-Origin-Resource-Policy", "same-site");
+                        })
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_ENDPOINT).permitAll()
                         .requestMatchers("/api/lecturers/**").hasRole("LECTURER")

@@ -27,7 +27,7 @@ public class StudentList {
     @Column(name = "last_name", nullable = false, length = 50)
     String lastName;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "exam_slot_room_id", nullable = false)
     ExamSlotRoom examSlotRoom;
 }

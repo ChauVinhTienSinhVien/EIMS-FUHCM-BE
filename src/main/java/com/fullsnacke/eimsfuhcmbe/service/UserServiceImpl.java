@@ -1,17 +1,21 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
+
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.user.UserNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -52,10 +56,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(userInDb);
     }
 
+
     public void deleteUser(String fuId) {
         User userInDb = userRepository.findByFuId(fuId);
-
-        if (userInDb == null) {
+        if(userInDb == null){
             throw new UserNotFoundException("No User found with given fuId:" + fuId);
         }
         userRepository.delete(userInDb);

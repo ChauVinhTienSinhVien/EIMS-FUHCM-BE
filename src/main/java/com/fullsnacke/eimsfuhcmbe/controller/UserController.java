@@ -9,7 +9,12 @@ import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.user.UserNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
+
 import jakarta.servlet.http.HttpServletResponse;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +32,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
+@Tag(name = "User Controller", description = "API for User Controller")
 public class UserController {
 
     private final UserServiceImpl userServiceImpl;
@@ -41,6 +47,7 @@ public class UserController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all users", description = "Retrieve a list of all users")
     public ResponseEntity<List<User>> getAllUsers(){
         List<User> userList = userServiceImpl.getAllUsers();
         if(userList.isEmpty()){
@@ -51,6 +58,7 @@ public class UserController {
     }
 
     @PostMapping
+    @Operation(summary = "Add a user", description = "Add a new user")
     public ResponseEntity<UserResponseDTO> addUser(@RequestBody @Valid UserRequestDTO userRequestDTO){
         User user = modelMapper.map(userRequestDTO, User.class);
         User addedUser = userServiceImpl.add(user);
@@ -60,6 +68,7 @@ public class UserController {
     }
 
     @PutMapping("/{fuId}")
+    @Operation(summary = "Update a user", description = "Update an existing user")
     public ResponseEntity<UserResponseDTO> updateUserByFuId(@RequestBody @Valid UserRequestDTO userRequestDTO){
         User user = modelMapper.map(userRequestDTO, User.class);
         try{
@@ -72,6 +81,7 @@ public class UserController {
     }
 
     @GetMapping("/{fuId}")
+    @Operation(summary = "Get a user by fuId", description = "Retrieve a user by fuId")
     public ResponseEntity<UserResponseDTO> getUserByFuId(@PathVariable("fuId") String fuId){
         User user = userServiceImpl.getUserByFuId(fuId);
         if(user == null){
@@ -83,6 +93,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{fuId}")
+    @Operation(summary = "Delete a user by fuId", description = "Delete a user by fuId")
     public ResponseEntity<?> deleteUserByFuId(@PathVariable("fuId") String fuId){
         try{
             userServiceImpl.deleteUser(fuId);

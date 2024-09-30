@@ -29,6 +29,5 @@ public class UserResponseDTO {
     String department;
     Boolean gender;
 
-    @JsonIgnore
     Role role;
 }

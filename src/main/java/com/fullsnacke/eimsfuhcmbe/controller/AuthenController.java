@@ -36,7 +36,7 @@ public class AuthenController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.ok().build();
     }
-    @CrossOrigin(origins = "http://localhost:3000")
+
     @GetMapping("/user/info")
     public ResponseEntity getUserInfo(Principal principal) {
 

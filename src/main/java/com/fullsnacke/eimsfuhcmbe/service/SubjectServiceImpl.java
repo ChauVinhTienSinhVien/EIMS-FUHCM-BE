@@ -36,7 +36,7 @@ public class SubjectServiceImpl implements SubjectService {
             throw new SubjectNotFoundException("Subject not found");
         }
         subjectInDB.setName(subject.getName());
-        subjectInDB.setSemester(subject.getSemester());
+        subjectInDB.setSemesterId(subject.getSemesterId());
         return subjectRepository.save(subjectInDB);
     }
 

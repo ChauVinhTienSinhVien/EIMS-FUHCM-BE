@@ -42,8 +42,8 @@ public class AuthenController {
 
         System.out.println(principal.toString());
         System.out.println("principle Name: " + principal.getName());
-        //User user = userServiceImpl.getUserByFuId(Long.valueOf(principal.getName()));
-        return ResponseEntity.ok().body(principal);
+        User user = userServiceImpl.getUserByEmail(principal.getName());
+        return ResponseEntity.ok().body(user);
     }
 
 }

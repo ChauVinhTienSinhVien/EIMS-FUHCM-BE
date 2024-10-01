@@ -36,6 +36,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByFuId(fuId);
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND));
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }

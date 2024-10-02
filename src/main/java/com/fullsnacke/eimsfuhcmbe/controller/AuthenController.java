@@ -43,6 +43,7 @@ public class AuthenController {
                 .httpOnly(true)
                 .maxAge(0)
                 .path("/")
+                .sameSite("Strict")
                 .secure(false)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());

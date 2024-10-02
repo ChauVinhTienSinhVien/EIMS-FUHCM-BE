@@ -17,4 +17,16 @@ public class ExamSlotRoom {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     Integer id;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "room_id", nullable = false)
+    Room room;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "exam_slot_id", nullable = false)
+    ExamSlot examSlot;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "invigilator_id", nullable = false)
+    User invigilator;
 }

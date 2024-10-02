@@ -18,7 +18,7 @@ public class Room {
     @Column(name = "id", nullable = false)
     int id;
 
-    @Column(name = "room_name", nullable = false, length = 50)
+    @Column(name = "room_name", nullable = false, length = 50, unique = true)
     String roomName;
 
     @Column(name = "capacity", nullable = false)

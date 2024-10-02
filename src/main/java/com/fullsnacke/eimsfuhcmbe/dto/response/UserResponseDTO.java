@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 
 @Setter
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -28,6 +29,5 @@ public class UserResponseDTO {
     String department;
     Boolean gender;
 
-    @JsonIgnore
     Role role;
 }

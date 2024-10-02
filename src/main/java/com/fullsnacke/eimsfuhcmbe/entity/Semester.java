@@ -20,7 +20,7 @@ public class Semester {
     @Column(name = "id", nullable = false)
     int id;
 
-    @Column(name = "name", nullable = false, length = 50)
+    @Column(name = "name", nullable = false, length = 50, unique = true)
     String name;
 
     @Column(name = "start_at", nullable = false)

@@ -55,7 +55,7 @@ public class SubjectController {
             return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
         }
 
-        subject.setSemester(semester);
+        subject.setSemesterId(semester);
 
         // kiểm tra subject đã tồn tại chưa?
 
@@ -63,7 +63,7 @@ public class SubjectController {
         URI uri = URI.create("/subjects/" + createdSubject.getCode());
 
         SubjectResponseDTO subjectResponseDTO = modelMapper.map(createdSubject, SubjectResponseDTO.class);
-        subjectResponseDTO.setSemesterId(createdSubject.getSemester().getId());
+        subjectResponseDTO.setSemesterId(createdSubject.getSemesterId().getId());
 
         return ResponseEntity.created(uri).body(subjectResponseDTO);
     }
@@ -81,12 +81,12 @@ public class SubjectController {
                 return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
             } // tạo exception mới?
 
-            subject.setSemester(semester);
+            subject.setSemesterId(semester);
 
             Subject updatedSubject = subjectServiceImpl.updateSubject(subject, id);
 
             SubjectResponseDTO subjectResponseDTO = modelMapper.map(updatedSubject, SubjectResponseDTO.class);
-            subjectResponseDTO.setSemesterId(updatedSubject.getSemester().getId());
+            subjectResponseDTO.setSemesterId(updatedSubject.getSemesterId().getId());
             return ResponseEntity.ok(subjectResponseDTO);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

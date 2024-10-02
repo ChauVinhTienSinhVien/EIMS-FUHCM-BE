@@ -20,12 +20,13 @@ public class Subject {
     @Column(name = "id", nullable = false)
     Integer id;
 
-    @Column(name = "code", nullable = false, length = 50)
+    @Column(name = "code", nullable = false, length = 50, unique = true)
     String code;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
-    Semester semester;
+    Semester semesterId;
 
     @Column(name = "name", nullable = false, length = 100)
     String name;

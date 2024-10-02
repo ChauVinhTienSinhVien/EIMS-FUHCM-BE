@@ -63,8 +63,7 @@ public class AuthenticationService {
             String lastName = (String) payload.get("family_name");
             String email = payload.getEmail();
 
-
-            return new User().builder()
+            return User.builder()
                     .firstName(firstName)
                     .lastName(lastName)
                     .email(email)

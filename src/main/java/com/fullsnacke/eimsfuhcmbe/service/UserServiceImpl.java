@@ -4,10 +4,12 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Role;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.user.UserNotFoundException;
+import com.fullsnacke.eimsfuhcmbe.repository.RoleRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +24,14 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private RoleRepository roleRepository;
 
     public User add(User user) {
+        Role role = roleRepository.findById(user.getId()).orElseThrow(() -> new UserNotFoundException("Role not found"));
+        user.setRole(role);
         return userRepository.save(user);
     }
 
@@ -84,7 +87,7 @@ public class UserServiceImpl implements UserService {
                 .phoneNumber(user.getPhoneNumber())
                 .department(user.getDepartment())
                 .gender(user.getGender())
-                .role(user.getRole())
+                .role(user.getRole().getId())
                 .build();
     }
 }

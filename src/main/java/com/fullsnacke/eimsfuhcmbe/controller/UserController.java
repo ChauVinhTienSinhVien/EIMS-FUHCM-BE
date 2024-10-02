@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.UserMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UserRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ApiResponse;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
@@ -35,45 +36,46 @@ import java.util.Optional;
 @Tag(name = "User Controller", description = "API for User Controller")
 public class UserController {
 
-    private final UserServiceImpl userServiceImpl;
-    private final ModelMapper modelMapper;
-    private final UserRepository userRepository;
+    @Autowired
+    private UserServiceImpl userServiceImpl;
 
-    public UserController(UserServiceImpl userServiceImpl, ModelMapper modelMapper,
-                          UserRepository userRepository) {
-        this.userServiceImpl = userServiceImpl;
-        this.modelMapper = modelMapper;
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @GetMapping
     @Operation(summary = "Get all users", description = "Retrieve a list of all users")
-    public ResponseEntity<List<User>> getAllUsers(){
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers(){
         List<User> userList = userServiceImpl.getAllUsers();
+
         if(userList.isEmpty()){
             return ResponseEntity.noContent().build();
         }else{
-            return ResponseEntity.ok(userList);
+            List<UserResponseDTO> userResponseDTOList;
+            userResponseDTOList = userList.stream().map(user -> userMapper.toDto(user)).toList();
+            return ResponseEntity.ok(userResponseDTOList);
         }
     }
 
     @PostMapping
     @Operation(summary = "Add a user", description = "Add a new user")
     public ResponseEntity<UserResponseDTO> addUser(@RequestBody @Valid UserRequestDTO userRequestDTO){
-        User user = modelMapper.map(userRequestDTO, User.class);
+        User user = userMapper.toEntity(userRequestDTO);
         User addedUser = userServiceImpl.add(user);
         URI uri = URI.create("/users" + user.getFuId());
-        UserResponseDTO userResponseDTO = modelMapper.map(addedUser, UserResponseDTO.class);
+        UserResponseDTO userResponseDTO = userMapper.toDto(addedUser);
         return ResponseEntity.created(uri).body(userResponseDTO);
     }
 
     @PutMapping("/{fuId}")
     @Operation(summary = "Update a user", description = "Update an existing user")
     public ResponseEntity<UserResponseDTO> updateUserByFuId(@RequestBody @Valid UserRequestDTO userRequestDTO){
-        User user = modelMapper.map(userRequestDTO, User.class);
+        User user = userMapper.toEntity(userRequestDTO);
         try{
             User updatedUser = userServiceImpl.updateUser(user);
-            UserResponseDTO userResponseDTO = modelMapper.map(updatedUser, UserResponseDTO.class);
+            UserResponseDTO userResponseDTO = userMapper.toDto(updatedUser);
             return ResponseEntity.ok(userResponseDTO);
         }catch (UserNotFoundException exception){
             return ResponseEntity.notFound().build();
@@ -87,7 +89,7 @@ public class UserController {
         if(user == null){
             return ResponseEntity.notFound().build();
         }else{
-            UserResponseDTO userResponseDTO = modelMapper.map(user, UserResponseDTO.class);
+            UserResponseDTO userResponseDTO = userMapper.toDto(user);
             return ResponseEntity.ok(userResponseDTO);
         }
     }

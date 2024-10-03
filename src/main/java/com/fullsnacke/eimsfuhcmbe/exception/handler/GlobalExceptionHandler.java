@@ -2,10 +2,6 @@ package com.fullsnacke.eimsfuhcmbe.exception.handler;
 
 import com.fullsnacke.eimsfuhcmbe.dto.response.ApiResponse;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ErrorDTO;
-import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
-import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
-
-import jakarta.servlet.ServletRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -48,33 +44,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return errorDTO;
     }
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setTimestamp(new Date());
-        errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
-        errorDTO.setPath(((ServletWebRequest) request).getRequest().getServletPath());
 
-        List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
-
-        fieldErrors.forEach(fieldError -> {
-            errorDTO.addError(fieldError.getDefaultMessage());
-        });
-
-        return new ResponseEntity<>(errorDTO, headers, status);
-    }
-  
-    //NGAN
-    @ExceptionHandler(value = AuthenticationProcessException.class)
-    ResponseEntity<ApiResponse> handlingOAuth2AuthenticationProcessException(AuthenticationProcessException exception){
-        ErrorCode errorCode = exception.getErrorCode();
-        System.out.println("Not found have been here");
-        return ResponseEntity
-                .status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
-                        .code(errorCode.getStatusCode().value())
-                        .message(errorCode.getMessage())
-                        .build());
-    }
 
 }

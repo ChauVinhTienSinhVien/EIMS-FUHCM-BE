@@ -3,9 +3,11 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ExamSlotServiceImpl implements ExamSlotService {
 
     private ExamSlotRepository examSlotRepository;
@@ -43,4 +45,5 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     public void deleteExamSlot(int id) {
 
     }
+
 }

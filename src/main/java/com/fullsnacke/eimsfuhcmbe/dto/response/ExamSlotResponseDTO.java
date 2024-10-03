@@ -1,4 +1,4 @@
-package com.fullsnacke.eimsfuhcmbe.dto.request;
+package com.fullsnacke.eimsfuhcmbe.dto.response;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import lombok.*;
@@ -6,12 +6,13 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 import java.util.Date;
+
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ExamSlotRequestDTO {
+public class ExamSlotResponseDTO {
 
     int id;
     int subjectExamId;

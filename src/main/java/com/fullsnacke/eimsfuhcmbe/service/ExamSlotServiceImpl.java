@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.List;
 @Service
 public class ExamSlotServiceImpl implements ExamSlotService {
 
+    @Autowired
     private ExamSlotRepository examSlotRepository;
 
     @Override

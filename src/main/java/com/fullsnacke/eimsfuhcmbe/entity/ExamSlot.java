@@ -34,7 +34,7 @@ public class ExamSlot {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "updated_by", nullable = false)
-    User updated_by;
+    User updatedBy;
 
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     Instant createdAt;

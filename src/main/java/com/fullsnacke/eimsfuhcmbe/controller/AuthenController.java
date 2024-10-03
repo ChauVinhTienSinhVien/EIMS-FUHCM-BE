@@ -24,9 +24,8 @@ public class AuthenController {
     private UserServiceImpl userServiceImpl;
 
     @PostMapping("/login")
-    public ResponseEntity LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
+    public ResponseEntity<?> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
         String authToken = authenticationService.loginOAuthGoogle(requestBody);
-        System.out.println(requestBody.getIdToken());
         final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", authToken)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
@@ -37,11 +36,22 @@ public class AuthenController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/user/info")
-    public ResponseEntity getUserInfo(Principal principal) {
 
-        System.out.println(principal.toString());
-        System.out.println("principle Name: " + principal.getName());
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", "")
+                .httpOnly(true)
+                .maxAge(0)
+                .path("/")
+                .sameSite("Strict")
+                .secure(false)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/user/info")
+    public ResponseEntity<?> getUserInfo(Principal principal) {
         User user = userServiceImpl.getUserByEmail(principal.getName());
         return ResponseEntity.ok().body(user);
     }

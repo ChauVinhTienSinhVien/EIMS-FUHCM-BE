@@ -29,5 +29,5 @@ public class UserResponseDTO {
     String department;
     Boolean gender;
 
-    Role role;
+    int role;
 }

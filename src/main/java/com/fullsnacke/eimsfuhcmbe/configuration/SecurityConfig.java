@@ -11,17 +11,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private String[] PUBLIC_ENDPOINT = {
+    private static final String[] PUBLIC_ENDPOINT = {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
     };
 
-    private final String loginUrl = "/v1/oauth/login";
+    private static final String loginUri = "/v1/oauth/login";
+    private static final String logoutUri = "/v1/oauth/logout";
 
     private final JWTRequestFilter jwtRequestFilter;
 
@@ -32,13 +35,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(AbstractHttpConfigurer::disable);
-        http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/v1/oauth/login"));
+        http.csrf(AbstractHttpConfigurer::disable);
+        //http.csrf(csrf ->
+        //        csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        //        .ignoringRequestMatchers(loginUri,logoutUri));
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_ENDPOINT).permitAll()
-                .requestMatchers(loginUrl).permitAll()
+                .requestMatchers(loginUri,logoutUri).permitAll()
                 .anyRequest().authenticated());
         return http.build();
     }

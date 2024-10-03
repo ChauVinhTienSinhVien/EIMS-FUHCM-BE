@@ -36,6 +36,7 @@ public class UserRequestDTO implements Serializable {
     Boolean gender;
 
     String passWord;
-    Role role;
+
+    int role;
 
 }

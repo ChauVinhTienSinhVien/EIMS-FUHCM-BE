@@ -13,5 +13,4 @@ public class InvigilatorAssignmentResponseDTO {
     Integer invigilatorAssignmentId;
     String fuId;
     Integer examSlotId;
-    boolean isSuccess;
 }

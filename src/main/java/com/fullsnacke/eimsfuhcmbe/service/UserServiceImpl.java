@@ -27,11 +27,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
     private RoleRepository roleRepository;
 
     public User add(User user) {
-        Role role = roleRepository.findById(user.getId()).orElseThrow(() -> new UserNotFoundException("Role not found"));
+        Role role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found"));
         user.setRole(role);
+        System.out.println(user);
         return userRepository.save(user);
     }
 

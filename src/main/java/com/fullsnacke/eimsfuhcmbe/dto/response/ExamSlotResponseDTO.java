@@ -1,6 +1,9 @@
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,11 +25,11 @@ public class ExamSlotResponseDTO {
 
     int createdBy;
 
-    int updateBy;
+    int updatedBy;
 
-    Instant createAt;
+    Instant createdAt;
 
-    Instant updateAt;
+    Instant updatedAt;
 
     Instant startAt;
 

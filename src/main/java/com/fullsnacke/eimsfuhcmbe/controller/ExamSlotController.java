@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class ExamSlotController {
             List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
             for (ExamSlot e:examSlotList) {
                 ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
+                System.out.println(examSlotResponseDTO.getCreatedAt());
                 examSlotResponseDTOList.add(examSlotResponseDTO);
             }
             return ResponseEntity.ok(examSlotResponseDTOList);
@@ -46,10 +48,12 @@ public class ExamSlotController {
 
     @PostMapping
     public ResponseEntity<ExamSlotResponseDTO> createExamSlot(@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
-        ExamSlot examSlot = new ExamSlot();
+        ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
+        examSlot.setCreatedAt(Instant.now());
         ExamSlot createdExamSlot = examSlotServiceImpl.createExamSlot(examSlot);
         URI uri = URI.create("/examslots/" + createdExamSlot.getId());
-        ExamSlotResponseDTO examSlotResponseDTO = modelMapper.map(createdExamSlot, ExamSlotResponseDTO.class);
+        System.out.println(createdExamSlot.getCreatedAt());
+        ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(createdExamSlot);
         return ResponseEntity.created(uri).body(examSlotResponseDTO);
     }
 

@@ -14,12 +14,12 @@ public interface ExamSlotMapper {
 
     @Mapping(target = "subjectExam", source = "subjectExamId", qualifiedByName = "intToSubjectExam")
     @Mapping(target = "createdBy", source = "createdBy", qualifiedByName = "intToUser")
-    @Mapping(target = "updatedBy", source = "updateBy", qualifiedByName = "intToUser")
+    @Mapping(target = "updatedBy", source = "updatedBy", qualifiedByName = "intToUser")
     ExamSlot toEntity(ExamSlotRequestDTO dto);
 
     @Mapping(target = "subjectExamId", source = "subjectExam.id")
     @Mapping(target = "createdBy", source = "createdBy.id")
-    @Mapping(target = "updateBy", source = "updatedBy.id")
+    @Mapping(target = "updatedBy", source = "updatedBy.id")
     ExamSlotResponseDTO toDto(ExamSlot entity);
 
     @Named("intToSubjectExam")
@@ -34,6 +34,12 @@ public interface ExamSlotMapper {
         User user = new User();
         user.setId(userId);
         return user;
+    }
+
+    @Named("userToInt")
+    default int userToInt(User user) {
+        int userId = user.getId();
+        return userId;
     }
 
 }

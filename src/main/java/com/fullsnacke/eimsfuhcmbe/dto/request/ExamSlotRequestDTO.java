@@ -21,11 +21,11 @@ public class ExamSlotRequestDTO {
 
     int createdBy;
 
-    int updateBy;
+    int updatedBy;
 
-    Instant createAt;
+    Instant createdAt;
 
-    Instant updateAt;
+    Instant updatedAt;
 
     Instant startAt;
 

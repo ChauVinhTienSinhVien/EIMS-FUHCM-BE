@@ -36,7 +36,7 @@ public class ExamSlot {
     @JoinColumn(name = "updated_by", nullable = false)
     User updatedBy;
 
-    @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at")
     Instant createdAt;
 
     @Column(name = "updated_at")
@@ -47,4 +47,5 @@ public class ExamSlot {
 
     @Column(name = "end_at", nullable = false)
     Instant endAt;
+
 }

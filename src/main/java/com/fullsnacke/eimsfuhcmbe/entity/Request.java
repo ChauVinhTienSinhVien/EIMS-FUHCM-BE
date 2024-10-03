@@ -42,7 +42,7 @@ public class Request {
     @Column(name = "request_type", nullable = false, length = 50)
     String requestType;
 
-    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at")
     Instant createdAt;
 
     @Column(name = "updated_at")

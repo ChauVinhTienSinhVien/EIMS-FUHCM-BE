@@ -36,10 +36,9 @@ public interface ExamSlotMapper {
         return user;
     }
 
-    @Named("userToInt")
-    default int userToInt(User user) {
-        int userId = user.getId();
-        return userId;
-    }
+//    @Named("userToInt")
+//    default int userToInt(User user) {
+//        return user.getId();
+//    }
 
 }

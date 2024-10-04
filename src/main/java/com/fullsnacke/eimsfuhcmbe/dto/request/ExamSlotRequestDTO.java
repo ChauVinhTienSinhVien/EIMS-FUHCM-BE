@@ -13,8 +13,6 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ExamSlotRequestDTO {
 
-    int id;
-
     int subjectExamId;
 
     int status;

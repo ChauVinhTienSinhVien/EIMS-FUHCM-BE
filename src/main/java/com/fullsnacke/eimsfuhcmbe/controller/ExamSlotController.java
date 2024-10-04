@@ -4,7 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
-import com.fullsnacke.eimsfuhcmbe.entity.StudentList;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -66,6 +66,22 @@ public class ExamSlotController {
             examSlotResponseDTOList.add(examSlotResponseDTO);
         }
         return ResponseEntity.ok(examSlotResponseDTOList);
+    }
+
+    @PutMapping("/id")
+    public ResponseEntity<ExamSlotResponseDTO> updateExamSlot(@PathVariable("id") int id,@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
+        try{
+            ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
+            ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlotServiceImpl.updateExamSlotExamSlot(examSlot));
+            return ResponseEntity.ok(examSlotResponseDTO);
+        } catch (ExamSlotNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/id")
+    public ResponseEntity<ExamSlotResponseDTO> findById() {
+        return null;
     }
 
 }

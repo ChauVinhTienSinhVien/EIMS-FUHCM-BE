@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/invigilators")
@@ -26,6 +27,13 @@ public class InvigilatorAssignmentController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(invigilatorAssignmentResponseDTO);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<RegisteredExamInvigilationResponseDTO>> getAllRegisteredSlot(){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.getAllRegisteredSlot());
     }
 
 

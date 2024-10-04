@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAssignmentMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
@@ -16,8 +17,9 @@ import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -104,6 +106,26 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         System.out.println("Slot1: " + slot1.getStartAt() + " | " + slot1.getEndAt());
         System.out.println("Slot2: " + slot2.getStartAt() + " | " + slot2.getEndAt());
         return !slot1.getEndAt().isBefore(slot2.getStartAt()) && !slot2.getEndAt().isBefore(slot1.getStartAt());
+    }
+
+    public List<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot() {
+        var context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        String email = authentication.getName();
+        System.out.println(context);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvigilatorAssignException(ErrorCode.USER_NOT_FOUND));
+
+        List<InvigilatorAssignment> assignments = invigilatorRegistrationRepository.findByInvigilator(user);
+
+        return assignments.stream()
+                .map(assignment -> RegisteredExamInvigilationResponseDTO.builder()
+                        .examSlotId(assignment.getExamSlot().getId())
+                        .startAt(assignment.getExamSlot().getStartAt())
+                        .endAt(assignment.getExamSlot().getEndAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 
 }

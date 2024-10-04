@@ -11,7 +11,6 @@ import java.util.List;
 
 @Repository
 public interface InvigilatorAssignmentRepository extends JpaRepository<InvigilatorAssignment, Integer> {
-//    List<InvigilatorAssignment> findByInvigilator(User invigilator);
 List<InvigilatorAssignment> findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterIdAndExamSlot_SubjectExam_ExamType(
         User invigilator, Semester semesterId, String examType);
 }

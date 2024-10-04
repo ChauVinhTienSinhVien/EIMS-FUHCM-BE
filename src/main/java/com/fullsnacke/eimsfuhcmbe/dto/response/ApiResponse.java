@@ -20,5 +20,6 @@ public class ApiResponse <T> {
     int code = HttpStatus.OK.value();
     String message;
     T result;
+    String path;
     List<T> listResult;
 }

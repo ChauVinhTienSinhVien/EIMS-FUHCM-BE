@@ -3,6 +3,8 @@ package com.fullsnacke.eimsfuhcmbe.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -10,9 +12,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvigilatorAssignmentResponseDTO {
-    Integer invigilatorAssignmentId;
     String fuId;
-    Integer examSlotId;
     String examType;
     int semesterId;
+    Set<Integer> examSlotId;
 }

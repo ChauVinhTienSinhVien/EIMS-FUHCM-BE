@@ -8,11 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface InvigilatorAssignmentRepository extends JpaRepository<InvigilatorAssignment, Integer> {
     List<InvigilatorAssignment> findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterIdAndExamSlot_SubjectExam_ExamType(
             User invigilator, Semester semesterId, String examType);
 
-    List<InvigilatorAssignment> findByInvigilator(User invigilator);
+    Set<InvigilatorAssignment> findByInvigilator(User invigilator);
 }

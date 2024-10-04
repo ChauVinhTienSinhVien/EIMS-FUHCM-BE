@@ -9,8 +9,9 @@ import java.util.List;
 public interface InvigilatorAssignmentService {
     InvigilatorAssignmentResponseDTO registerExamSlot(InvigilatorAssignmentRequestDTO request);
 
-        List<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot();
-//    String getAllRegisteredSlot();
+    RegisteredExamInvigilationResponseDTO getAllRegisteredSlot();
+
+    InvigilatorAssignmentResponseDTO updateRegisterExamSlot(InvigilatorAssignmentRequestDTO request);
 
 }
 

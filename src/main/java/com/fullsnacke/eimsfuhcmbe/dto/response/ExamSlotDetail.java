@@ -3,9 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -13,8 +11,8 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RegisteredExamInvigilationResponseDTO {
-    String semester;
-    String examType;
-    Set<ExamSlotDetail> examSlots;
+public class ExamSlotDetail{
+    int examSlotId;
+    Instant startAt;
+    Instant endAt;
 }

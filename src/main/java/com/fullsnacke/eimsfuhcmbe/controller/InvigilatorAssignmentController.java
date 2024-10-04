@@ -23,18 +23,26 @@ public class InvigilatorAssignmentController {
 
     @PostMapping
     public ResponseEntity<InvigilatorAssignmentResponseDTO> registerExamSlot(@RequestBody InvigilatorAssignmentRequestDTO request) {
-        InvigilatorAssignmentResponseDTO invigilatorAssignmentResponseDTO = invigilatorAssignmentService.registerExamSlot(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(invigilatorAssignmentResponseDTO);
+                .body(invigilatorAssignmentService.registerExamSlot(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<RegisteredExamInvigilationResponseDTO>> getAllRegisteredSlot(){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.getAllRegisteredSlot());
     }
+
+    @PutMapping
+    public ResponseEntity<InvigilatorAssignmentResponseDTO> updateRegisteredSlot(@RequestBody InvigilatorAssignmentRequestDTO request) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.updateRegisterExamSlot(request));
+    }
+
+
 
 
 

@@ -15,6 +15,10 @@ public enum ErrorCode{
     EXAM_SLOT_NOT_FOUND("Exam slot not found.", HttpStatus.BAD_REQUEST),
     EXAM_SLOT_SET_EMPTY("Exam slot set is empty or null", HttpStatus.BAD_REQUEST),
     HTTP_MESSAGE_NOT_READABLE("Failed to read request.", HttpStatus.BAD_REQUEST),
+    AUTHENTICATION_CONTEXT_NOT_FOUND("Authentication context not found or invalid.", HttpStatus.UNAUTHORIZED),
+    AUTHENTICATION_EMAIL_MISSING("Authentication email is missing or empty.", HttpStatus.UNAUTHORIZED),
+
+
     ;
 
     private String message;

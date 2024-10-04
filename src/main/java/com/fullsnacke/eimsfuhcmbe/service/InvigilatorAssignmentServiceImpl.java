@@ -5,8 +5,11 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.InvigilatorRoleEnum;
+import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.InvigilatorAssignException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
@@ -30,19 +33,31 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     public InvigilatorAssignmentResponseDTO registerAnExamSlot(InvigilatorAssignmentRequestDTO request){
         User invigilator = userRepository.findByFuId(request.getFuId());
         ExamSlot examSlot = examSlotRepository.findById(request.getExamSlotId()).orElseThrow(
-                () -> new IllegalArgumentException("Exam slot not found")
+                () -> new InvigilatorAssignException(ErrorCode.EXAM_SLOT_NOT_FOUND)
         );
+
+        if (isExamSlotOverlapping(invigilator, examSlot)) {
+            throw new InvigilatorAssignException(ErrorCode.OVERLAP_SLOT);
+        }
+
         InvigilatorAssignment invigilatorAssignment = InvigilatorAssignment.builder()
                 .invigilator(invigilator)
                 .examSlot(examSlot)
                 .role(InvigilatorRoleEnum.IN_ROOM_INVIGILATOR.name())
                 .build();
-        invigilatorAssignment = invigilatorRegistrationRepository.save(invigilatorAssignment);
+        System.out.println("invigilator: " + invigilatorAssignment.getInvigilator().getFuId() +
+                            "\nexamSlot: " + invigilatorAssignment.getExamSlot().getId() +
+                            "\nrole: " + invigilatorAssignment.getRole());
+        invigilatorRegistrationRepository.save(invigilatorAssignment);
         return invigilatorAssignmentMapper.toInvigilatorAssignmentResponseDTO(invigilatorAssignment);
     }
 
     private boolean isExamSlotOverlapping(User invigilator, ExamSlot newExamSlot){
-        List<InvigilatorAssignment> existingAssignments = invigilatorRegistrationRepository.findByInvigilator(invigilator);
+        Semester semester = newExamSlot.getSubjectExam().getSubjectId().getSemesterId();
+        String examType = newExamSlot.getSubjectExam().getExamType();
+
+        List<InvigilatorAssignment> existingAssignments = invigilatorRegistrationRepository
+                .findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterIdAndExamSlot_SubjectExam_ExamType(invigilator, semester, examType);
 
         for (InvigilatorAssignment assignment : existingAssignments) {
             ExamSlot existingSlot = assignment.getExamSlot();
@@ -51,10 +66,11 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             }
         }
         return false;
-
     }
 
     private boolean isOverlapping(ExamSlot slot1, ExamSlot slot2){
+        System.out.println("Slot1: " + slot1.getStartAt() + " | " + slot1.getEndAt());
+        System.out.println("Slot2: " + slot2.getStartAt() + " | " + slot2.getEndAt());
         return !slot1.getEndAt().isBefore(slot2.getStartAt()) && !slot2.getEndAt().isBefore(slot1.getStartAt());
     }
 

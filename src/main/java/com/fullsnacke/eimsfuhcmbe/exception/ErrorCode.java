@@ -9,7 +9,9 @@ public enum ErrorCode{
     EMAIL_NOT_VERIFIED("Email not found.", HttpStatus.BAD_REQUEST),
     EMAIL_NOT_FOUND("Your email is not permitted to log in to the system.", HttpStatus.FORBIDDEN),
     UNAUTHENTICATED("Login failed.", HttpStatus.UNAUTHORIZED),
-    USER_NOT_FOUND("User not found", HttpStatus.NOT_FOUND)
+    USER_NOT_FOUND("User not found", HttpStatus.NOT_FOUND),
+    OVERLAP_SLOT("Exam slot overlaps with existing assignments in the same semester", HttpStatus.CONFLICT),
+    EXAM_SLOT_NOT_FOUND("Exam slot not found.", HttpStatus.BAD_REQUEST),
     ;
 
     private String message;

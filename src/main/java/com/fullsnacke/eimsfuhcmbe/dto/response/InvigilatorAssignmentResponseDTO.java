@@ -13,4 +13,6 @@ public class InvigilatorAssignmentResponseDTO {
     Integer invigilatorAssignmentId;
     String fuId;
     Integer examSlotId;
+    String examType;
+    int semesterId;
 }

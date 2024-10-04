@@ -5,6 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ErrorDTO;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.InvigilatorAssignException;
 import jakarta.servlet.ServletRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,7 +69,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = AuthenticationProcessException.class)
     ResponseEntity<ApiResponse> handlingOAuth2AuthenticationProcessException(AuthenticationProcessException exception){
         ErrorCode errorCode = exception.getErrorCode();
-        System.out.println("Not found have been here");
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getStatusCode().value())
+                        .message(errorCode.getMessage())
+                        .build());
+    }
+
+    //NGAN
+    @ExceptionHandler(value = InvigilatorAssignException.class)
+    ResponseEntity<ApiResponse> handlingInvigilatorAssignException(InvigilatorAssignException exception){
+        ErrorCode errorCode = exception.getErrorCode();
         return ResponseEntity
                 .status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()

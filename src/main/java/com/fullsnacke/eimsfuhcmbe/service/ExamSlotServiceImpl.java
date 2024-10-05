@@ -47,11 +47,13 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     @Override
     public void deleteExamSlot(int id) {
         ExamSlot examSlot = examSlotRepository.findById(id);
-        if (examSlot != null) {
-            examSlotRepository.delete(examSlot);
-        } else {
+        if (examSlot == null ) {
             throw new ExamSlotNotFoundException("ExamSlot not found with ID: " + id);
+        } else {
+            examSlotRepository.delete(examSlot);
         }
+
+
     }
 
 }

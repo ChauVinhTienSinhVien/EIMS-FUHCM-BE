@@ -1,10 +1,8 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
-import com.fullsnacke.eimsfuhcmbe.exception.repository.semester.SemesterNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,26 +28,25 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
-    public Subject updateSubject(Subject subject, int id) {
-        Subject subjectInDB = subjectRepository.findById(id).orElse(null);
+    public Subject updateSubject(Subject subject) {
+        int id = subject.getId();
+        Subject subjectInDB = subjectRepository.findSubjectsById(id);
         if (subjectInDB == null) {
             throw new SubjectNotFoundException("Subject not found");
         }
-        subjectInDB.setName(subject.getName());
-        subjectInDB.setSemesterId(subject.getSemesterId());
-        return subjectRepository.save(subjectInDB);
+        return subjectRepository.save(subject);
     }
 
     @Override
     public Subject findSubjectById(int id) {
-        return subjectRepository.findById(id).orElse(null);
+        return subjectRepository.findSubjectsById(id);
     }
 
     @Override
     public void deleteSubject(int id) {
-        Optional<Subject> optionalSubject = subjectRepository.findById(id);
-        if (optionalSubject.isPresent()) {
-            subjectRepository.delete(optionalSubject.get());
+        Subject subject = subjectRepository.findSubjectsById(id);
+        if (subject != null) {
+            subjectRepository.delete(subject);
         } else {
             throw new SubjectNotFoundException("Subject not found with ID: " + id);
         }

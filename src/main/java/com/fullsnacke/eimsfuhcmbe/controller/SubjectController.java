@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.SubjectMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.SubjectRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.SubjectResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
@@ -19,16 +20,15 @@ import java.util.List;
 @RequestMapping("/subjects")
 public class SubjectController {
 
+    @Autowired
     private SubjectServiceImpl subjectServiceImpl;
+    @Autowired
     private ModelMapper modelMapper;
     @Autowired
-    private SemesterServiceImpl semesterServiceImpl;
+    private SubjectMapper subjectMapper;
 
 
-    public SubjectController(SubjectServiceImpl subjectServiceImpl, ModelMapper modelMapper) {
-        this.subjectServiceImpl = subjectServiceImpl;
-        this.modelMapper = modelMapper;
-    }
+
 
     @GetMapping
     public ResponseEntity<List<SubjectResponseDTO>> getAllSubjects() {
@@ -45,28 +45,19 @@ public class SubjectController {
 
     @PostMapping
     public ResponseEntity<?> createSubject(@RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
-        Subject subject = new Subject();
-        subject.setName(subjectRequestDTO.getName());
-        subject.setCode(subjectRequestDTO.getCode());
+        Subject subject = subjectMapper.toEntity(subjectRequestDTO);
 
+        System.out.println("Semester: " + subject.getSemesterId());
 
-        Semester semester = semesterServiceImpl.findSemesterById(subjectRequestDTO.getSemesterId());
-
-        System.out.println("Semester: " + semester);
-
-        if (semester == null) {
+        if (subject.getSemesterId() == null) {
             return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
         }
 
-        subject.setSemesterId(semester);
-
-        // kiểm tra subject đã tồn tại chưa?
 
         Subject createdSubject = subjectServiceImpl.createSubject(subject);
         URI uri = URI.create("/subjects/" + createdSubject.getCode());
 
-        SubjectResponseDTO subjectResponseDTO = modelMapper.map(createdSubject, SubjectResponseDTO.class);
-        subjectResponseDTO.setSemesterId(createdSubject.getSemesterId().getId());
+        SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(createdSubject);
 
         return ResponseEntity.created(uri).body(subjectResponseDTO);
     }
@@ -75,21 +66,16 @@ public class SubjectController {
     public ResponseEntity<?> updateSubject(@PathVariable("id") int id, @RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
         try {
 
-            Subject subject = new Subject();
-            subject.setName(subjectRequestDTO.getName());
-            subject.setCode(subjectRequestDTO.getCode());
-
-            Semester semester = semesterServiceImpl.findSemesterById(subjectRequestDTO.getSemesterId());
-            if (semester == null) {
+            Subject subject = subjectMapper.toEntity(subjectRequestDTO);
+            subject.setId(id);
+            if (subject.getSemesterId() == null) {
                 return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
             } // tạo exception mới?
 
-            subject.setSemesterId(semester);
 
-            Subject updatedSubject = subjectServiceImpl.updateSubject(subject, id);
+            Subject updatedSubject = subjectServiceImpl.updateSubject(subject);
 
-            SubjectResponseDTO subjectResponseDTO = modelMapper.map(updatedSubject, SubjectResponseDTO.class);
-            subjectResponseDTO.setSemesterId(updatedSubject.getSemesterId().getId());
+            SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(updatedSubject);
             return ResponseEntity.ok(subjectResponseDTO);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
@@ -102,7 +88,7 @@ public class SubjectController {
         if (subject == null) {
             return ResponseEntity.notFound().build();
         }
-        SubjectResponseDTO subjectResponseDTO = modelMapper.map(subject, SubjectResponseDTO.class);
+        SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(subject);
         return ResponseEntity.ok(subjectResponseDTO);
     }
 

@@ -19,6 +19,7 @@ public enum ErrorCode{
     AUTHENTICATION_CONTEXT_NOT_FOUND("Authentication context not found or invalid.", HttpStatus.UNAUTHORIZED),
     AUTHENTICATION_EMAIL_MISSING("Authentication email is missing or empty.", HttpStatus.UNAUTHORIZED),
     EXAM_SLOT_ALREADY_REGISTERED("Exam slot already registered.", HttpStatus.CONFLICT),
+    SEMESTER_NOT_FOUND("Semester not found.", HttpStatus.BAD_REQUEST),
 
 
     ;

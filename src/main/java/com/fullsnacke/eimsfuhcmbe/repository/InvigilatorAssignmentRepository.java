@@ -12,7 +12,7 @@ import java.util.Set;
 
 @Repository
 public interface InvigilatorAssignmentRepository extends JpaRepository<InvigilatorAssignment, Integer> {
-    List<InvigilatorAssignment> findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(
+    Set<InvigilatorAssignment> findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(
             User invigilator, Semester semesterId);
 
     Set<InvigilatorAssignment> findByInvigilator(User invigilator);

@@ -1,6 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
@@ -40,6 +41,20 @@ public class InvigilatorAssignmentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.getAllRegisteredSlotsByInvigilator(fuId));
+    }
+
+    @GetMapping("/semester")
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlotsInSemesterByInvigilator(@RequestBody RegisterdSlotWithSemesterAndInvigilatorRequestDTO request){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.getAllRegisteredSlotsInSemesterByInvigilator(request));
+    }
+
+    @GetMapping("/semester/{semesterId}")
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@RequestBody @PathVariable("semesterId") int semesterId){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.getAllCurrentInvigilatorRegisteredSlotsInSemester(semesterId));
     }
 
     @PutMapping

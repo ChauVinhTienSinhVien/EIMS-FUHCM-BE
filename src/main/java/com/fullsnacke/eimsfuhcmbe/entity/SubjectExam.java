@@ -18,6 +18,12 @@ public class SubjectExam {
     @Column(name = "id", nullable = false)
     Integer id;
 
+    @Column(name = "duration", nullable = false)
+    Integer duration;
+
+    @Column(name = "exam_type", nullable = false, length = 50)
+    String examType;
+
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "subject_id", nullable = false)
     Subject subjectId;
@@ -26,9 +32,4 @@ public class SubjectExam {
     @JoinColumn(name = "staff_id", nullable = false)
     User staffId;
 
-    @Column(name = "duration", nullable = false)
-    Integer duration;
-
-    @Column(name = "exam_type", nullable = false, length = 50)
-    String examType;
 }

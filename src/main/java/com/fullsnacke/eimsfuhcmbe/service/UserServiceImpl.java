@@ -62,6 +62,8 @@ public class UserServiceImpl implements UserService {
         userInDb.setLastName(userInRequest.getLastName());
         userInDb.setGender(userInRequest.getGender());
         userInDb.setDepartment(userInRequest.getDepartment());
+        userInDb.setPhoneNumber(userInRequest.getPhoneNumber());
+        userInDb.setRole(roleRepository.findById(userInRequest.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found")));
 
         return userRepository.save(userInDb);
     }

@@ -18,8 +18,7 @@ public interface InvigilatorAssignmentMapper {
 //    @Mapping(source = "examSlot.subjectExam.subjectId.semesterId.id", target = "semesterId")
 //    InvigilatorAssignmentResponseDTO toInvigilatorAssignmentResponseDTO (InvigilatorAssignment invigilatorAssignment);
 //
-    @Mapping(source = "examSlot.subjectExam.subjectId.semesterId.name", target = "semester")
-    @Mapping(source = "examSlot.subjectExam.examType", target = "examType")
-    @Mapping(target = "examSlots", ignore = true)
-    RegisteredExamInvigilationResponseDTO toRegisteredExamInvigilationDTO(InvigilatorAssignment invigilatorAssignment);
+//    @Mapping(source = "examSlot.subjectExam.subjectId.semesterId", target = "semester")
+//    @Mapping(target = "examSlots", ignore = true)
+//    RegisteredExamInvigilationResponseDTO toRegisteredExamInvigilationDTO(InvigilatorAssignment invigilatorAssignment);
 }

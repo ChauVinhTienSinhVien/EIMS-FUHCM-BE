@@ -32,7 +32,14 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.getAllRegisteredSlot());
+                .body(invigilatorAssignmentService.getAllCurrentInvigilatorRegisteredSlots());
+    }
+
+    @GetMapping("/{fuId}")
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(@PathVariable("fuId") @RequestBody String fuId){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.getAllRegisteredSlotsByInvigilator(fuId));
     }
 
     @PutMapping
@@ -40,6 +47,13 @@ public class InvigilatorAssignmentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.updateRegisterExamSlot(request));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Boolean> deleteAssignmentBySemester(@RequestBody InvigilatorAssignmentRequestDTO request) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.deleteAssignmentBySemester(request));
     }
 
 

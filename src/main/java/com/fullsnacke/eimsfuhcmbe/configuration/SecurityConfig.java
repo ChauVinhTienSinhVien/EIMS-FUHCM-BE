@@ -44,8 +44,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(PUBLIC_ENDPOINT).permitAll()
                 .requestMatchers(loginUri,logoutUri).permitAll()
-        //        .anyRequest().authenticated());
-                .anyRequest().permitAll());
+                .anyRequest().authenticated());
+        //        .anyRequest().permitAll());
         return http.build();
     }
 

@@ -2,10 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
-import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.SemesterInvigilatorAssignmentResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
@@ -180,6 +177,38 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         invigilatorRegistrationRepository.saveAll(assignments);
 
         return createResponseDTO(invigilator, semester, slotDetails);
+    }
+
+    public Set<RegisteredExamBySemester> getRegisteredExamBySemester(int semesterId) {
+
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new InvigilatorAssignException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        Set<InvigilatorAssignment> assignments = invigilatorRegistrationRepository
+                .findByExamSlot_SubjectExam_SubjectId_SemesterId(semester);
+
+        Map<String, RegisteredExamBySemester> registeredExamBySemesterMap = new HashMap<>();
+
+        for(InvigilatorAssignment assignment : assignments) {
+            String fuId = assignment.getInvigilator().getFuId();
+            RegisteredExamBySemester registeredExamBySemester = registeredExamBySemesterMap.get(fuId);
+            if(registeredExamBySemester == null) {
+                registeredExamBySemester = RegisteredExamBySemester.builder()
+                        .fuId(fuId)
+                        .firstName(assignment.getInvigilator().getFirstName())
+                        .lastName(assignment.getInvigilator().getLastName())
+                        .examSlotDetails(new HashSet<>())
+                        .build();
+                registeredExamBySemesterMap.put(fuId, registeredExamBySemester);
+            }
+            registeredExamBySemester.getExamSlotDetails().add(ExamSlotDetail.builder()
+                    .examSlotId(assignment.getExamSlot().getId())
+                    .startAt(assignment.getExamSlot().getStartAt())
+                    .endAt(assignment.getExamSlot().getEndAt())
+                    .build());
+        }
+
+        return new HashSet<>(registeredExamBySemesterMap.values());
     }
 
     private User findInvigilatorByFuId(String fuId) {

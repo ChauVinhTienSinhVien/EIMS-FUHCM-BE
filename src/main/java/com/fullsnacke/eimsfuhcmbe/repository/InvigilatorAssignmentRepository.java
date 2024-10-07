@@ -7,7 +7,6 @@ import com.fullsnacke.eimsfuhcmbe.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Set;
 
 @Repository
@@ -16,4 +15,7 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
             User invigilator, Semester semesterId);
 
     Set<InvigilatorAssignment> findByInvigilator(User invigilator);
+
+    Set<InvigilatorAssignment> findByExamSlot_SubjectExam_SubjectId_SemesterId(Semester semesterId);
+
 }

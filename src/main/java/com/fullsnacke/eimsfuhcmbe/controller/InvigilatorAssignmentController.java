@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemester;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/invigilators")
@@ -61,6 +63,13 @@ public class InvigilatorAssignmentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.getAllCurrentInvigilatorRegisteredSlotsInSemester(semesterId));
+    }
+
+    @GetMapping("/examSlots-invigilators/{semesterId}")
+    @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of all invigilators")
+    public ResponseEntity<Set<RegisteredExamBySemester>> getAllRegisteredSlotsInSemester(@PathVariable("semesterId") @RequestBody int semesterId){
+        return ResponseEntity
+                .body(invigilatorAssignmentService.getRegisteredExamBySemester(semesterId));
     }
 
     @PutMapping

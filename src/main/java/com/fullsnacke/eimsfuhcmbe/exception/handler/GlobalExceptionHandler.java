@@ -5,6 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ErrorDTO;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.InvigilatorAssignException;
 import jakarta.servlet.ServletRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -66,15 +68,51 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   
     //NGAN
     @ExceptionHandler(value = AuthenticationProcessException.class)
-    ResponseEntity<ApiResponse> handlingOAuth2AuthenticationProcessException(AuthenticationProcessException exception){
+    ResponseEntity<ApiResponse> handlingOAuth2AuthenticationProcessException(AuthenticationProcessException exception, HttpServletRequest request) {
         ErrorCode errorCode = exception.getErrorCode();
-        System.out.println("Not found have been here");
+        if(errorCode.getPath() == null){
+            errorCode.setPath(request.getRequestURI());
+        }
         return ResponseEntity
                 .status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
                         .code(errorCode.getStatusCode().value())
                         .message(errorCode.getMessage())
+                        .path(errorCode.getPath())
                         .build());
     }
 
+    //NGAN
+    @ExceptionHandler(value = InvigilatorAssignException.class)
+    ResponseEntity<ApiResponse> handlingInvigilatorAssignException(InvigilatorAssignException exception, HttpServletRequest request){
+        ErrorCode errorCode = exception.getErrorCode();
+        if(errorCode.getPath() == null){
+            errorCode.setPath(request.getServletPath());
+        }
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getStatusCode().value())
+                        .message(errorCode.getMessage())
+                        .path(errorCode.getPath())
+                        .build());
+    }
+
+    //NGAN
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ErrorCode errorCode = ErrorCode.HTTP_MESSAGE_NOT_READABLE;
+
+        if(errorCode.getPath() == null){
+            errorCode.setPath(((ServletWebRequest) request).getRequest().getServletPath());
+        }
+
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getStatusCode().value())
+                        .message(errorCode.getMessage())
+                        .path(errorCode.getPath())
+                        .build());
+    }
 }

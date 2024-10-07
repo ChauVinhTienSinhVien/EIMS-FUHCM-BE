@@ -9,6 +9,7 @@ import java.time.Instant;
 @Entity
 @Getter
 @Setter
+@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

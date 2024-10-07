@@ -29,5 +29,5 @@ public class Config {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "semester_id", nullable = false)
-    private Semester semesterId;
+    private Semester semester;
 }

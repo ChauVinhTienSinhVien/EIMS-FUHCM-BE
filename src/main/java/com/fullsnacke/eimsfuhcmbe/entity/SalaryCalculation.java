@@ -38,13 +38,4 @@ public class SalaryCalculation {
     @Column(name = "total_salary", nullable = false, precision = 10, scale = 2)
     BigDecimal totalSalary;
 
-    @Column(name = "status", nullable = false)
-    Integer status;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    User updatedBy;
-
-    @Column(name = "updated_at")
-    Instant updatedAt;
 }

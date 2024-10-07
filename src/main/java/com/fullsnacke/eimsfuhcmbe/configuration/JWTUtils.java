@@ -6,6 +6,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,12 +22,15 @@ import java.util.Map;
 
 @Component
 public class JWTUtils {
-    private static final long TOKEN_VALIDITY = 86400000L;
-    private static final long TOKEN_VALIDITY_REMEMBER = 2592000000L;
+
+    private long TOKEN_VALIDITY;
+    private long TOKEN_VALIDITY_REMEMBER;
     private final Key key;
 
-    public JWTUtils(@Value("${app.jwtSecret}") String secret) {
+    public JWTUtils(@Value("${jwt.secretKey}") String secret, @Value("${jwt.expirationInMs}") long expirationInMs, @Value("${jwt.expirationInMsRemember}") long expirationInMsRemember) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        this.TOKEN_VALIDITY = expirationInMs;
+        this.TOKEN_VALIDITY_REMEMBER = expirationInMsRemember;
     }
 
     public String createToken(User user, boolean rememberMe) {

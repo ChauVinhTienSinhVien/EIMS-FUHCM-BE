@@ -30,26 +30,30 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Override
     public User add(User user) {
         Role role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found"));
         user.setRole(role);
-        System.out.println(user);
         return userRepository.save(user);
     }
 
+    @Override
     public User getUserByFuId(String fuId) {
         return userRepository.findByFuId(fuId);
     }
 
+    @Override
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND));
     }
 
+    @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    @Override
     public User updateUser(User userInRequest) {
         String fuId = userInRequest.getFuId();
         User userInDb = userRepository.findByFuId(fuId);
@@ -62,11 +66,13 @@ public class UserServiceImpl implements UserService {
         userInDb.setLastName(userInRequest.getLastName());
         userInDb.setGender(userInRequest.getGender());
         userInDb.setDepartment(userInRequest.getDepartment());
+        userInDb.setPhoneNumber(userInRequest.getPhoneNumber());
+        userInDb.setRole(roleRepository.findById(userInRequest.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found")));
 
         return userRepository.save(userInDb);
     }
 
-
+    @Override
     public void deleteUser(String fuId) {
         User userInDb = userRepository.findByFuId(fuId);
         if(userInDb == null){
@@ -75,6 +81,7 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(userInDb);
     }
 
+    @Override
     public UserResponseDTO getMyInfo(OAuth2User oAuth2User) {
         String email = oAuth2User.getAttribute("email");
         System.out.println(email);

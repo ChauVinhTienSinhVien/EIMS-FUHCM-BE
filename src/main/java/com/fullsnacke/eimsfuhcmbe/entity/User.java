@@ -23,14 +23,8 @@ public class User {
     @Column(name = "id", nullable = false)
     Integer id;
 
-    @Column(name = "fu_id", nullable = false, length = 10)
+    @Column(name = "fu_id", nullable = false, length = 10, unique = true)
     String fuId;
-
-    @Column(name = "first_name", nullable = false, length = 50)
-    String firstName;
-
-    @Column(name = "last_name", nullable = false, length = 50)
-    String lastName;
 
     @Column(name = "email", nullable = false, length = 50, unique = true)
     String email;
@@ -41,13 +35,18 @@ public class User {
     @Column(name = "phone_number", length = 20, unique = true)
     String phoneNumber;
 
+    @Column(name = "first_name", nullable = false, length = 50)
+    String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 50)
+    String lastName;
+
     @Column(name = "department", length = 50)
     String department;
 
     @ColumnDefault("b'1'")
     @Column(name = "gender")
     Boolean gender;
-
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.SET_NULL)

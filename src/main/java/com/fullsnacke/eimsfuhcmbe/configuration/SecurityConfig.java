@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers(PUBLIC_ENDPOINT).permitAll()
                 .requestMatchers(loginUri,logoutUri).permitAll()
                 .anyRequest().authenticated());
+        //        .anyRequest().permitAll());
         return http.build();
     }
 

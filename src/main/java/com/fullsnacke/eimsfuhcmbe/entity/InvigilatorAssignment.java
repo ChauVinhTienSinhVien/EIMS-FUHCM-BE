@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
+
 @Entity
 @Getter
 @Setter
@@ -27,7 +29,9 @@ public class InvigilatorAssignment {
     @JoinColumn(name = "invigilator_id", nullable = false)
     User invigilator;
 
-    @Column(name = "role", nullable = false, length = 50)
-    String role;
+    @Column(name = "is_hall_invigilator", nullable = false)
+    Boolean isHallInvigilator;
 
+    @Column(name = "created_at", nullable = false)
+    Instant createdAt;
 }

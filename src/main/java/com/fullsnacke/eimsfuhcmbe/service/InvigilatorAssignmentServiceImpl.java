@@ -39,6 +39,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     UserRepository userRepository;
     SemesterRepository semesterRepository;
 
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteAssignmentBySemester(InvigilatorAssignmentRequestDTO request) {
         ExamSlot representativeExamSlot = findRepresentativeExamSlot(request.getExamSlotId());
         Set<InvigilatorAssignment> assignments = invigilatorRegistrationRepository
@@ -49,6 +50,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return true;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public InvigilatorAssignmentResponseDTO registerExamSlot(InvigilatorAssignmentRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
 
@@ -69,11 +71,13 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return createResponseDTO(invigilator, semester, slotDetails);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlots() {
         User currentUser = getCurrentUser();
         return getAllRegisteredSlotsByInvigilator(currentUser.getFuId());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsByInvigilator(String fuId) {
         User invigilator = findInvigilatorByFuId(fuId);
 
@@ -115,6 +119,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlotsInSemester(int semesterId) {
         User currentUser = getCurrentUser();
         return getAllRegisteredSlotsInSemesterByInvigilator(RegisterdSlotWithSemesterAndInvigilatorRequestDTO.builder()
@@ -123,6 +128,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .build());
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsInSemesterByInvigilator(RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
         Semester semester = semesterRepository.findById(request.getSemesterId())
@@ -152,7 +158,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .build();
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public InvigilatorAssignmentResponseDTO updateRegisterExamSlot(InvigilatorAssignmentRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
 

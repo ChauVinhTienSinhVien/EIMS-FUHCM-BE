@@ -228,7 +228,8 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .map(examSlot -> InvigilatorAssignment.builder()
                         .invigilator(invigilator)
                         .examSlot(examSlot)
-                        .role(InvigilatorRoleEnum.IN_ROOM_INVIGILATOR.name())
+                        //.role(InvigilatorRoleEnum.IN_ROOM_INVIGILATOR.name())
+                        .isHallInvigilator(false)
                         .build())
                 .collect(Collectors.toSet());
     }

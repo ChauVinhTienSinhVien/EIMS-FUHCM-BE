@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class ExamSlotServiceImpl implements ExamSlotService {
@@ -35,7 +35,6 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         if (examSlotInDB == null) {
             throw new ExamSlotNotFoundException("Exam Slot not found with ID: " + id);
         }
-
         return examSlotRepository.save(examSlotInRequest);
     }
 
@@ -52,8 +51,6 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         } else {
             examSlotRepository.delete(examSlot);
         }
-
-
     }
 
 }

@@ -26,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -234,6 +235,8 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .map(examSlot -> InvigilatorAssignment.builder()
                         .invigilator(invigilator)
                         .examSlot(examSlot)
+                        .isHallInvigilator(false)
+                        .createdAt(Instant.now())
                         .build())
                 .collect(Collectors.toSet());
     }

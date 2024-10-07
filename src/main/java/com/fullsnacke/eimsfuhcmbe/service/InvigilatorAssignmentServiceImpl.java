@@ -24,6 +24,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -151,6 +152,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .build();
     }
 
+    @Transactional
     public InvigilatorAssignmentResponseDTO updateRegisterExamSlot(InvigilatorAssignmentRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
 
@@ -165,7 +167,6 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         deleteExistingAssignments(invigilator, semester);
 
         Set<ExamSlotDetail> slotDetails = checkForOverlappingSlots(invigilator, semester, requestExamSlotId);
-        System.out.println("SlotDetails: " + slotDetails);
 
         Set<InvigilatorAssignment> assignments = createAssignments(invigilator, requestExamSlotId);
 
@@ -251,6 +252,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         if (context == null || context.getAuthentication() == null) {
             throw new AuthenticationProcessException(ErrorCode.AUTHENTICATION_CONTEXT_NOT_FOUND);
         }
+
         Authentication authentication = context.getAuthentication();
 
         String email = authentication.getName();

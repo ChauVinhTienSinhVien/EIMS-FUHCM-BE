@@ -29,8 +29,6 @@ public class ConfigController {
     @Autowired
     ConfigMapper configMapper;
 
-
-
     @GetMapping
     @Operation(summary = "Get all configs", description = "Retrieve a list of all configuarations")
     public ResponseEntity<List<Config>> getAllConfigs(){

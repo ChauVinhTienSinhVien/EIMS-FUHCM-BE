@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -57,13 +58,19 @@ public class RoomController {
     }
 
     @GetMapping("/{name}")
-    public ResponseEntity<RoomResponseDTO> findByRoomName(@PathVariable("name") String name) {
-        Room room = roomServiceImpl.findByRoomName(name);
-        if (room == null) {
+    public ResponseEntity<List<RoomResponseDTO>> findByRoomName(@PathVariable("name") String name) {
+        List<Room> roomList = roomServiceImpl.findByRoomName(name);
+        if (roomList == null) {
             return ResponseEntity.notFound().build();
         }
-        RoomResponseDTO roomResponseDTO = modelMapper.map(room, RoomResponseDTO.class);
-        return ResponseEntity.ok(roomResponseDTO);
+
+        List<RoomResponseDTO> roomResponseDTOList = new ArrayList<>();
+        for (Room r : roomList) {
+            RoomResponseDTO roomResponseDTO = modelMapper.map(r, RoomResponseDTO.class);
+            roomResponseDTOList.add(roomResponseDTO);
+        }
+
+        return ResponseEntity.ok(roomResponseDTOList);
 
     }
 

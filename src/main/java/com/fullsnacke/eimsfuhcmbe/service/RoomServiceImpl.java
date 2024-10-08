@@ -53,8 +53,8 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room findByRoomName(String roomName) {
-        return roomRepository.findByRoomName(roomName);
+    public List<Room> findByRoomName(String roomName) {
+        return roomRepository.findByRoomNameLike("%" + roomName + "%");
     }
 
 

@@ -16,4 +16,8 @@ public interface ConfigService {
     Config updateConfig(Config config);
 
     void deleteConfig(Integer id);
+
+    List<Config> addAllConfig(List<Config> configList);
+
+    List<Config> updateAllConfig(List<Config> configList);
 }

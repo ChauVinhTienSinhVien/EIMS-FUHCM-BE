@@ -34,6 +34,7 @@ public class SemesterController {
     public ResponseEntity<List<SemesterResponseDTO>> getAllSemesters() {
         List<Semester> semesterList = semesterServiceImpl.getAllSemesters();
         List<SemesterResponseDTO> semesterResponseDTOS = new ArrayList<>();
+
         for (Semester semester : semesterList) {
             SemesterResponseDTO semesterResponseDTO = new SemesterResponseDTO();
             semesterResponseDTO.setId(semester.getId());
@@ -81,14 +82,17 @@ public class SemesterController {
         semesterUpdate.setStartAt(semesterRequestDTO.getStartAt());
         semesterUpdate.setEndAt(semesterRequestDTO.getEndAt());
 
-        Config hourlyRateConfig = configServiceImpl.getConfigBySemesterIdAndConfigType(semester.getId(), ConfigType.HOURLY_RATE.getValue());
-        Config allowedSlotConfig = configServiceImpl.getConfigBySemesterIdAndConfigType(semester.getId(), ConfigType.ALLOWED_SLOT.getValue());
+        List<Config> configList = configServiceImpl.getConfigBySemesterId(semester.getId());
 
-        hourlyRateConfig.setValue(semesterRequestDTO.getHourlyConfig());
-        allowedSlotConfig.setValue(semesterRequestDTO.getAllowedSlotConfig());
+        for (Config config : configList) {
+            if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
+                config.setValue(semesterRequestDTO.getHourlyConfig());
+            } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
+                config.setValue(semesterRequestDTO.getAllowedSlotConfig());
+            }
+        }
 
-        configServiceImpl.updateConfig(hourlyRateConfig);
-        configServiceImpl.updateConfig(allowedSlotConfig);
+        configServiceImpl.updateAllConfig(configList);
 
         try {
             Semester updatedSemester = semesterServiceImpl.updateSemester(semesterUpdate, id);
@@ -99,9 +103,15 @@ public class SemesterController {
             semesterResponseDTO.setName(updatedSemester.getName());
             semesterResponseDTO.setStartAt(updatedSemester.getStartAt());
             semesterResponseDTO.setEndAt(updatedSemester.getEndAt());
-            semesterResponseDTO.setHourlyConfig(hourlyRateConfig.getValue());
-            semesterResponseDTO.setAllowedSlotConfig(allowedSlotConfig.getValue());
-            
+
+            for (Config config : configList) {
+                if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
+                    semesterResponseDTO.setHourlyConfig(config.getValue());
+                } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
+                    semesterResponseDTO.setAllowedSlotConfig(config.getValue());
+                }
+            }
+
             return ResponseEntity.ok(semesterResponseDTO);
         } catch (SemesterNotFoundException exception) {
             return ResponseEntity.notFound().build();

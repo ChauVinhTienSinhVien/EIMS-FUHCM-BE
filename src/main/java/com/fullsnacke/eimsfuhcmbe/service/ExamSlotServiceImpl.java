@@ -2,10 +2,12 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
+import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,9 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
     @Autowired
     private ExamSlotRepository examSlotRepository;
+
+    @Autowired
+    private SemesterRepository semesterRepository;
 
     @Override
     public List<ExamSlot> getAllExamSlot() {
@@ -53,4 +58,9 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         }
     }
 
+    @Override
+    public List<ExamSlot> getExamSlotsBySemesterId(int semesterId) {
+        Semester semester = semesterRepository.findById(semesterId).orElseThrow(() -> new RuntimeException("Semester not found"));
+        return examSlotRepository.findExamSlotBySubjectExam_SubjectId_SemesterId(semester);
+    }
 }

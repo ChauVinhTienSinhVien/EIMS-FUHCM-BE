@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
+import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectRepository;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +12,12 @@ import java.util.Optional;
 @Service
 public class SubjectServiceImpl implements SubjectService {
 
+    private final SemesterRepository semesterRepository;
     private SubjectRepository subjectRepository;
 
-    public SubjectServiceImpl(SubjectRepository subjectRepository) {
+    public SubjectServiceImpl(SubjectRepository subjectRepository, SemesterRepository semesterRepository) {
         this.subjectRepository = subjectRepository;
+        this.semesterRepository = semesterRepository;
     }
 
     @Override

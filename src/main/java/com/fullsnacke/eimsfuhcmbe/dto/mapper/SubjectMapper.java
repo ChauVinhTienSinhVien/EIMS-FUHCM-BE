@@ -4,6 +4,8 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.SubjectRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.SubjectResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
+import com.fullsnacke.eimsfuhcmbe.service.SemesterService;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -14,7 +16,7 @@ public interface SubjectMapper {
     @Mapping(target = "semesterId", source = "semesterId", qualifiedByName = "intToSemester")
     Subject toEntity(SubjectRequestDTO dto);
 
-    @Mapping(target = "semesterId", source = "semesterId.id")
+    @Mapping(target = "semesterName", source = "semesterId.name")
     SubjectResponseDTO toDto(Subject entity);
 
     @Named("intToSemester")

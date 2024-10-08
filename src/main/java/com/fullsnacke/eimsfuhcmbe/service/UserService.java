@@ -15,6 +15,8 @@ public interface UserService {
 
     public User add(User user);
 
+    public List<User> saveAll(List<User> users);
+
     public User getUserByFuId(String fuId);
 
     public User getUserByEmail(String email);

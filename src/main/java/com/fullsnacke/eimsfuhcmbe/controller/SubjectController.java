@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,9 +37,11 @@ public class SubjectController {
         if (subjectList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            List<SubjectResponseDTO> subjectResponseDTOList = subjectList.stream()
-                    .map(subject -> modelMapper.map(subject, SubjectResponseDTO.class))
-                    .toList();
+            List<SubjectResponseDTO> subjectResponseDTOList = new ArrayList<>();
+            for (Subject subject:subjectList) {
+                SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(subject);
+                subjectResponseDTOList.add(subjectResponseDTO);
+            }
             return ResponseEntity.ok(subjectResponseDTOList);
         }
     }

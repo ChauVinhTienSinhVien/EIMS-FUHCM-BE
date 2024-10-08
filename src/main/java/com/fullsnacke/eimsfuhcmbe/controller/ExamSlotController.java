@@ -4,12 +4,16 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -23,6 +27,9 @@ public class ExamSlotController {
 
     @Autowired
     private ExamSlotServiceImpl examSlotServiceImpl;
+
+    @Autowired
+    private UserServiceImpl userServiceImpl;
 
     @Autowired
     private ExamSlotMapper examSlotMapper;
@@ -65,7 +72,14 @@ public class ExamSlotController {
     @Operation(summary = "Create a new exam slot", description = "Creates a new exam slot based on the provided data in the request body. The created exam slot is returned with a 201 Created response.")
     public ResponseEntity<ExamSlotResponseDTO> createExamSlot(@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        User currentUser = userServiceImpl.getUserByEmail(email);
+
         examSlot.setCreatedAt(Instant.now());
+        examSlot.setCreatedBy(currentUser);
         ExamSlot createdExamSlot = examSlotServiceImpl.createExamSlot(examSlot);
         URI uri = URI.create("/examslots/" + createdExamSlot.getId());
         System.out.println(createdExamSlot.getCreatedAt());

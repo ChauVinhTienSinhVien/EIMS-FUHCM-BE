@@ -73,4 +73,28 @@ public class ConfigServiceImpl implements ConfigService{
         configRepository.deleteById(config.getId());
     }
 
+    public void cloneLastedSemesterConfig(Semester semester, Semester lastestSemester){
+
+        Config hourlyRateConfig = new Config();
+        Config allowedSlotConfig = new Config();
+
+
+        Config oldHourlyRateConfig = configRepository.findBySemesterIdAndConfigType(lastestSemester.getId(), ConfigType.HOURLY_RATE.getValue());
+        Config oldHowedSlotConfig = configRepository.findBySemesterIdAndConfigType(lastestSemester.getId(), ConfigType.ALLOWED_SLOT.getValue());
+
+        hourlyRateConfig.setConfigType(oldHourlyRateConfig.getConfigType());
+        hourlyRateConfig.setUnit(oldHourlyRateConfig.getUnit());
+        hourlyRateConfig.setValue(oldHourlyRateConfig.getValue());
+
+        allowedSlotConfig.setConfigType(oldHowedSlotConfig.getConfigType());
+        allowedSlotConfig.setUnit(oldHowedSlotConfig.getUnit());
+        allowedSlotConfig.setValue(oldHowedSlotConfig.getValue());
+
+        hourlyRateConfig.setSemester(semester);
+        allowedSlotConfig.setSemester(semester);
+
+        configRepository.save(hourlyRateConfig);
+        configRepository.save(allowedSlotConfig);
+    }
+
 }

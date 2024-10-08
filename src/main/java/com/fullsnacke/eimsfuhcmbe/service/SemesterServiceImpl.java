@@ -1,11 +1,15 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.SemesterRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.entity.Config;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
+import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.semester.SemesterNotFoundException;
+import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +19,13 @@ public class SemesterServiceImpl implements SemesterService {
 
 
     private SemesterRepository semesterRepository;
+    private ConfigServiceImpl configServiceImpl;
 
     @Autowired
-    public SemesterServiceImpl(SemesterRepository semesterRepository) {
+    public SemesterServiceImpl(SemesterRepository semesterRepository, ConfigServiceImpl configServiceImpl) {
+
         this.semesterRepository = semesterRepository;
+        this.configServiceImpl   = configServiceImpl;
     }
 
     @Override
@@ -27,8 +34,12 @@ public class SemesterServiceImpl implements SemesterService {
     }
 
     @Override
+    @Transactional
     public Semester createSemester(Semester semester) {
-        return semesterRepository.save(semester);
+        Semester lastestSemester =  semesterRepository.findFirstByOrderByStartAtDesc();
+        Semester createdSemester = semesterRepository.save(semester);
+        configServiceImpl.cloneLastedSemesterConfig(createdSemester, lastestSemester);
+        return createdSemester;
     }
 
     @Override

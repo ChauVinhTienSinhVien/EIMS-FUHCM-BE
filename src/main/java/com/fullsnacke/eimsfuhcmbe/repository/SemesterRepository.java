@@ -6,5 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SemesterRepository extends JpaRepository<Semester, Integer>{
 
     Semester findSemesterByName(String name);
-        Semester findFirstByOrderByStartAtDesc();
+    Semester findFirstByOrderByStartAtDesc();
+
+    Semester findSemesterById(Integer semesterId);
 }

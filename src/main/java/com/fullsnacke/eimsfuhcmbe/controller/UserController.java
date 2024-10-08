@@ -60,6 +60,19 @@ public class UserController {
         return ResponseEntity.created(uri).body(userResponseDTO);
     }
 
+    @PostMapping("/bulk")
+    @Operation(summary = "Add multiple users", description = "Add multiple users")
+    public ResponseEntity<List<UserResponseDTO>> addUsers(@RequestBody List<UserRequestDTO> userRequestDTOList){
+        List<User> userList = userRequestDTOList.stream()
+                .map(userRequestDTO -> userMapper.toEntity(userRequestDTO))
+                .toList();
+        List<User> addedUsers = userServiceImpl.saveAll(userList);
+        List<UserResponseDTO> userResponseDTOList = addedUsers.stream()
+                .map(user -> userMapper.toDto(user))
+                .toList();
+        return ResponseEntity.ok(userResponseDTOList);
+    }
+
     @PutMapping("/{fuId}")
     @Operation(summary = "Update a user", description = "Update an existing user")
     public ResponseEntity<UserResponseDTO> updateUserByFuId(@RequestBody @Valid UserRequestDTO userRequestDTO){

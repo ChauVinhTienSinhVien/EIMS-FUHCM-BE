@@ -10,6 +10,6 @@ public interface RoomService {
     Room createRoom(Room room);
     Room updateRoom(Room room, int id);
     void deleteRoom(int id);
-    Room findByRoomName(String roomName);
+    List<Room> findByRoomName(String roomName);
 
 }

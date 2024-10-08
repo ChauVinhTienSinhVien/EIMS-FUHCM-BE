@@ -38,6 +38,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public List<User> saveAll(List<User> users) {
+        return userRepository.saveAll(users);
+    }
+
+    @Override
     public User getUserByFuId(String fuId) {
         return userRepository.findByFuId(fuId);
     }

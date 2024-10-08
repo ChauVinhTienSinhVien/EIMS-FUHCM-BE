@@ -7,6 +7,7 @@ import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.service.SemesterServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.SubjectServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,9 +38,11 @@ public class SubjectController {
         if (subjectList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            List<SubjectResponseDTO> subjectResponseDTOList = subjectList.stream()
-                    .map(subject -> modelMapper.map(subject, SubjectResponseDTO.class))
-                    .toList();
+            List<SubjectResponseDTO> subjectResponseDTOList = new ArrayList<>();
+            for (Subject subject:subjectList) {
+                SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(subject);
+                subjectResponseDTOList.add(subjectResponseDTO);
+            }
             return ResponseEntity.ok(subjectResponseDTOList);
         }
     }
@@ -60,6 +64,24 @@ public class SubjectController {
         SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(createdSubject);
 
         return ResponseEntity.created(uri).body(subjectResponseDTO);
+    }
+
+    @PostMapping("/bulk")
+    @Operation()
+    public ResponseEntity<List<SubjectResponseDTO>> importSubjects(@RequestBody @Valid List<SubjectRequestDTO> subjectRequestDTOList) {
+        List<Subject> subjectList = subjectRequestDTOList.stream()
+                .map(subjectRequestDTO ->subjectMapper.toEntity(subjectRequestDTO))
+                .toList();
+
+        List<Subject> addedSubjects = subjectServiceImpl.saveAll(subjectList);
+
+        List<SubjectResponseDTO> subjectResponseDTOList = new ArrayList<>();
+        for (Subject subject:addedSubjects) {
+            System.out.println(subject.getSemesterId().getName());
+            SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(subject);
+            subjectResponseDTOList.add(subjectResponseDTO);
+        }
+        return ResponseEntity.ok(subjectResponseDTOList);
     }
 
     @PutMapping("/{id}")

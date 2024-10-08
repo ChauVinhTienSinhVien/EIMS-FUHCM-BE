@@ -3,8 +3,10 @@ package com.fullsnacke.eimsfuhcmbe.repository;
 import com.fullsnacke.eimsfuhcmbe.entity.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface RoomRepository extends JpaRepository<Room, Integer> {
 
-    Room findByRoomName(String roomName);
+    List<Room> findByRoomNameLike(String roomName);
 
 }

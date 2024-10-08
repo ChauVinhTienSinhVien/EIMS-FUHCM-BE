@@ -44,6 +44,23 @@ public class ExamSlotController {
         }
     }
 
+    @GetMapping("/by-semester/{semesterId}")
+    @Operation(summary = "Retrieve all exam slots by semester ID", description = "Fetches a list of all exam slots from the system based on the semester ID. If no exam slots are found, it will return a 204 No Content response.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsBySemesterId(@PathVariable("semesterId") int semesterId) {
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsBySemesterId(semesterId);
+
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
+            for (ExamSlot e:examSlotList) {
+                ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
+                examSlotResponseDTOList.add(examSlotResponseDTO);
+            }
+            return ResponseEntity.ok(examSlotResponseDTOList);
+        }
+    }
+
     @PostMapping
     @Operation(summary = "Create a new exam slot", description = "Creates a new exam slot based on the provided data in the request body. The created exam slot is returned with a 201 Created response.")
     public ResponseEntity<ExamSlotResponseDTO> createExamSlot(@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {

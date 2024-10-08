@@ -14,10 +14,11 @@ import lombok.experimental.FieldDefaults;
 public class SubjectResponseDTO {
 
     int id;
+
     String code;
 
     String name;
 
-    int semesterId;
+    String semesterName;
 
 }

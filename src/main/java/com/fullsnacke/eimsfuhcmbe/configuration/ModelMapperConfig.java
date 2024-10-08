@@ -18,7 +18,7 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new PropertyMap<Subject, SubjectResponseDTO>() {
             @Override
             protected void configure() {
-                map().setSemesterId(source.getSemesterId().getId());
+//                map().setSemesterId(source.getSemesterId().getId());
             }
         });
         return modelMapper;

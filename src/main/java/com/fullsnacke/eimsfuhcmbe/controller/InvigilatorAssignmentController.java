@@ -3,7 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemester;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemesterResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -67,8 +66,9 @@ public class InvigilatorAssignmentController {
 
     @GetMapping("/examSlots-invigilators/{semesterId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of all invigilators")
-    public ResponseEntity<Set<RegisteredExamBySemester>> getAllRegisteredSlotsInSemester(@PathVariable("semesterId") @RequestBody int semesterId){
+    public ResponseEntity<Set<RegisteredExamBySemesterResponseDTO>> getAllRegisteredSlotsInSemester(@PathVariable("semesterId") @RequestBody int semesterId){
         return ResponseEntity
+                .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.getRegisteredExamBySemester(semesterId));
     }
 
@@ -81,7 +81,8 @@ public class InvigilatorAssignmentController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Boolean> deleteAssignmentBySemester(@RequestBody InvigilatorAssignmentRequestDTO request) {
+    @Operation(summary = "Delete Registered Slot", description = "Delete the registered slot by fuId and semester")
+    public ResponseEntity<Boolean> deleteAssignmentBySemester(@RequestBody RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.deleteAssignmentBySemester(request));

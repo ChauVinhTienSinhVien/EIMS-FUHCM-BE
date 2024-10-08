@@ -11,7 +11,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RegisteredExamBySemester {
+public class RegisteredExamBySemesterResponseDTO {
     String fuId;
     String firstName;
     String lastName;

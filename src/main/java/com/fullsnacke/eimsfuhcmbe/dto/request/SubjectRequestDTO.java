@@ -18,5 +18,5 @@ public class SubjectRequestDTO {
 
     String name;
 
-    int semesterId;
+    String semesterName;
 }

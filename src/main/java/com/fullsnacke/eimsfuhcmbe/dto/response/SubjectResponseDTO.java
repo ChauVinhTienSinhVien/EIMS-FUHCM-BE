@@ -18,6 +18,6 @@ public class SubjectResponseDTO {
 
     String name;
 
-    int semesterId;
+    String semesterName;
 
 }

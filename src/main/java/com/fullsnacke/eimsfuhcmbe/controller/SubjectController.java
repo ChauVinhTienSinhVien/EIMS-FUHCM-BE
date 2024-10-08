@@ -50,7 +50,7 @@ public class SubjectController {
         System.out.println("Semester: " + subject.getSemesterId());
 
         if (subject.getSemesterId() == null) {
-            return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
+            return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterName());
         }
 
 
@@ -69,7 +69,7 @@ public class SubjectController {
             Subject subject = subjectMapper.toEntity(subjectRequestDTO);
             subject.setId(id);
             if (subject.getSemesterId() == null) {
-                return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
+                return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterName());
             } // tạo exception mới?
 
 

@@ -13,15 +13,17 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring")
 public interface SubjectMapper {
 
-    @Mapping(target = "semesterId", source = "semesterName", qualifiedByName = "nameToSemester")
+    @Mapping(target = "semesterId", source = "semesterId", qualifiedByName = "intToSemester")
     Subject toEntity(SubjectRequestDTO dto);
 
     @Mapping(target = "semesterName", source = "semesterId.name")
     SubjectResponseDTO toDto(Subject entity);
 
-    @Named("nameToSemester")
-    default Semester nameToSemester(String semesterName, @Context SemesterService semesterService) {
-        return semesterService.findSemesterByName(semesterName);
+    @Named("intToSemester")
+    default Semester intToSemester(int semesterId) {
+        Semester semester = new Semester();
+        semester.setId(semesterId);
+        return semester;
     }
 
 }

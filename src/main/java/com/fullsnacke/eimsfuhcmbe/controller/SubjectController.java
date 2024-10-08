@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,9 +37,11 @@ public class SubjectController {
         if (subjectList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            List<SubjectResponseDTO> subjectResponseDTOList = subjectList.stream()
-                    .map(subject -> modelMapper.map(subject, SubjectResponseDTO.class))
-                    .toList();
+            List<SubjectResponseDTO> subjectResponseDTOList = new ArrayList<>();
+            for (Subject subject:subjectList) {
+                SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(subject);
+                subjectResponseDTOList.add(subjectResponseDTO);
+            }
             return ResponseEntity.ok(subjectResponseDTOList);
         }
     }
@@ -50,7 +53,7 @@ public class SubjectController {
         System.out.println("Semester: " + subject.getSemesterId());
 
         if (subject.getSemesterId() == null) {
-            return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterName());
+            return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
         }
 
 
@@ -69,7 +72,7 @@ public class SubjectController {
             Subject subject = subjectMapper.toEntity(subjectRequestDTO);
             subject.setId(id);
             if (subject.getSemesterId() == null) {
-                return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterName());
+                return ResponseEntity.badRequest().body("Semester not found with ID" + subjectRequestDTO.getSemesterId());
             } // tạo exception mới?
 
 

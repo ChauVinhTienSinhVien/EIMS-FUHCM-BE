@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ListInvigilatorsByExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemesterResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
@@ -32,7 +33,7 @@ public class InvigilatorAssignmentController {
                 .body(invigilatorAssignmentService.registerExamSlot(request));
     }
 
-    @GetMapping
+    @GetMapping("/myinfo")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots for the current invigilator")
     public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(){
         return ResponseEntity
@@ -42,34 +43,42 @@ public class InvigilatorAssignmentController {
 
     @GetMapping("/{fuId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by fuID")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(@PathVariable("fuId") @RequestBody String fuId){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(@PathVariable("fuId") String fuId){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.getAllRegisteredSlotsByInvigilator(fuId));
     }
 
-    @GetMapping("/semester")
+    @GetMapping("/semesterid={semesterId}/invigilator={fuId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester and fuId")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlotsInSemesterByInvigilator(@RequestBody RegisterdSlotWithSemesterAndInvigilatorRequestDTO request){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlotsInSemesterByInvigilator(@PathVariable("semesterId") int semesterId, @PathVariable("fuId") String fuId){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.getAllRegisteredSlotsInSemesterByInvigilator(request));
+                .body(invigilatorAssignmentService.getAllRegisteredSlotsInSemesterByInvigilator(semesterId, fuId));
     }
 
-    @GetMapping("/semester/{semesterId}")
+    @GetMapping("/myinfo/semesterid={semesterId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of current invigilator")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@RequestBody @PathVariable("semesterId") int semesterId){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@PathVariable("semesterId") int semesterId){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.getAllCurrentInvigilatorRegisteredSlotsInSemester(semesterId));
     }
 
-    @GetMapping("/examSlots-invigilators/{semesterId}")
+    @GetMapping("/semesterid={semesterId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of all invigilators")
     public ResponseEntity<Set<RegisteredExamBySemesterResponseDTO>> getAllRegisteredSlotsInSemester(@PathVariable("semesterId") @RequestBody int semesterId){
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.getRegisteredExamBySemester(semesterId));
+    }
+
+    @GetMapping("/examslotid={examSlotId}")
+    @Operation(summary = "Get All Invigilators", description = "Get all the invigilators by exam slot")
+    public ResponseEntity<ListInvigilatorsByExamSlotResponseDTO> listInvigilatorsByExamSlot(@PathVariable("examSlotId") int examSlotId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.listInvigilatorsByExamSlot(examSlotId));
     }
 
     @PutMapping

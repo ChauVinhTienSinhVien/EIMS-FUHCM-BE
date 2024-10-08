@@ -18,4 +18,6 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
 
     Set<InvigilatorAssignment> findByExamSlot_SubjectExam_SubjectId_SemesterId(Semester semesterId);
 
+    Set<InvigilatorAssignment> findByExamSlot(ExamSlot examSlot);
+
 }

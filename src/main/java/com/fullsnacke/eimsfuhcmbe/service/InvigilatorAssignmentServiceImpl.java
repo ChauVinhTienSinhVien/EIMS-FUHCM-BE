@@ -119,16 +119,13 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     @Transactional(rollbackFor = Exception.class)
     public RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlotsInSemester(int semesterId) {
         User currentUser = getCurrentUser();
-        return getAllRegisteredSlotsInSemesterByInvigilator(RegisterdSlotWithSemesterAndInvigilatorRequestDTO.builder()
-                .fuId(currentUser.getFuId())
-                .semesterId(semesterId)
-                .build());
+        return getAllRegisteredSlotsInSemesterByInvigilator(semesterId, currentUser.getFuId());
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsInSemesterByInvigilator(RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
-        User invigilator = findInvigilatorByFuId(request.getFuId());
-        Semester semester = semesterRepository.findById(request.getSemesterId())
+    public RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsInSemesterByInvigilator(int semesterId, String fuId) {
+        User invigilator = findInvigilatorByFuId(fuId);
+        Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new InvigilatorAssignException(ErrorCode.SEMESTER_NOT_FOUND));
 
         Set<ExamSlot> examSlots = invigilatorRegistrationRepository
@@ -150,7 +147,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .build();
 
         return RegisteredExamInvigilationResponseDTO.builder()
-                .fuId(request.getFuId())
+                .fuId(fuId)
                 .semesterInvigilatorAssignment(Collections.singletonList(semesterInvigilatorAssignmentResponseDTO))
                 .build();
     }
@@ -208,6 +205,31 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         }
 
         return new HashSet<>(registeredExamBySemesterMap.values());
+    }
+
+    public ListInvigilatorsByExamSlotResponseDTO listInvigilatorsByExamSlot(int examSlotId) {
+        ExamSlot examSlot = examSlotRepository.findById(examSlotId)
+                .orElseThrow(() -> new InvigilatorAssignException(ErrorCode.EXAM_SLOT_NOT_FOUND));
+
+        Set<InvigilatorAssignment> assignments = invigilatorRegistrationRepository.findByExamSlot(examSlot);
+
+        return ListInvigilatorsByExamSlotResponseDTO.builder()
+                .examSlotId(examSlotId)
+                .startAt(examSlot.getStartAt())
+                .endAt(examSlot.getEndAt())
+                .userResponseDTOSet(assignments.stream()
+                        .map(assignment -> UserResponseDTO.builder()
+                                .fuId(assignment.getInvigilator().getFuId())
+                                .firstName(assignment.getInvigilator().getFirstName())
+                                .lastName(assignment.getInvigilator().getLastName())
+                                .department(assignment.getInvigilator().getDepartment())
+                                .gender(assignment.getInvigilator().getGender())
+                                .phoneNumber(assignment.getInvigilator().getPhoneNumber())
+                                .email(assignment.getInvigilator().getEmail())
+                                .role(assignment.getInvigilator().getRole().getId())
+                                .build())
+                        .collect(Collectors.toSet()))
+                .build();
     }
 
     private User findInvigilatorByFuId(String fuId) {

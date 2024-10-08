@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ListInvigilatorsByExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemesterResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
 
@@ -15,7 +16,7 @@ public interface InvigilatorAssignmentService {
 
     RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsByInvigilator(String fuId);
 
-    RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsInSemesterByInvigilator(RegisterdSlotWithSemesterAndInvigilatorRequestDTO request);
+    RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsInSemesterByInvigilator(int semesterId, String fuId);
 
     RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlotsInSemester(int semesterId);
 
@@ -25,5 +26,6 @@ public interface InvigilatorAssignmentService {
 
     Set<RegisteredExamBySemesterResponseDTO> getRegisteredExamBySemester(int semesterId);
 
+    ListInvigilatorsByExamSlotResponseDTO listInvigilatorsByExamSlot(int examSlotId);
 }
 

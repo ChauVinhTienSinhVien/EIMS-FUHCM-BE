@@ -36,26 +36,20 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     @Override
     public ExamSlot updateExamSlotExamSlot(ExamSlot examSlotInRequest) {
         int id = examSlotInRequest.getId();
-        ExamSlot examSlotInDB = examSlotRepository.findById(id);
-        if (examSlotInDB == null) {
-            throw new ExamSlotNotFoundException("Exam Slot not found with ID: " + id);
-        }
+        ExamSlot examSlotInDB = findById(id);
         return examSlotRepository.save(examSlotInRequest);
     }
 
     @Override
     public ExamSlot findById(int id) {
-        return examSlotRepository.findById(id);
+        return examSlotRepository.findById(id)
+                .orElseThrow(() -> new ExamSlotNotFoundException("Exam Slot not found with ID: " + id));
     }
 
     @Override
     public void deleteExamSlot(int id) {
-        ExamSlot examSlot = examSlotRepository.findById(id);
-        if (examSlot == null ) {
-            throw new ExamSlotNotFoundException("ExamSlot not found with ID: " + id);
-        } else {
+        ExamSlot examSlot = findById(id);
             examSlotRepository.delete(examSlot);
-        }
     }
 
     @Override

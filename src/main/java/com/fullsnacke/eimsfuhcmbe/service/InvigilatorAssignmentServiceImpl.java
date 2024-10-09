@@ -398,4 +398,8 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         System.out.println("Slot2: " + slot2.getStartAt() + " | " + slot2.getEndAt());
         return !slot1.getEndAt().isBefore(slot2.getStartAt()) && !slot2.getEndAt().isBefore(slot1.getStartAt());
     }
+
+    private int allowedSlot(Semester semester) {
+        return Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue());
+    }
 }

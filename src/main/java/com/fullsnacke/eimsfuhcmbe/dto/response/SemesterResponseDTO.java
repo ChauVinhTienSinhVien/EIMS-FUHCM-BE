@@ -20,6 +20,6 @@ public class SemesterResponseDTO {
     Date endAt;
 
     String hourlyConfig;
-    String allowedSlotConfig;
+    int allowedSlotConfig;
 
 }

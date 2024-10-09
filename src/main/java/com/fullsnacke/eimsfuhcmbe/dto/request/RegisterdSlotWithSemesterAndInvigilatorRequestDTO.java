@@ -13,3 +13,4 @@ public class RegisterdSlotWithSemesterAndInvigilatorRequestDTO {
     String fuId;
     int semesterId;
 }
+//10 18 17 9

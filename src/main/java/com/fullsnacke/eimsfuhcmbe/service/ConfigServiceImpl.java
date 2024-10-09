@@ -7,7 +7,9 @@ import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,8 +26,8 @@ public class ConfigServiceImpl implements ConfigService{
         Semester semester = semesterRepository.findById(config.getSemester().getId()).orElseThrow(() -> new RuntimeException("Semester not found"));
 
         List<Config> configList = configRepository.findBySemesterId(semester.getId());
-        for(Config c:configList){
-            if(c.getConfigType().equals(config.getConfigType())){
+        for (Config c : configList) {
+            if (c.getConfigType().equals(config.getConfigType())) {
                 throw new RuntimeException("Config already exists, update this config instead");
             }
         }
@@ -71,6 +73,48 @@ public class ConfigServiceImpl implements ConfigService{
     public void deleteConfig(Integer id) {
         Config config = configRepository.findById(id).orElseThrow(() -> new RuntimeException("Config not found"));
         configRepository.deleteById(config.getId());
+    }
+
+    @Override
+    @Transactional
+    public List<Config> addAllConfig(List<Config> configList) {
+        return configRepository.saveAll(configList);
+    }
+
+    @Override
+    @Transactional
+    public List<Config> updateAllConfig(List<Config> configList) {
+        return configRepository.saveAll(configList);
+    }
+
+    public void cloneLastedSemesterConfig(Semester semester, Semester lastestSemester){
+
+        Config hourlyRateConfig = new Config();
+        Config allowedSlotConfig = new Config();
+
+        List<Config> configList = configRepository.findBySemesterId(lastestSemester.getId());
+
+        for (Config config : configList) {
+            if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
+                hourlyRateConfig.setConfigType(config.getConfigType());
+                hourlyRateConfig.setUnit(config.getUnit());
+                hourlyRateConfig.setValue(config.getValue());
+            } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
+                allowedSlotConfig.setConfigType(config.getConfigType());
+                allowedSlotConfig.setUnit(config.getUnit());
+                allowedSlotConfig.setValue(config.getValue());
+            }
+        }
+
+        List<Config> newConfigList = new ArrayList<>();
+
+        hourlyRateConfig.setSemester(semester);
+        allowedSlotConfig.setSemester(semester);
+
+        newConfigList.add(hourlyRateConfig);
+        newConfigList.add(allowedSlotConfig);
+
+        configRepository.saveAll(newConfigList);
     }
 
 }

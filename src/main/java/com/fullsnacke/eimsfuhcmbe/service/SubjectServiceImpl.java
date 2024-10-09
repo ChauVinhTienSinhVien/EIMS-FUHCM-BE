@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
@@ -28,6 +29,15 @@ public class SubjectServiceImpl implements SubjectService {
     @Override
     public Subject createSubject(Subject subject) {
         return subjectRepository.save(subject);
+    }
+
+    @Override
+    public List<Subject> saveAll(List<Subject> subjectList) {
+        for (Subject subject:  subjectList) {
+            Semester semester = semesterRepository.findSemesterById(subject.getSemesterId().getId());
+            subject.setSemesterId(semester);
+        }
+        return subjectRepository.saveAll(subjectList);
     }
 
     @Override

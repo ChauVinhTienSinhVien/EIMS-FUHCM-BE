@@ -7,6 +7,7 @@ import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.service.SemesterServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.SubjectServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,24 @@ public class SubjectController {
         SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(createdSubject);
 
         return ResponseEntity.created(uri).body(subjectResponseDTO);
+    }
+
+    @PostMapping("/bulk")
+    @Operation()
+    public ResponseEntity<List<SubjectResponseDTO>> importSubjects(@RequestBody @Valid List<SubjectRequestDTO> subjectRequestDTOList) {
+        List<Subject> subjectList = subjectRequestDTOList.stream()
+                .map(subjectRequestDTO ->subjectMapper.toEntity(subjectRequestDTO))
+                .toList();
+
+        List<Subject> addedSubjects = subjectServiceImpl.saveAll(subjectList);
+
+        List<SubjectResponseDTO> subjectResponseDTOList = new ArrayList<>();
+        for (Subject subject:addedSubjects) {
+            System.out.println(subject.getSemesterId().getName());
+            SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(subject);
+            subjectResponseDTOList.add(subjectResponseDTO);
+        }
+        return ResponseEntity.ok(subjectResponseDTOList);
     }
 
     @PutMapping("/{id}")

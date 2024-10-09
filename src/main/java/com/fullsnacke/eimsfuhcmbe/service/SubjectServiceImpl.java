@@ -55,6 +55,13 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    public List<Subject> findSubjectBySemesterId(int semesterId) {
+        Semester semester = semesterRepository.findSemesterById(semesterId);
+        return subjectRepository.findBySemesterId(semester);
+    }
+
+
+    @Override
     public void deleteSubject(int id) {
         Subject subject = subjectRepository.findSubjectsById(id);
         if (subject != null) {

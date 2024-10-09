@@ -110,4 +110,21 @@ public class SubjectController {
         return ResponseEntity.ok(subjectResponseDTO);
     }
 
+    @GetMapping("/subjects/by-semester/{semesterId}")
+    public ResponseEntity<List<SubjectResponseDTO>> getSubjectBySemesterId(@PathVariable("semesterId") int semesterId) {
+        List<Subject> subjectList = subjectServiceImpl.findSubjectBySemesterId(semesterId);
+
+        if (subjectList.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<SubjectResponseDTO> subjectResponseDTOList = new ArrayList<>();
+        for (Subject subject : subjectList) {
+            SubjectResponseDTO subjectResponseDTO = subjectMapper.toDto(subject);
+            subjectResponseDTOList.add(subjectResponseDTO);
+        }
+
+        return ResponseEntity.ok(subjectResponseDTOList);
+    }
+
 }

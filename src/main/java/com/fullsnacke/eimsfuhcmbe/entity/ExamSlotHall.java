@@ -11,19 +11,18 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "rooms")
-public class Room {
+@Table(name = "exam_slot_halls")
+public class ExamSlotHall {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     int id;
 
-    @Column(name = "room_name", nullable = false, length = 50, unique = true)
-    String roomName;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "examslot_id", nullable = false)
+    ExamSlot examSlot;
 
-    @Column(name = "capacity", nullable = false)
-    Integer capacity;
-
-    @Column(name = "campus")
-    String campus;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "hall_invigilator_id", nullable = false)
+    InvigilatorAssignment hallInvigilator;
 }

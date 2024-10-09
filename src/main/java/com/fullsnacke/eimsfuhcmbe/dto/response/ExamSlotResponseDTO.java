@@ -17,22 +17,24 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ExamSlotResponseDTO {
 
-    int id;
+    Integer id;
 
     SubjectExam subjectExamId;
-
-    int status;
-
-    int createdBy;
-
-    int updatedBy;
-
-    Instant createdAt;
-
-    Instant updatedAt;
 
     Instant startAt;
 
     Instant endAt;
+
+    Integer requiredInvigilators;
+
+    Instant createdAt;
+
+    Integer createdBy;
+
+    Integer status;
+
+    Integer updatedBy;
+
+    Instant updatedAt;
 
 }

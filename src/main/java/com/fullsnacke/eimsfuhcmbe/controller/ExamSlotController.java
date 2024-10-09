@@ -6,6 +6,8 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
+import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
+import com.fullsnacke.eimsfuhcmbe.repository.SubjectExamRepository;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +35,9 @@ public class ExamSlotController {
 
     @Autowired
     private ExamSlotMapper examSlotMapper;
+
+    @Autowired
+    private SubjectExamRepository subjectExamRepository;
 
     @GetMapping
     @Operation(summary = "Retrieve all exam slots", description = "Fetches a list of all exam slots from the system. If no exam slots are found, it will return a 204 No Content response.")
@@ -104,8 +109,8 @@ public class ExamSlotController {
     public ResponseEntity<ExamSlotResponseDTO> updateExamSlot(@PathVariable("id") int id,@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         try{
             ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
-            examSlot.setId(id);
-            ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlotServiceImpl.updateExamSlotExamSlot(examSlot));
+            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlotExamSlot(examSlot);
+            ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
             return ResponseEntity.ok(examSlotResponseDTO);
         } catch (ExamSlotNotFoundException e) {
             return ResponseEntity.notFound().build();

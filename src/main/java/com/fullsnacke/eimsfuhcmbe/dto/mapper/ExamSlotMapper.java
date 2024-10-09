@@ -5,9 +5,12 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.repository.SubjectExamRepository;
+import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Mapper(componentModel = "spring")
 public interface ExamSlotMapper {
@@ -23,14 +26,14 @@ public interface ExamSlotMapper {
     ExamSlotResponseDTO toDto(ExamSlot entity);
 
     @Named("intToSubjectExam")
-    default SubjectExam intToSubjectExam(int subjectExamId) {
+    default SubjectExam intToSubjectExam(Integer subjectExamId) {
         SubjectExam subjectExam = new SubjectExam();
-        subjectExam.setId(subjectExamId);
+        subjectExam.setSubjectId(subjectExamId);
         return subjectExam;
     }
 
     @Named("intToUser")
-    default User intToUser(int userId) {
+    default User intToUser(Integer userId) {
         User user = new User();
         user.setId(userId);
         return user;

@@ -1,6 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.dto.request;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,20 +14,40 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ExamSlotRequestDTO {
 
-    int subjectExamId;
+//    int subjectExamId;
+//
+//    int status;
+//
+//    int createdBy;
+//
+//    int updatedBy;
+//
+//    Instant createdAt;
+//
+//    Instant updatedAt;
+//
+//    Instant startAt;
+//
+//    Instant endAt;
 
-    int status;
+    Integer id;
 
-    int createdBy;
-
-    int updatedBy;
-
-    Instant createdAt;
-
-    Instant updatedAt;
+    Integer subjectExamId;
 
     Instant startAt;
 
     Instant endAt;
+
+    Integer requiredInvigilators;
+
+    Instant createdAt;
+
+    Integer createdBy;
+
+    Integer status;
+
+    Integer updatedBy;
+
+    Instant updatedAt;
 
 }

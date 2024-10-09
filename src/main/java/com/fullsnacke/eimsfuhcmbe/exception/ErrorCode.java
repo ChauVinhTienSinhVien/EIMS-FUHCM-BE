@@ -20,7 +20,8 @@ public enum ErrorCode{
     AUTHENTICATION_EMAIL_MISSING("Authentication email is missing or empty.", HttpStatus.UNAUTHORIZED),
     EXAM_SLOT_ALREADY_REGISTERED("Exam slot already registered.", HttpStatus.CONFLICT),
     SEMESTER_NOT_FOUND("Semester not found.", HttpStatus.BAD_REQUEST),
-
+    EXAM_SLOT_FULL("Exam slot is full.", HttpStatus.CONFLICT),
+    EXCEEDED_ALLOWED_SLOT("Exceeded allowed slot.", HttpStatus.CONFLICT),
 
     ;
 

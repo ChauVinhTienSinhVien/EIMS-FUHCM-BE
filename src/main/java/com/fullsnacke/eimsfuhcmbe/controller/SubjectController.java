@@ -110,7 +110,7 @@ public class SubjectController {
         return ResponseEntity.ok(subjectResponseDTO);
     }
 
-    @GetMapping("/subjects/by-semester/{semesterId}")
+    @GetMapping("/by-semester/{semesterId}")
     public ResponseEntity<List<SubjectResponseDTO>> getSubjectBySemesterId(@PathVariable("semesterId") int semesterId) {
         List<Subject> subjectList = subjectServiceImpl.findSubjectBySemesterId(semesterId);
 

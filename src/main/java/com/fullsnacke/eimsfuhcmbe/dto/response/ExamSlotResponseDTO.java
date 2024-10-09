@@ -19,7 +19,7 @@ public class ExamSlotResponseDTO {
 
     int id;
 
-    int subjectExamId;
+    SubjectExam subjectExamId;
 
     int status;
 

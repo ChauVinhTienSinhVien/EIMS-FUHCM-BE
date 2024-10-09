@@ -5,6 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,13 +14,11 @@ import java.util.Optional;
 @Service
 public class SubjectServiceImpl implements SubjectService {
 
-    private final SemesterRepository semesterRepository;
+    @Autowired
+    private SemesterRepository semesterRepository;
+    @Autowired
     private SubjectRepository subjectRepository;
 
-    public SubjectServiceImpl(SubjectRepository subjectRepository, SemesterRepository semesterRepository) {
-        this.subjectRepository = subjectRepository;
-        this.semesterRepository = semesterRepository;
-    }
 
     @Override
     public List<Subject> getAllSubjects() {
@@ -54,6 +53,13 @@ public class SubjectServiceImpl implements SubjectService {
     public Subject findSubjectById(int id) {
         return subjectRepository.findSubjectsById(id);
     }
+
+    @Override
+    public List<Subject> findSubjectBySemesterId(int semesterId) {
+        Semester semester = semesterRepository.findSemesterById(semesterId);
+        return subjectRepository.findBySemesterId(semester);
+    }
+
 
     @Override
     public void deleteSubject(int id) {

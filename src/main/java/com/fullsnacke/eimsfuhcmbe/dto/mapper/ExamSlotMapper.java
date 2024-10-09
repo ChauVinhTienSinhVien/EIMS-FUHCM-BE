@@ -17,7 +17,7 @@ public interface ExamSlotMapper {
     @Mapping(target = "updatedBy", source = "updatedBy", qualifiedByName = "intToUser")
     ExamSlot toEntity(ExamSlotRequestDTO dto);
 
-    @Mapping(target = "subjectExamId", source = "subjectExam.id")
+    @Mapping(target = "subjectExamId", source = "subjectExam.id", qualifiedByName = "intToSubjectExam")
     @Mapping(target = "createdBy", source = "createdBy.id")
     @Mapping(target = "updatedBy", source = "updatedBy.id")
     ExamSlotResponseDTO toDto(ExamSlot entity);

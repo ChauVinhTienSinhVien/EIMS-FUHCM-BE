@@ -24,13 +24,9 @@ public class SubjectController {
 
     @Autowired
     private SubjectServiceImpl subjectServiceImpl;
-    @Autowired
-    private ModelMapper modelMapper;
+
     @Autowired
     private SubjectMapper subjectMapper;
-
-
-
 
     @GetMapping
     public ResponseEntity<List<SubjectResponseDTO>> getAllSubjects() {

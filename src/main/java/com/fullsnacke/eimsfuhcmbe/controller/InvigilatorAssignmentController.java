@@ -26,7 +26,7 @@ public class InvigilatorAssignmentController {
     InvigilatorAssignmentService invigilatorAssignmentService;
 
     @PostMapping
-    @Operation(summary = "Register Exam Slots", description = "Save the invigilator customEx for the exam slot")
+    @Operation(summary = "Register Exam Slots", description = "Save the invigilator assignment for the exam slot")
     public ResponseEntity<InvigilatorAssignmentResponseDTO> registerExamSlot(@RequestBody InvigilatorAssignmentRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)

@@ -3,23 +3,22 @@ package com.fullsnacke.eimsfuhcmbe.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
-
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SemesterResponseDTO {
-
+public class SubjectExamResponseDTO {
 
     int id;
-    String name;
 
-    Date startAt;
-    Date endAt;
+    int duration;
 
-    String hourlyConfig;
-    String allowedSlotConfig;
+    String examType;
+
+    String subjectName;
+
+    String subjectCode;
 
 }

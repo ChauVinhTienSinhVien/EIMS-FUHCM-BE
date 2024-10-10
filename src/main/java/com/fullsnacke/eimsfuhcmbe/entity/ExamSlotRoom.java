@@ -22,15 +22,16 @@ public class ExamSlotRoom {
     @JoinColumn(name = "exam_slot_id", nullable = false)
     ExamSlot examSlot;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_invigilator_id")
-    InvigilatorAssignment roomInvigilator;
+    User roomInvigilator;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "hall_invigilator_id")
+    User hallInvigilator;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "room_id", nullable = false)
     Room room;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "exam_slot_hall_id", nullable = false)
-    ExamSlotHall examSlotHall;
 }

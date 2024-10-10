@@ -12,5 +12,6 @@ public interface SubjectService {
     Subject updateSubject(Subject subject);
     Subject findSubjectById(int id);
     void deleteSubject(int id);
+    List<Subject> findSubjectBySemesterId(int id);
 
 }

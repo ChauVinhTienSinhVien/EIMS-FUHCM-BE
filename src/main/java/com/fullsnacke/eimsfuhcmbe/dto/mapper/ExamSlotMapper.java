@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.dto.mapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectExamRepository;
@@ -28,7 +29,7 @@ public interface ExamSlotMapper {
     @Named("intToSubjectExam")
     default SubjectExam intToSubjectExam(Integer subjectExamId) {
         SubjectExam subjectExam = new SubjectExam();
-        subjectExam.setSubjectId(subjectExamId);
+        subjectExam.setId(subjectExamId);
         return subjectExam;
     }
 

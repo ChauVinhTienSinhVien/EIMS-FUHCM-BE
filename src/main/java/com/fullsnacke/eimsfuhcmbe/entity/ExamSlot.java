@@ -31,6 +31,7 @@ public class ExamSlot {
     @Column(name = "end_at", nullable = false)
     Instant endAt;
 
+
     @Column(name = "required_invigilators")
     Integer requiredInvigilators;
 

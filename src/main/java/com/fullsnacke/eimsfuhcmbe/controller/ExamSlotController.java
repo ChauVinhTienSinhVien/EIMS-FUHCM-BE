@@ -4,6 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
@@ -49,7 +50,8 @@ public class ExamSlotController {
             List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
             for (ExamSlot e:examSlotList) {
                 ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
-                System.out.println(examSlotResponseDTO.getCreatedAt());
+                SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+                examSlotResponseDTO.setSubjectExamId(subjectExam);
                 examSlotResponseDTOList.add(examSlotResponseDTO);
             }
             return ResponseEntity.ok(examSlotResponseDTOList);
@@ -67,6 +69,8 @@ public class ExamSlotController {
             List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
             for (ExamSlot e:examSlotList) {
                 ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
+                SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+                examSlotResponseDTO.setSubjectExamId(subjectExam);
                 examSlotResponseDTOList.add(examSlotResponseDTO);
             }
             return ResponseEntity.ok(examSlotResponseDTOList);
@@ -89,6 +93,8 @@ public class ExamSlotController {
         URI uri = URI.create("/examslots/" + createdExamSlot.getId());
         System.out.println(createdExamSlot.getCreatedAt());
         ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(createdExamSlot);
+        SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+        examSlotResponseDTO.setSubjectExamId(subjectExam);
         return ResponseEntity.created(uri).body(examSlotResponseDTO);
     }
 
@@ -99,6 +105,8 @@ public class ExamSlotController {
         for (ExamSlotRequestDTO e:examSlotRequestDTOList) {
             ExamSlot examSlot = examSlotServiceImpl.createExamSlot(examSlotMapper.toEntity(e));
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
+            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+            examSlotResponseDTO.setSubjectExamId(subjectExam);
             examSlotResponseDTOList.add(examSlotResponseDTO);
         }
         return ResponseEntity.ok(examSlotResponseDTOList);
@@ -111,6 +119,8 @@ public class ExamSlotController {
             ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
             ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlotExamSlot(examSlot);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
+            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
         } catch (ExamSlotNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -125,6 +135,8 @@ public class ExamSlotController {
             return ResponseEntity.notFound().build();
         } else {
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
+            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
         }
     }

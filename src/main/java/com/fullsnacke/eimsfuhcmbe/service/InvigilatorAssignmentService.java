@@ -27,5 +27,7 @@ public interface InvigilatorAssignmentService {
     Set<RegisteredExamBySemesterResponseDTO> getRegisteredExamBySemester(int semesterId);
 
     ListInvigilatorsByExamSlotResponseDTO listInvigilatorsByExamSlot(int examSlotId);
+
+    RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId);
 }
 

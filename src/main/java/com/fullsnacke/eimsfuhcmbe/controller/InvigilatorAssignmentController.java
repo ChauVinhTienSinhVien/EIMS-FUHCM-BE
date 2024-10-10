@@ -97,6 +97,13 @@ public class InvigilatorAssignmentController {
                 .body(invigilatorAssignmentService.deleteAssignmentBySemester(request));
     }
 
+    @GetMapping("/register/semesterid={semesterId}")
+    public ResponseEntity<RegisteredExamBySemesterResponseDTO> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId){
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.getAllExamSlotsInSemesterWithStatus(semesterId));
+    }
+
 
 
 

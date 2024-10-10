@@ -46,7 +46,7 @@ public class SemesterController {
             Config allowedSlotConfig = configServiceImpl.getConfigBySemesterIdAndConfigType(semester.getId(), ConfigType.ALLOWED_SLOT.getValue());
 
             semesterResponseDTO.setHourlyConfig(hourlyRateConfig.getValue());
-            semesterResponseDTO.setAllowedSlotConfig(Integer.parseInt(allowedSlotConfig.getValue()));
+            semesterResponseDTO.setAllowedSlotConfig(allowedSlotConfig.getValue());
 
             semesterResponseDTOS.add(semesterResponseDTO);
         }
@@ -108,7 +108,7 @@ public class SemesterController {
                 if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
                     semesterResponseDTO.setHourlyConfig(config.getValue());
                 } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
-                    semesterResponseDTO.setAllowedSlotConfig(Integer.parseInt(config.getValue()));
+                    semesterResponseDTO.setAllowedSlotConfig(config.getValue());
                 }
             }
 

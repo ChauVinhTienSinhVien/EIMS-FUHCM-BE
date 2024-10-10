@@ -29,12 +29,9 @@ public class InvigilatorAssignment {
     @JoinColumn(name = "invigilator_id", nullable = false)
     User invigilator;
 
-    @Column(name = "is_hall_invigilator")
+    @Column(name = "is_hall_invigilator", nullable = false)
     Boolean isHallInvigilator;
 
     @Column(name = "created_at", nullable = false)
     Instant createdAt;
-
-    @Column(name = "is_assigned", nullable = false, columnDefinition = "boolean default false")
-    boolean isAssigned;
 }

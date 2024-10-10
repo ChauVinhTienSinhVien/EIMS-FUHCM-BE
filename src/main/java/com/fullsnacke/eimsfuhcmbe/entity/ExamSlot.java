@@ -31,6 +31,9 @@ public class ExamSlot {
     @Column(name = "end_at", nullable = false)
     Instant endAt;
 
+    @Column(name = "required_invigilators", nullable = false)
+    Integer requiredInvigilators;
+
     @Column(name = "created_at", nullable = false)
     Instant createdAt;
 
@@ -47,5 +50,4 @@ public class ExamSlot {
 
     @Column(name = "updated_at")
     Instant updatedAt;
-
 }

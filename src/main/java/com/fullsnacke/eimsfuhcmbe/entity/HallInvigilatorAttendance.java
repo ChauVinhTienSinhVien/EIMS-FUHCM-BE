@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.entity;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -7,14 +8,14 @@ import lombok.experimental.FieldDefaults;
 import java.time.Instant;
 
 @Entity
-@Table(name = "attendance")
 @Setter
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Attendance {
+@Table(name = "hall_invigilator_attendances")
+public class HallInvigilatorAttendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -32,16 +33,11 @@ public class Attendance {
     @Column(name = "updated_at")
     Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "updated_by")
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "updated_by", nullable = false)
     User updatedBy;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "exam_slot_room_id", nullable = false)
-    ExamSlotRoom examSlotRoom;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "invigilator_id", nullable = false)
-    User invigilator;
-
+    @JoinColumn(name = "exam_slot_hall_id", nullable = false)
+    ExamSlotHall examSlotHall;
 }

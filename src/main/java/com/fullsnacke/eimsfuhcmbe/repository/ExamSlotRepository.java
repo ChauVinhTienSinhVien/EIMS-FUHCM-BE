@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
-    Optional<ExamSlot> findById(int id);
+
+    ExamSlot findExamSlotById(int id);
+
 
     List<ExamSlot> findExamSlotBySubjectExam_SubjectId_SemesterId(Semester semester);
 }

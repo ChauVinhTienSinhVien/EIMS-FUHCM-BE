@@ -243,6 +243,11 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .build();
     }
 
+    @Override
+    public RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId) {
+        return null;
+    }
+
     private User findInvigilatorByFuId(String fuId) {
         User invigilator = userRepository.findByFuId(fuId);
         if (invigilator == null) {

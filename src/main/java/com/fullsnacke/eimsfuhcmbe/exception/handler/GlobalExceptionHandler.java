@@ -4,9 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ApiResponse;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ErrorDTO;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
-
-import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomException;
-
+import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +81,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     //NGAN
     @ExceptionHandler(value = CustomException.class)
-    ResponseEntity<ApiResponse> handlingInvigilatorAssignException(CustomException exception, HttpServletRequest request){
+    ResponseEntity<ApiResponse> handlingCustomException(CustomException exception, HttpServletRequest request){
         ErrorCode errorCode = exception.getErrorCode();
         if(errorCode.getPath() == null){
             errorCode.setPath(request.getServletPath());

@@ -22,7 +22,11 @@ public enum ErrorCode{
     SEMESTER_NOT_FOUND("Semester not found.", HttpStatus.BAD_REQUEST),
     EXAM_SLOT_FULL("Exam slot is full.", HttpStatus.CONFLICT),
     EXCEEDED_ALLOWED_SLOT("Exceeded allowed slot.", HttpStatus.CONFLICT),
-
+    REQUEST_EMPTY("Request is empty or null.", HttpStatus.BAD_REQUEST),
+    REQUEST_CREATION_FAILED("Failed to create request.", HttpStatus.INTERNAL_SERVER_ERROR),
+    EXAM_SLOT_ID_MISSING("Exam slot ID is missing.", HttpStatus.BAD_REQUEST),
+    REQUEST_TYPE_EMPTY("Request type is empty or null.", HttpStatus.BAD_REQUEST),
+    REASON_EMPTY("Reason is empty or null.", HttpStatus.BAD_REQUEST),
     ;
 
     private String message;

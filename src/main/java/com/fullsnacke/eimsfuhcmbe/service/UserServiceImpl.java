@@ -105,4 +105,5 @@ public class UserServiceImpl implements UserService {
                 .role(user.getRole().getId())
                 .build();
     }
+
 }

@@ -50,4 +50,5 @@ public class ExamSlot {
 
     @Column(name = "updated_at")
     Instant updatedAt;
+
 }

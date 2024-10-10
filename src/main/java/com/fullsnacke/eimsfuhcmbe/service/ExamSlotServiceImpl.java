@@ -55,6 +55,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     @Override
     public List<ExamSlot> getExamSlotsBySemesterId(int semesterId) {
         Semester semester = semesterRepository.findById(semesterId).orElseThrow(() -> new RuntimeException("Semester not found"));
+
         return examSlotRepository.findExamSlotBySubjectExam_SubjectId_SemesterId(semester);
     }
 }

@@ -41,7 +41,7 @@ public class Request {
     @Column(name = "updated_at")
     Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = true)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "updated_by")
     User updatedBy;
 

@@ -1,4 +1,4 @@
-package com.fullsnacke.eimsfuhcmbe.exception.repository.assignment;
+package com.fullsnacke.eimsfuhcmbe.exception.repository.customEx;
 
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import lombok.*;

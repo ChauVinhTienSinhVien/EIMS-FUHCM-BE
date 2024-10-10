@@ -8,6 +8,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.Instant;
+
 
 @Entity
 @Table(name = "users")
@@ -48,8 +50,13 @@ public class User {
     @Column(name = "gender")
     Boolean gender;
 
+    @Column(name = "created_at", nullable = false)
+    Instant createdAt;
+
+    @Column(name = "is_deleted")
+    Boolean isDeleted;
+
     @ManyToOne(fetch = FetchType.EAGER)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "role_id")
     Role role;
 

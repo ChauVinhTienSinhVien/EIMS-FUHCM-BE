@@ -17,6 +17,8 @@ public class SubjectExamResponseDTO {
 
     String examType;
 
-    String subjectName; // subjectId
+    String subjectName; // subjectCode
+
+    String subjectCode;
 
 }

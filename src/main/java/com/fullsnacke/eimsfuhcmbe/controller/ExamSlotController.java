@@ -89,6 +89,8 @@ public class ExamSlotController {
 
         examSlot.setCreatedAt(Instant.now());
         examSlot.setCreatedBy(currentUser);
+        examSlot.setUpdatedBy(currentUser);
+        examSlot.setStatus(1);
         ExamSlot createdExamSlot = examSlotServiceImpl.createExamSlot(examSlot);
         URI uri = URI.create("/examslots/" + createdExamSlot.getId());
         System.out.println(createdExamSlot.getCreatedAt());

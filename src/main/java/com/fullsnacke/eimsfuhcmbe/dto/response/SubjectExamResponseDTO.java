@@ -17,7 +17,7 @@ public class SubjectExamResponseDTO {
 
     String examType;
 
-    String subjectName; // subjectCode
+    String subjectName;
 
     String subjectCode;
 

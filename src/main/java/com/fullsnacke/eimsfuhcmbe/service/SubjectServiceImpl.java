@@ -7,6 +7,7 @@ import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     @Override
+    @Transactional
     public List<Subject> saveAll(List<Subject> subjectList) {
         for (Subject subject:  subjectList) {
             Semester semester = semesterRepository.findSemesterById(subject.getSemesterId().getId());

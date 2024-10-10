@@ -31,7 +31,7 @@ public class ExamSlot {
     @Column(name = "end_at", nullable = false)
     Instant endAt;
 
-    @Column(name = "required_invigilators")
+    @Column(name = "required_invigilators", nullable = false)
     Integer requiredInvigilators;
 
     @Column(name = "created_at", nullable = false)
@@ -44,7 +44,7 @@ public class ExamSlot {
     @Column(name = "status", nullable = false)
     Integer status;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "updated_by")
     User updatedBy;
 

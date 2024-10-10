@@ -23,7 +23,4 @@ public class Room {
 
     @Column(name = "capacity", nullable = false)
     Integer capacity;
-
-    @Column(name = "campus")
-    String campus;
 }

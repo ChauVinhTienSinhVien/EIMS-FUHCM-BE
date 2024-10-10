@@ -33,8 +33,8 @@ public class HallInvigilatorAttendance {
     @Column(name = "updated_at")
     Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "updated_by")
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "updated_by", nullable = false)
     User updatedBy;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)

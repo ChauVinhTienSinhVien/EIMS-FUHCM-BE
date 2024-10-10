@@ -14,5 +14,6 @@ import java.util.Set;
 public class SemesterInvigilatorAssignmentResponseDTO {
     int semesterId;
     String semesterName;
+    int allowedSlots;
     Set<ExamSlotDetail> examSlotDetailSet;
 }

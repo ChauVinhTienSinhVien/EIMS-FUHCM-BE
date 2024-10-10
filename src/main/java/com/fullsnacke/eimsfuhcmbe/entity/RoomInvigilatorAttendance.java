@@ -7,14 +7,14 @@ import lombok.experimental.FieldDefaults;
 import java.time.Instant;
 
 @Entity
-@Table(name = "attendance")
+@Table(name = "room_invigilator_attendances")
 @Setter
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Attendance {
+public class RoomInvigilatorAttendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -39,9 +39,5 @@ public class Attendance {
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "exam_slot_room_id", nullable = false)
     ExamSlotRoom examSlotRoom;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "invigilator_id", nullable = false)
-    User invigilator;
 
 }

@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface RequestService {
     RequestResponseDTO createRequest(RequestRequestDTO request);
-    List<RequestResponseDTO> getAllRequestByInvigilator();
+    List<RequestResponseDTO> getAllRequestOfCurrentInvigilator();
+    List<RequestResponseDTO> getAllRequestByInvigilatorId(int invigilatorId);
     RequestResponseDTO getRequestById(int requestId);
 }

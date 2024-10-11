@@ -63,9 +63,22 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
-    public List<RequestResponseDTO> getAllRequestByInvigilator() {
+    public List<RequestResponseDTO> getAllRequestOfCurrentInvigilator() {
         User currentUser = getCurrentUser();
         List<Request> entity = requestRepository.findByCreatedBy(currentUser);
+
+        return getAllRequestsByInvigilator(currentUser);
+    }
+
+    public List<RequestResponseDTO> getAllRequestByInvigilatorId(int invigilatorId) {
+        User invigilator = userRepository.findById(invigilatorId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        return getAllRequestsByInvigilator(invigilator);
+    }
+
+    private List<RequestResponseDTO> getAllRequestsByInvigilator(User invigilator) {
+        List<Request> entity = requestRepository.findByCreatedBy(invigilator);
 
         return entity.stream()
                 .map(request -> {

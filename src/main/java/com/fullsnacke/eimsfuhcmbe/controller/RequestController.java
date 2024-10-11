@@ -30,7 +30,7 @@ public class RequestController {
     public ResponseEntity<List<RequestResponseDTO>> getAllRequest() {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(requestService.getAllRequestByInvigilator());
+                .body(requestService.getAllRequestOfCurrentInvigilator());
     }
 
     @GetMapping("myinfo/requestid={requestId}")
@@ -39,4 +39,6 @@ public class RequestController {
                 .status(HttpStatus.OK)
                 .body(requestService.getRequestById(requestId));
     }
+
+
 }

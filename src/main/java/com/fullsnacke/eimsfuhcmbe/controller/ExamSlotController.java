@@ -6,6 +6,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectExamRepository;
@@ -90,7 +91,7 @@ public class ExamSlotController {
         examSlot.setCreatedAt(Instant.now());
         examSlot.setCreatedBy(currentUser);
         examSlot.setUpdatedBy(currentUser);
-        examSlot.setStatus(1);
+        examSlot.setStatus(ExamSlotStatus.NEEDS_ROOM_ASSIGNMENT.getValue());
         ExamSlot createdExamSlot = examSlotServiceImpl.createExamSlot(examSlot);
         URI uri = URI.create("/examslots/" + createdExamSlot.getId());
         System.out.println(createdExamSlot.getCreatedAt());

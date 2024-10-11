@@ -7,6 +7,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Role;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
+import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.user.UserNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.RoleRepository;
@@ -45,6 +46,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByFuId(String fuId) {
+        User user = userRepository.findByFuId(fuId);
+        if(user == null){
+            throw new EntityNotFoundException(User.class, "fuId", fuId);
+        }
         return userRepository.findByFuId(fuId);
     }
 
@@ -65,7 +70,7 @@ public class UserServiceImpl implements UserService {
         User userInDb = userRepository.findByFuId(fuId);
 
         if (userInDb == null) {
-            throw new UserNotFoundException("No User found with given fuId:" + fuId);
+            throw new EntityNotFoundException(User.class, "fuId", fuId);
         }
 
         userInDb.setFirstName(userInRequest.getFirstName());
@@ -82,7 +87,7 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(String fuId) {
         User userInDb = userRepository.findByFuId(fuId);
         if(userInDb == null){
-            throw new UserNotFoundException("No User found with given fuId:" + fuId);
+            throw new EntityNotFoundException(User.class, "fuId", fuId);
         }
         userRepository.delete(userInDb);
     }

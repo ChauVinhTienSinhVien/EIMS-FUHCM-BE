@@ -34,7 +34,6 @@ public class AuthenticationService {
                 .build();
     }
 
-
     public String loginOAuthGoogle(IdTokenRequestDto requestBody) {
         User user = verifyIDToken(requestBody.getIdToken());
 

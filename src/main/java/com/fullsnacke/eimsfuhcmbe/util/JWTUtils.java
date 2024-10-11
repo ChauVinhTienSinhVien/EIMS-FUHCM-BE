@@ -22,8 +22,8 @@ import java.util.Map;
 @Component
 public class JWTUtils {
 
-    private long TOKEN_VALIDITY;
-    private long TOKEN_VALIDITY_REMEMBER;
+    private final long TOKEN_VALIDITY;
+    private final long TOKEN_VALIDITY_REMEMBER;
     private final Key key;
 
     public JWTUtils(@Value("${jwt.secretKey}") String secret, @Value("${jwt.expirationInMs}") long expirationInMs, @Value("${jwt.expirationInMsRemember}") long expirationInMsRemember) {

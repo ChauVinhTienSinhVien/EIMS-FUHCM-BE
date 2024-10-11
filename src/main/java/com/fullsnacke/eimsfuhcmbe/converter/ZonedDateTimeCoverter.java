@@ -23,10 +23,7 @@ public class ZonedDateTimeCoverter implements AttributeConverter<ZonedDateTime, 
         if (zonedDateTime == null) {
             return null;
         }
-
         ZonedDateTime utc7DateTime = zonedDateTime.withZoneSameInstant(UTC);
-        System.out.println("utc7DateTime: " + utc7DateTime);
-        System.out.println("utc7DateTime.withZoneSameInstant(DEFAULT_ZONE): " + utc7DateTime.withZoneSameInstant(DEFAULT_ZONE));
         return utc7DateTime.withZoneSameInstant(DEFAULT_ZONE);
     }
 }

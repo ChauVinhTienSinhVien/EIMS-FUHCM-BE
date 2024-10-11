@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Date;
 @Setter
 @Getter
@@ -34,9 +35,9 @@ public class ExamSlotRequestDTO {
 
     Integer subjectExamId;
 
-    Instant startAt;
+    ZonedDateTime startAt;
 
-    Instant endAt;
+    ZonedDateTime endAt;
 
     Integer requiredInvigilators;
 

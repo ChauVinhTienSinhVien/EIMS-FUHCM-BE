@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.configuration;
 
+import com.fullsnacke.eimsfuhcmbe.util.JWTUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

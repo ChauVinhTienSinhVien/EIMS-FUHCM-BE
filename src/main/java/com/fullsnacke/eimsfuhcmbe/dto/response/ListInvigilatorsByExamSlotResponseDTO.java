@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 @Getter
@@ -14,7 +15,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ListInvigilatorsByExamSlotResponseDTO {
     int examSlotId;
-    Instant startAt;
-    Instant endAt;
+    ZonedDateTime startAt;
+    ZonedDateTime endAt;
     Set<UserResponseDTO> userResponseDTOSet;
 }

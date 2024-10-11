@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ import java.time.Instant;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExamSlotDetail{
     int examSlotId;
-    Instant startAt;
-    Instant endAt;
+    ZonedDateTime startAt;
+    ZonedDateTime endAt;
     String status;
 }

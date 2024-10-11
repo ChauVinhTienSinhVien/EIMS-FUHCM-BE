@@ -1,6 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service.authentication;
 
-import com.fullsnacke.eimsfuhcmbe.configuration.JWTUtils;
+import com.fullsnacke.eimsfuhcmbe.util.JWTUtils;
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;

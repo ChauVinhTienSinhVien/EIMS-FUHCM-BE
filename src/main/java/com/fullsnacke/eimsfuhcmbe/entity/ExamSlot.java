@@ -1,11 +1,14 @@
 package com.fullsnacke.eimsfuhcmbe.entity;
 
+import com.fullsnacke.eimsfuhcmbe.converter.InstantConverter;
+import com.fullsnacke.eimsfuhcmbe.converter.ZonedDateTimeCoverter;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @Entity
 @Getter
@@ -26,10 +29,12 @@ public class ExamSlot {
     SubjectExam subjectExam;
 
     @Column(name = "start_at", nullable = false)
-    Instant startAt;
+    @Convert(converter = ZonedDateTimeCoverter.class)
+    ZonedDateTime startAt;
 
     @Column(name = "end_at", nullable = false)
-    Instant endAt;
+    @Convert(converter = ZonedDateTimeCoverter.class)
+    ZonedDateTime endAt;
 
     @Column(name = "required_invigilators")
     Integer requiredInvigilators;

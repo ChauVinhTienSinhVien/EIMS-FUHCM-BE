@@ -27,6 +27,7 @@ public enum ErrorCode{
     EXAM_SLOT_ID_MISSING("Exam slot ID is missing.", HttpStatus.BAD_REQUEST),
     REQUEST_TYPE_EMPTY("Request type is empty or null.", HttpStatus.BAD_REQUEST),
     REASON_EMPTY("Reason is empty or null.", HttpStatus.BAD_REQUEST),
+    NO_REQUEST("No requests have been sent yet.", HttpStatus.NOT_FOUND),
     ;
 
     private String message;

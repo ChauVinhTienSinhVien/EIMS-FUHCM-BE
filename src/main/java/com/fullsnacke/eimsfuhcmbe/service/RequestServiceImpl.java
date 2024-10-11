@@ -7,6 +7,7 @@ import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.RequestStatusEnum;
+import com.fullsnacke.eimsfuhcmbe.enums.RequestTypeEnum;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
@@ -20,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,13 +41,16 @@ public class RequestServiceImpl implements RequestService {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
         } else if(request.getReason() == null || request.getReason().isEmpty()) {
             throw new CustomException(ErrorCode.REASON_EMPTY);
-        } else if(request.getRequestType() == null) {
-            throw new CustomException(ErrorCode.REQUEST_TYPE_EMPTY);
         }
+//        else if(request.getRequestType() == null) {
+//            throw new CustomException(ErrorCode.REQUEST_TYPE_EMPTY);
+//        }
 
         try {
             var currentUser = getCurrentUser();
             request.setInvigilator(currentUser);
+            request.setRequestType(RequestTypeEnum.CANCEL.name());
+            System.out.println("--------------------------------------------------");
             System.out.println(request);
             Request entity = requestMapper.toEntity(request);
             setExamSlot(entity.getExamSlot());
@@ -59,22 +65,14 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
-//    public RequestResponseDTO getRequestById(int requestId) {
-//        if(requestId >) {
-//            throw new CustomException(ErrorCode.REQUEST_ID_INVALID);
-//        }
-//
-//        try {
-//            Request entity = requestRepository.findById(requestId)
-//                    .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_NOT_FOUND));
-//            RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
-//            responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
-//            return responseDTO;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw new CustomException(ErrorCode.REQUEST_NOT_FOUND);
-//        }
-//    }
+    public List<RequestResponseDTO> getAllRequestByInvigilator() {
+        User currentUser = getCurrentUser();
+        List<Request> entity = requestRepository.findByCreatedBy(currentUser);
+
+        return entity.stream()
+                .map(requestMapper::toResponseDTO)
+                .toList();
+    }
 
 
 

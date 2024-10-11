@@ -59,6 +59,25 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
+//    public RequestResponseDTO getRequestById(int requestId) {
+//        if(requestId >) {
+//            throw new CustomException(ErrorCode.REQUEST_ID_INVALID);
+//        }
+//
+//        try {
+//            Request entity = requestRepository.findById(requestId)
+//                    .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_NOT_FOUND));
+//            RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+//            responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
+//            return responseDTO;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw new CustomException(ErrorCode.REQUEST_NOT_FOUND);
+//        }
+//    }
+
+
+
     private void setExamSlot(ExamSlot examSlot) {
         if (examSlot == null) {
             throw new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND);
@@ -83,4 +102,6 @@ public class RequestServiceImpl implements RequestService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException(ErrorCode.USER_NOT_FOUND));
     }
+
+
 }

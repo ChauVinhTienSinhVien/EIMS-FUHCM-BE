@@ -45,13 +45,11 @@ public class RequestServiceImpl implements RequestService {
 //        else if(request.getRequestType() == null) {
 //            throw new CustomException(ErrorCode.REQUEST_TYPE_EMPTY);
 //        }
-
         try {
             var currentUser = getCurrentUser();
             request.setInvigilator(currentUser);
             request.setRequestType(RequestTypeEnum.CANCEL.name());
-            System.out.println("--------------------------------------------------");
-            System.out.println(request);
+
             Request entity = requestMapper.toEntity(request);
             setExamSlot(entity.getExamSlot());
             requestRepository.save(entity);
@@ -70,8 +68,21 @@ public class RequestServiceImpl implements RequestService {
         List<Request> entity = requestRepository.findByCreatedBy(currentUser);
 
         return entity.stream()
-                .map(requestMapper::toResponseDTO)
+                .map(request -> {
+                    RequestResponseDTO responseDTO = requestMapper.toResponseDTO(request);
+                    responseDTO.setStatus(RequestStatusEnum.fromValue(request.getStatus()).name());
+                    return responseDTO;
+                })
                 .toList();
+    }
+
+    public RequestResponseDTO getRequestById(int requestId) {
+        Request entity = requestRepository.findById(requestId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
+
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+        responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
+        return responseDTO;
     }
 
 

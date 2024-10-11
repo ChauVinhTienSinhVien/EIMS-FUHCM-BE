@@ -32,4 +32,11 @@ public class RequestController {
                 .status(HttpStatus.OK)
                 .body(requestService.getAllRequestByInvigilator());
     }
+
+    @GetMapping("myinfo/requestid={requestId}")
+    public ResponseEntity<RequestResponseDTO> getRequestById(@PathVariable int requestId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.getRequestById(requestId));
+    }
 }

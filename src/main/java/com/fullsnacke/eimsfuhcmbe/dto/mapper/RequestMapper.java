@@ -23,6 +23,9 @@ public interface RequestMapper {
 
 
     @Mapping(target = "examSlotId", source = "examSlot.id")
+    @Mapping(target = "startAt", source = "examSlot.startAt")
+    @Mapping(target = "endAt", source = "examSlot.endAt")
+    @Mapping(target = "semesterName", source = "examSlot.subjectExam.subjectId.semesterId.name")
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "reason", source = "reason")
     @Mapping(target = "status", ignore = true)

@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
@@ -35,11 +36,11 @@ public class RequestServiceImpl implements RequestService {
 
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO createRequest(RequestRequestDTO request) {
-        if(request == null) {
+        if (request == null) {
             throw new CustomException(ErrorCode.REQUEST_EMPTY);
-        } else if(request.getExamSlotId() == null) {
+        } else if (request.getExamSlotId() == null) {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
-        } else if(request.getReason() == null || request.getReason().isEmpty()) {
+        } else if (request.getReason() == null || request.getReason().isEmpty()) {
             throw new CustomException(ErrorCode.REASON_EMPTY);
         }
 //        else if(request.getRequestType() == null) {
@@ -70,9 +71,11 @@ public class RequestServiceImpl implements RequestService {
         return getAllRequestsByInvigilator(currentUser);
     }
 
-    public List<RequestResponseDTO> getAllRequestByInvigilatorId(int invigilatorId) {
-        User invigilator = userRepository.findById(invigilatorId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public List<RequestResponseDTO> getAllRequestByInvigilatorId(String invigilatorId) {
+        User invigilator = userRepository.findByFuId(invigilatorId);
+        if (invigilator == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
 
         return getAllRequestsByInvigilator(invigilator);
     }
@@ -97,7 +100,6 @@ public class RequestServiceImpl implements RequestService {
         responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
         return responseDTO;
     }
-
 
 
     private void setExamSlot(ExamSlot examSlot) {
@@ -125,5 +127,17 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
+    public RequestResponseDTO updateRequestStatus(int requestId, UpdateStatusRequestDTO status) {
+        Request entity = requestRepository.findById(requestId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
+
+        entity.setStatus(RequestStatusEnum.fromName(status.getStatus()).getValue());
+        entity.setUpdatedAt(java.time.Instant.now());
+        requestRepository.save(entity);
+
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+        responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
+        return responseDTO;
+    }
 
 }

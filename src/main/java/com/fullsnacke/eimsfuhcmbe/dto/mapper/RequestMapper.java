@@ -31,6 +31,7 @@ public interface RequestMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "requestType", source = "requestType")
     @Mapping(target = "requestId", source = "id")
+    @Mapping(target = "updatedAt", source = "updatedAt")
     RequestResponseDTO toResponseDTO(Request entity);
 
     @Named("examSlotIdToExamSlot")

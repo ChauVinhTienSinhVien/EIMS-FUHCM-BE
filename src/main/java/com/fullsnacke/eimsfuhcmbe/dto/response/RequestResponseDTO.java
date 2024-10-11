@@ -25,4 +25,5 @@ public class RequestResponseDTO {
     String reason;
     String status;
     String requestType;
+    Instant updatedAt;
 }

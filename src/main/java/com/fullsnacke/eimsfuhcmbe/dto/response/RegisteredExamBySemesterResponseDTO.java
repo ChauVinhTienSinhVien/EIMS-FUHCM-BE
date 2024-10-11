@@ -15,7 +15,5 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegisteredExamBySemesterResponseDTO {
     String fuId;
-    String firstName;
-    String lastName;
     Set<ExamSlotDetail> examSlotDetails;
 }

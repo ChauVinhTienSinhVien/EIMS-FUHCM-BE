@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAssignmentMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
@@ -22,11 +23,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import static com.fullsnacke.eimsfuhcmbe.enums.ConfigType.*;
 
 @Service
@@ -39,6 +38,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     UserRepository userRepository;
     SemesterRepository semesterRepository;
     ConfigService configService;
+    InvigilatorAssignmentMapper invigilatorAssignmentMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteAssignmentBySemester(RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
@@ -64,7 +64,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         Semester semester = representativeExamSlot.getSubjectExam().getSubjectId().getSemesterId();
 
         int allowedSlot = Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue());
-        System.out.println("Allowed slot: " + allowedSlot);
+
         if (requestExamSlotId.size() > allowedSlot) {
             throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);
         }
@@ -97,11 +97,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         for (InvigilatorAssignment assignment : assignments) {
             Semester semester = assignment.getExamSlot().getSubjectExam().getSubjectId().getSemesterId();
 
-            ExamSlotDetail detail = ExamSlotDetail.builder()
-                    .examSlotId(assignment.getExamSlot().getId())
-                    .startAt(assignment.getExamSlot().getStartAt())
-                    .endAt(assignment.getExamSlot().getEndAt())
-                    .build();
+            ExamSlotDetail detail = invigilatorAssignmentMapper.toExamSlotDetail(assignment.getExamSlot());
 
             groupedAssignments
                     .computeIfAbsent(semester.getId(), k -> new HashMap<>())
@@ -147,13 +143,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .semesterId(semester.getId())
                 .semesterName(semester.getName())
                 .allowedSlots(Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue()))
-                .examSlotDetailSet(examSlots.stream()
-                        .map(examSlot -> ExamSlotDetail.builder()
-                                .examSlotId(examSlot.getId())
-                                .startAt(examSlot.getStartAt())
-                                .endAt(examSlot.getEndAt())
-                                .build())
-                        .collect(Collectors.toSet()))
+                .examSlotDetailSet(invigilatorAssignmentMapper.mapExamSlotDetails(examSlots))
                 .build();
 
         return RegisteredExamInvigilationResponseDTO.builder()
@@ -200,17 +190,13 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             if (registeredExamBySemester == null) {
                 registeredExamBySemester = RegisteredExamBySemesterResponseDTO.builder()
                         .fuId(fuId)
-                        .firstName(assignment.getInvigilator().getFirstName())
-                        .lastName(assignment.getInvigilator().getLastName())
                         .examSlotDetails(new HashSet<>())
                         .build();
                 registeredExamBySemesterMap.put(fuId, registeredExamBySemester);
             }
-            registeredExamBySemester.getExamSlotDetails().add(ExamSlotDetail.builder()
-                    .examSlotId(assignment.getExamSlot().getId())
-                    .startAt(assignment.getExamSlot().getStartAt())
-                    .endAt(assignment.getExamSlot().getEndAt())
-                    .build());
+            registeredExamBySemester
+                    .getExamSlotDetails()
+                    .add(invigilatorAssignmentMapper.toExamSlotDetail(assignment.getExamSlot()));
         }
 
         return new HashSet<>(registeredExamBySemesterMap.values());
@@ -222,23 +208,9 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         Set<InvigilatorAssignment> assignments = invigilatorAssignmentRepository.findByExamSlot(examSlot);
 
-        return ListInvigilatorsByExamSlotResponseDTO.builder()
-                .examSlotId(examSlotId)
-                .startAt(examSlot.getStartAt())
-                .endAt(examSlot.getEndAt())
-                .userResponseDTOSet(assignments.stream()
-                        .map(assignment -> UserResponseDTO.builder()
-                                .fuId(assignment.getInvigilator().getFuId())
-                                .firstName(assignment.getInvigilator().getFirstName())
-                                .lastName(assignment.getInvigilator().getLastName())
-                                .department(assignment.getInvigilator().getDepartment())
-                                .gender(assignment.getInvigilator().getGender())
-                                .phoneNumber(assignment.getInvigilator().getPhoneNumber())
-                                .email(assignment.getInvigilator().getEmail())
-                                .role(assignment.getInvigilator().getRole().getId())
-                                .build())
-                        .collect(Collectors.toSet()))
-                .build();
+        ListInvigilatorsByExamSlotResponseDTO response = invigilatorAssignmentMapper.toListInvigilatorsByExamSlotResponseDTO(examSlot);
+        response.setUserResponseDTOSet(invigilatorAssignmentMapper.mapInvigilatorAssignments(assignments));
+        return response;
     }
 
     public RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId) {
@@ -257,6 +229,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             long count = registeredSlots.stream()
                     .filter(assignment -> assignment.getExamSlot().equals(examSlot))
                     .count();
+
             if (registeredSlots.stream().anyMatch(assignment -> assignment.getExamSlot().equals(examSlot))) {
                 status = ExamSlotRegisterStatusEnum.REGISTERED.name();
             } else if (count <= examSlot.getRequiredInvigilators()) {
@@ -264,13 +237,9 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             } else {
                 status = ExamSlotRegisterStatusEnum.FULL.name();
             }
-            // Thêm ExamSlotDetail vào kết quả với trạng thái
-            examSlotDetails.add(ExamSlotDetail.builder()
-                    .examSlotId(examSlot.getId())
-                    .startAt(examSlot.getStartAt())
-                    .endAt(examSlot.getEndAt())
-                    .status(status)
-                    .build());
+            ExamSlotDetail examSlotDetail = invigilatorAssignmentMapper.toExamSlotDetail(examSlot);
+            examSlotDetail.setStatus(status);
+            examSlotDetails.add(examSlotDetail);
         }
 
         return RegisteredExamBySemesterResponseDTO.builder()
@@ -280,9 +249,8 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
     private Semester getSemesterById(int semesterId) {
-        Semester semester = semesterRepository.findById(semesterId)
+        return semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
-        return semester;
     }
 
     private User findInvigilatorByFuId(String fuId) {
@@ -304,12 +272,6 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
     }
 
-    //    private void checkForOverlappingSlots(User invigilator, Semester semester, String examType, Set<Integer> examSlotIds) {
-//        if (isAnyExamSlotOverlapping(invigilator, semester, examType, examSlotIds)) {
-//            throw new CustomException(ErrorCode.OVERLAP_SLOT);
-//        }
-//    }
-
     private Set<ExamSlotDetail> checkForOverlappingSlots(User invigilator, Semester semester, Set<Integer> examSlots) {
 
         Set<ExamSlotDetail> examSlotDetails = isAnyExamSlotOverlapping(invigilator, semester, examSlots);
@@ -320,18 +282,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
     private Set<InvigilatorAssignment> createAssignments(User invigilator, Set<Integer> examSlotIds) {
-//        Set<InvigilatorAssignment> assignments = new HashSet<>();
-//        for (Integer examSlotId : examSlotIds) {
-//            ExamSlot examSlot = examSlotRepository.findById(examSlotId)
-//                    .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
-//
-//            InvigilatorAssignment customEx = InvigilatorAssignment.builder()
-//                    .invigilator(invigilator)
-//                    .examSlot(examSlot)
-//                    .role(InvigilatorRoleEnum.IN_ROOM_INVIGILATOR.name())
-//                    .build();
-//            assignments.add(customEx);
-//        }
+
         return examSlotIds.stream()
                 .map(examSlotId -> examSlotRepository.findById(examSlotId)
                         .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND)))
@@ -375,32 +326,12 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
-//    private boolean isAnyExamSlotOverlapping(User invigilator, Semester semester, String examType, Set<Integer> examSlotIds) {
-//        //Lấy ra các examSlot đã được đăng ký trước đó của invigilator hiện tại
-//        List<InvigilatorAssignment> existingAssignments = invigilatorRegistrationRepository
-//                .findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterIdAndExamSlot_SubjectExam_ExamType(invigilator, semester, examType);
-//
-//        //Lấy ra ExamSlot của tất cả các examSlotId cần được check và add vô db
-//        Set<ExamSlot> newExamSlots = new HashSet<>(examSlotRepository.findAllById(examSlotIds));
-//
-//        //Check overlap
-//        for (InvigilatorAssignment customEx : existingAssignments) {
-//            ExamSlot existingSlot = customEx.getExamSlot();
-//            for (ExamSlot newSlot : newExamSlots) {
-//                if (isOverlapping(existingSlot, newSlot)) {
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
-
     private Set<ExamSlotDetail> isAnyExamSlotOverlapping(User invigilator, Semester semester, Set<Integer> examSlotIds) {
         //Lấy ra các examSlot đã được đăng ký trước đó của invigilator hiện tại
         Set<InvigilatorAssignment> existingAssignments = invigilatorAssignmentRepository
                 .findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(invigilator, semester);
 
-        if(existingAssignments.size() + examSlotIds.size() > allowedSlot(semester)) {
+        if (existingAssignments.size() + examSlotIds.size() > allowedSlot(semester)) {
             throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);
         }
         //Lấy ra ExamSlot của tất cả các examSlotId cần được check và add vô db
@@ -416,11 +347,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                     throw new CustomException(ErrorCode.OVERLAP_SLOT_IN_LIST);
                 }
             }
-            examSlotDetails.add(ExamSlotDetail.builder()
-                    .examSlotId(newSlot.getId())
-                    .startAt(newSlot.getStartAt())
-                    .endAt(newSlot.getEndAt())
-                    .build());
+            examSlotDetails.add(invigilatorAssignmentMapper.toExamSlotDetail(newSlot));
         }
 
         //Check overlap in existing assignments
@@ -438,8 +365,6 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
     private boolean isOverlapping(ExamSlot slot1, ExamSlot slot2) {
-        System.out.println("Slot1: " + slot1.getStartAt() + " | " + slot1.getEndAt());
-        System.out.println("Slot2: " + slot2.getStartAt() + " | " + slot2.getEndAt());
         return !slot1.getEndAt().isBefore(slot2.getStartAt()) && !slot2.getEndAt().isBefore(slot1.getStartAt());
     }
 

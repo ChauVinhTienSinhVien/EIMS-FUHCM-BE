@@ -40,9 +40,9 @@ public interface RequestMapper {
         examSlot.setId(examSlotId);
         return examSlot;
     }
-    @Named("intToString")
-    default String intToString(int value) {
-        RequestStatusEnum status = RequestStatusEnum.fromValue(value);
-        return String.valueOf(status);
-    }
+//    @Named("intToString")
+//    default String intToString(int value) {
+//        RequestStatusEnum status = RequestStatusEnum.fromValue(value);
+//        return String.valueOf(status);
+//    }
 }

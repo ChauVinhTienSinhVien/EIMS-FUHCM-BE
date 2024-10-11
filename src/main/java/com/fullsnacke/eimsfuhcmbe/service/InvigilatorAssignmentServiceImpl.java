@@ -400,6 +400,9 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         Set<InvigilatorAssignment> existingAssignments = invigilatorAssignmentRepository
                 .findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(invigilator, semester);
 
+        if(existingAssignments.size() + examSlotIds.size() > allowedSlot(semester)) {
+            throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);
+        }
         //Lấy ra ExamSlot của tất cả các examSlotId cần được check và add vô db
         Set<ExamSlot> newExamSlots = new HashSet<>(examSlotRepository.findAllById(examSlotIds));
         Set<ExamSlotDetail> examSlotDetails = new HashSet<>();

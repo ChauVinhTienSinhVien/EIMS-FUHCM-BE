@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.dto.mapper;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.SubjectExamDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
@@ -21,7 +22,7 @@ public interface ExamSlotMapper {
     @Mapping(target = "updatedBy", source = "updatedBy", qualifiedByName = "intToUser")
     ExamSlot toEntity(ExamSlotRequestDTO dto);
 
-    @Mapping(target = "subjectExamId", source = "subjectExam.id", qualifiedByName = "intToSubjectExam")
+    @Mapping(target = "subjectExamDTO", source = "subjectExam", qualifiedByName = "mapToSubjectExamDTO")
     @Mapping(target = "createdBy", source = "createdBy.id")
     @Mapping(target = "updatedBy", source = "updatedBy.id")
     ExamSlotResponseDTO toDto(ExamSlot entity);
@@ -38,6 +39,16 @@ public interface ExamSlotMapper {
         User user = new User();
         user.setId(userId);
         return user;
+    }
+
+    @Named("mapToSubjectExamDTO")
+    default SubjectExamDTO mapToSubjectExamDTO(SubjectExam subjectExam) {
+        return new SubjectExamDTO(subjectExam.getId(),
+                subjectExam.getDuration(),
+                subjectExam.getExamType(),
+                subjectExam.getSubjectId().getName(),
+                subjectExam.getSubjectId().getCode()
+        );
     }
 
 }

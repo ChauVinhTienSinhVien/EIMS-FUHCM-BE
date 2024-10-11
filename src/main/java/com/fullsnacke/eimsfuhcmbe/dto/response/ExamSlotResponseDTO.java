@@ -19,7 +19,15 @@ public class ExamSlotResponseDTO {
 
     Integer id;
 
-    SubjectExam subjectExamId;
+    SubjectExamDTO subjectExamDTO;
+
+//    Integer subjectExamId; // subjectExam.id
+//
+//    String examType; // subjectExam.examType
+//
+//    String subjectName; //subjectExam.duration
+//
+//    String subjectCode; //subjectExam.subjectId.code
 
     Instant startAt;
 

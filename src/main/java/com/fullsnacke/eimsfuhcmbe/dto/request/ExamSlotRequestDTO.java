@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.dto.request;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -44,7 +45,7 @@ public class ExamSlotRequestDTO {
 
     Integer createdBy;
 
-    Integer status;
+    ExamSlotStatus status;
 
     Integer updatedBy;
 

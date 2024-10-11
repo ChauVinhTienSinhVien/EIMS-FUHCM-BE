@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.dto.response;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -39,7 +40,7 @@ public class ExamSlotResponseDTO {
 
     Integer createdBy;
 
-    Integer status;
+    ExamSlotStatus status;
 
     Integer updatedBy;
 

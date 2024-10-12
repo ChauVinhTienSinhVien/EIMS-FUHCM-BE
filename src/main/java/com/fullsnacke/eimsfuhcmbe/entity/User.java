@@ -7,8 +7,11 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.Instant;
+import java.util.Collection;
 
 
 @Entity
@@ -19,7 +22,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -60,4 +63,14 @@ public class User {
     @JoinColumn(name = "role_id")
     Role role;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        com.fullsnacke.eimsfuhcmbe.enums.Role roleEnum = com.fullsnacke.eimsfuhcmbe.enums.Role.valueOf(role.getName().toUpperCase());
+        return roleEnum.getAuthorities();
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
 }

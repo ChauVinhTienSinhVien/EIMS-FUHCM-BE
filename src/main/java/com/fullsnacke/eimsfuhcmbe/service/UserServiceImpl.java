@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -61,13 +62,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        List<User> userList = userRepository.findAll();
+        List<User> nonDeletedUsers = new ArrayList<>();
+        for (User user : userList) {
+            if (user.getIsDeleted() == null || !user.getIsDeleted()) {
+                nonDeletedUsers.add(user);
+            }
+        }
+        if(userList.isEmpty()){
+            throw new EntityNotFoundException(User.class, "All", "All");
+        }
+        return nonDeletedUsers;
     }
 
     @Override
     public User updateUser(User userInRequest) {
         String fuId = userInRequest.getFuId();
-        User userInDb = userRepository.findByFuId(fuId);
+        User userInDb = userRepository.findByFuIdAndIsDeleted(fuId, false);
 
         if (userInDb == null) {
             throw new EntityNotFoundException(User.class, "fuId", fuId);
@@ -85,11 +96,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String fuId) {
-        User userInDb = userRepository.findByFuId(fuId);
+        User userInDb = userRepository.findByFuIdAndIsDeleted(fuId, false);
         if(userInDb == null){
             throw new EntityNotFoundException(User.class, "fuId", fuId);
         }
-        userRepository.delete(userInDb);
+        userInDb.setIsDeleted(true);
+        userRepository.save(userInDb);
     }
 
     @Override

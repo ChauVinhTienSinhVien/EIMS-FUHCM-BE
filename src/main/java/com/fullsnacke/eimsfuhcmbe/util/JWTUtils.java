@@ -1,6 +1,8 @@
 package com.fullsnacke.eimsfuhcmbe.util;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Role;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -26,17 +28,25 @@ public class JWTUtils {
     private final long TOKEN_VALIDITY_REMEMBER;
     private final Key key;
 
-    public JWTUtils(@Value("${jwt.secretKey}") String secret, @Value("${jwt.expirationInMs}") long expirationInMs, @Value("${jwt.expirationInMsRemember}") long expirationInMsRemember) {
+    UserRepository userRepository;
+
+    public JWTUtils(@Value("${jwt.secretKey}") String secret, @Value("${jwt.expirationInMs}") long expirationInMs, @Value("${jwt.expirationInMsRemember}") long expirationInMsRemember, UserRepository userRepository) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.TOKEN_VALIDITY = expirationInMs;
         this.TOKEN_VALIDITY_REMEMBER = expirationInMsRemember;
+        this.userRepository = userRepository;
     }
 
     public String createToken(User user, boolean rememberMe) {
         long now = (new Date()).getTime();
         Date validity = rememberMe ? new Date(now + TOKEN_VALIDITY_REMEMBER) : new Date(now + TOKEN_VALIDITY);
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole().getName());
+        Role role = user.getRole();
+
+        com.fullsnacke.eimsfuhcmbe.enums.Role roleEnum = com.fullsnacke.eimsfuhcmbe.enums.Role.valueOf(role.getName().toUpperCase());
+
+        claims.put("role", roleEnum);
+
 
         return Jwts.builder()
                 .setSubject(user.getEmail())
@@ -54,7 +64,11 @@ public class JWTUtils {
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(claims.get("role", String.class));
+            //List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(claims.get("role", String.class));
+            User user = userRepository.findByEmail(claims.getSubject()).orElse(null);
+
+            List<GrantedAuthority> authorities = (List<GrantedAuthority>) user.getAuthorities();
+
             return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, authorities);
         } catch (JwtException | IllegalArgumentException ignored) {
             return null;

@@ -232,12 +232,10 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
             if (registeredSlots.stream().anyMatch(assignment -> assignment.getExamSlot().equals(examSlot))) {
                 status = ExamSlotRegisterStatusEnum.REGISTERED.name();
-            } else if (count <= examSlot.getRequiredInvigilators()) {
+            } else if (examSlot.getRequiredInvigilators() != 0 && count <= examSlot.getRequiredInvigilators()) {
                 status = ExamSlotRegisterStatusEnum.NOT_FULL.name();
-            } else if (examSlot.getRequiredInvigilators() == 0 || count > examSlot.getRequiredInvigilators()) {
-                status = ExamSlotRegisterStatusEnum.FULL.name();
             } else {
-                status = ExamSlotRegisterStatusEnum.UNKNOWN.name();
+                status = ExamSlotRegisterStatusEnum.FULL.name();
             }
             ExamSlotDetail examSlotDetail = invigilatorAssignmentMapper.toExamSlotDetail(examSlot);
             examSlotDetail.setStatus(status);

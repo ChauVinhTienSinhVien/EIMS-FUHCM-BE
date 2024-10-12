@@ -4,4 +4,5 @@ public enum ExamSlotRegisterStatusEnum {
     REGISTERED,
     FULL,
     NOT_FULL,
+    UNKNOWN,
 }

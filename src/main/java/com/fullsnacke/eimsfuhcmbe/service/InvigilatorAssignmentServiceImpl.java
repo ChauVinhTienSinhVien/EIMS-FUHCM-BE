@@ -234,8 +234,10 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 status = ExamSlotRegisterStatusEnum.REGISTERED.name();
             } else if (count <= examSlot.getRequiredInvigilators()) {
                 status = ExamSlotRegisterStatusEnum.NOT_FULL.name();
-            } else {
+            } else if (examSlot.getRequiredInvigilators() == 0 || count > examSlot.getRequiredInvigilators()) {
                 status = ExamSlotRegisterStatusEnum.FULL.name();
+            } else {
+                status = ExamSlotRegisterStatusEnum.UNKNOWN.name();
             }
             ExamSlotDetail examSlotDetail = invigilatorAssignmentMapper.toExamSlotDetail(examSlot);
             examSlotDetail.setStatus(status);

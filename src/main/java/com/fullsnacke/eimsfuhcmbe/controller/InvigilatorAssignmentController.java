@@ -102,6 +102,14 @@ public class InvigilatorAssignmentController {
                 .body(invigilatorAssignmentService.deleteRegisteredSlotByExamSlotId(request));
     }
 
+    @DeleteMapping("/myinfo/register")
+    @Operation(summary = "Delete Registered Slot by ExamSlot Id")
+    public ResponseEntity<Set<ExamSlotDetail>> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestBody InvigilatorAssignmentRequestDTO request) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(request));
+    }
+
     @GetMapping("/register/semesterid={semesterId}")
     public ResponseEntity<RegisteredExamBySemesterResponseDTO> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId){
         return ResponseEntity

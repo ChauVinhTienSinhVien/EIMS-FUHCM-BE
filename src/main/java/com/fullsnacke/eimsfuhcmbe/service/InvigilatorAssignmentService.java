@@ -28,5 +28,7 @@ public interface InvigilatorAssignmentService {
     RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId);
 
     Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorAssignmentRequestDTO request);
+
+    Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(InvigilatorAssignmentRequestDTO request);
 }
 

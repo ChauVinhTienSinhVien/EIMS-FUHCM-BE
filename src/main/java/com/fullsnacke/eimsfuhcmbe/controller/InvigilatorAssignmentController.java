@@ -1,6 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
-import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
@@ -24,7 +24,7 @@ public class InvigilatorAssignmentController {
 
     @PostMapping
     @Operation(summary = "Register Exam Slots", description = "Save the invigilator customEx for the exam slot")
-    public ResponseEntity<InvigilatorAssignmentResponseDTO> registerExamSlot(@RequestBody InvigilatorAssignmentRequestDTO request) {
+    public ResponseEntity<InvigilatorRegistrationResponseDTO> registerExamSlot(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(invigilatorAssignmentService.registerExamSlot(request));
@@ -80,7 +80,7 @@ public class InvigilatorAssignmentController {
 
     @PutMapping
     @Operation(summary = "Update Registered Slot", description = "Update the registered slot by fuId")
-    public ResponseEntity<InvigilatorAssignmentResponseDTO> updateRegisteredSlot(@RequestBody InvigilatorAssignmentRequestDTO request) {
+    public ResponseEntity<InvigilatorRegistrationResponseDTO> updateRegisteredSlot(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.updateRegisterExamSlot(request));
@@ -96,7 +96,7 @@ public class InvigilatorAssignmentController {
 
     @DeleteMapping("/register")
     @Operation(summary = "Delete Registered Slot by ExamSlot Id")
-    public ResponseEntity<Set<ExamSlotDetail>> deleteRegisteredSlotByExamSlotId(@RequestBody InvigilatorAssignmentRequestDTO request) {
+    public ResponseEntity<Set<ExamSlotDetail>> deleteRegisteredSlotByExamSlotId(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.deleteRegisteredSlotByExamSlotId(request));
@@ -104,7 +104,7 @@ public class InvigilatorAssignmentController {
 
     @DeleteMapping("/myinfo/register")
     @Operation(summary = "Delete Registered Slot by ExamSlot Id")
-    public ResponseEntity<Set<ExamSlotDetail>> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestBody InvigilatorAssignmentRequestDTO request) {
+    public ResponseEntity<Set<ExamSlotDetail>> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(request));

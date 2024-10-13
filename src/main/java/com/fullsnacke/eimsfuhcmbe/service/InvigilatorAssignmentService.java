@@ -1,13 +1,13 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
-import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 
 import java.util.Set;
 
 public interface InvigilatorAssignmentService {
-    InvigilatorAssignmentResponseDTO registerExamSlot(InvigilatorAssignmentRequestDTO request);
+    InvigilatorRegistrationResponseDTO registerExamSlot(InvigilatorRegistrationRequestDTO request);
 
     RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlots();
 
@@ -17,7 +17,7 @@ public interface InvigilatorAssignmentService {
 
     RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlotsInSemester(int semesterId);
 
-    InvigilatorAssignmentResponseDTO updateRegisterExamSlot(InvigilatorAssignmentRequestDTO request);
+    InvigilatorRegistrationResponseDTO updateRegisterExamSlot(InvigilatorRegistrationRequestDTO request);
 
     boolean deleteAssignmentBySemester(RegisterdSlotWithSemesterAndInvigilatorRequestDTO request);
 
@@ -27,8 +27,8 @@ public interface InvigilatorAssignmentService {
 
     RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId);
 
-    Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorAssignmentRequestDTO request);
+    Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request);
 
-    Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(InvigilatorAssignmentRequestDTO request);
+    Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request);
 }
 

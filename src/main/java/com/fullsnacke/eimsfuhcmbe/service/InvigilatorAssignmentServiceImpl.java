@@ -1,7 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAssignmentMapper;
-import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
@@ -48,19 +48,19 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(InvigilatorAssignmentRequestDTO request) {
+    public Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request) {
         User currentInvigilator = getCurrentUser();
         return deleteSelectedRegisteredSlots(currentInvigilator, request);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorAssignmentRequestDTO request) {
+    public Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
         return deleteSelectedRegisteredSlots(invigilator, request);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    protected Set<ExamSlotDetail> deleteSelectedRegisteredSlots(User invigilator, InvigilatorAssignmentRequestDTO request) {
+    protected Set<ExamSlotDetail> deleteSelectedRegisteredSlots(User invigilator, InvigilatorRegistrationRequestDTO request) {
         Set<InvigilatorRegistration> assignments = invigilatorRegistrationRepository
                 .findByInvigilatorAndExamSlot_IdIn(invigilator, request.getExamSlotId());
         if (assignments.isEmpty()) {
@@ -80,7 +80,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public InvigilatorAssignmentResponseDTO registerExamSlot(InvigilatorAssignmentRequestDTO request) {
+    public InvigilatorRegistrationResponseDTO registerExamSlot(InvigilatorRegistrationRequestDTO request) {
 
         User invigilator = findInvigilatorByFuId(request.getFuId());
 
@@ -119,7 +119,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         Set<InvigilatorRegistration> assignments = invigilatorRegistrationRepository.findByInvigilator(invigilator);
 
-        List<SemesterInvigilatorAssignmentResponseDTO> semesterInvigilatorAssignmentList = new ArrayList<>();
+        List<SemesterInvigilatorRegistrationResponseDTO> semesterInvigilatorAssignmentList = new ArrayList<>();
 
         Map<Integer, Map<String, Set<ExamSlotDetail>>> groupedAssignments = new HashMap<>();
 
@@ -136,12 +136,12 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         for (Map.Entry<Integer, Map<String, Set<ExamSlotDetail>>> semesterIdEntry : groupedAssignments.entrySet()) {
             for (Map.Entry<String, Set<ExamSlotDetail>> semesterNameEntry : semesterIdEntry.getValue().entrySet()) {
-                SemesterInvigilatorAssignmentResponseDTO semesterInvigilatorAssignmentResponseDTO = SemesterInvigilatorAssignmentResponseDTO.builder()
+                SemesterInvigilatorRegistrationResponseDTO semesterInvigilatorRegistrationResponseDTO = SemesterInvigilatorRegistrationResponseDTO.builder()
                         .semesterId(semesterIdEntry.getKey())
                         .semesterName(semesterNameEntry.getKey())
                         .examSlotDetailSet(semesterNameEntry.getValue())
                         .build();
-                semesterInvigilatorAssignmentList.add(semesterInvigilatorAssignmentResponseDTO);
+                semesterInvigilatorAssignmentList.add(semesterInvigilatorRegistrationResponseDTO);
             }
         }
 
@@ -168,7 +168,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .map(InvigilatorRegistration::getExamSlot)
                 .collect(Collectors.toSet());
 
-        SemesterInvigilatorAssignmentResponseDTO semesterInvigilatorAssignmentResponseDTO = SemesterInvigilatorAssignmentResponseDTO.builder()
+        SemesterInvigilatorRegistrationResponseDTO semesterInvigilatorRegistrationResponseDTO = SemesterInvigilatorRegistrationResponseDTO.builder()
                 .semesterId(semester.getId())
                 .semesterName(semester.getName())
                 .allowedSlots(Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue()))
@@ -177,12 +177,12 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         return RegisteredExamInvigilationResponseDTO.builder()
                 .fuId(fuId)
-                .semesterInvigilatorAssignment(Collections.singletonList(semesterInvigilatorAssignmentResponseDTO))
+                .semesterInvigilatorAssignment(Collections.singletonList(semesterInvigilatorRegistrationResponseDTO))
                 .build();
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public InvigilatorAssignmentResponseDTO updateRegisterExamSlot(InvigilatorAssignmentRequestDTO request) {
+    public InvigilatorRegistrationResponseDTO updateRegisterExamSlot(InvigilatorRegistrationRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
 
         Set<Integer> requestExamSlotId = request.getExamSlotId();
@@ -322,8 +322,8 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .collect(Collectors.toSet());
     }
 
-    private InvigilatorAssignmentResponseDTO createResponseDTO(User invigilator, Semester semester, Set<ExamSlotDetail> slotDetails) {
-        return InvigilatorAssignmentResponseDTO.builder()
+    private InvigilatorRegistrationResponseDTO createResponseDTO(User invigilator, Semester semester, Set<ExamSlotDetail> slotDetails) {
+        return InvigilatorRegistrationResponseDTO.builder()
                 .fuId(invigilator.getFuId())
                 .semester(semester)
                 .examSlots(slotDetails)

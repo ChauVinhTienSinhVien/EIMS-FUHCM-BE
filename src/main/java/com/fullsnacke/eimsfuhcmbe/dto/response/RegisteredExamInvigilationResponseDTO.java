@@ -1,11 +1,9 @@
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
-import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-import java.util.Map;
 
 @Getter
 @Setter
@@ -15,5 +13,5 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisteredExamInvigilationResponseDTO {
     String fuId;
-    List<SemesterInvigilatorAssignmentResponseDTO> semesterInvigilatorAssignment;
+    List<SemesterInvigilatorRegistrationResponseDTO> semesterInvigilatorAssignment;
 }

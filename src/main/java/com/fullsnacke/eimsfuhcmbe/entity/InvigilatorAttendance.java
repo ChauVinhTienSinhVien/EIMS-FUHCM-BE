@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
@@ -16,6 +17,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "invigilator_attendances")
+@EntityListeners(AuditingEntityListener.class)
 public class InvigilatorAttendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
@@ -16,6 +17,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "invigilator_registrations")
+@EntityListeners(AuditingEntityListener.class)
 public class InvigilatorRegistration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

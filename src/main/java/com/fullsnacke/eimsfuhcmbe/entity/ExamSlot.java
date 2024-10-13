@@ -12,6 +12,7 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -24,6 +25,7 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "exam_slots")
+@EntityListeners(AuditingEntityListener.class)
 public class ExamSlot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -8,6 +8,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -23,6 +24,7 @@ import java.util.Collection;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,11 +56,11 @@ public class User implements UserDetails {
     @Column(name = "gender")
     Boolean gender;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at")
     @CreatedDate
     Instant createdAt;
 
-    @Column(name = "is_deleted")
+    @Column(name = "is_deleted", columnDefinition = "boolean default false")
     Boolean isDeleted;
 
     @ManyToOne(fetch = FetchType.EAGER)

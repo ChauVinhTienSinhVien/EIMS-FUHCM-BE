@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.time.Instant;
 
@@ -21,20 +22,15 @@ public class InvigilatorAssignment {
     @Column(name = "id", nullable = false)
     Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "exam_slot_id", nullable = false)
-    ExamSlot examSlot;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "invigilator_id", nullable = false)
-    User invigilator;
+    @OneToOne
+    @JoinColumn(name = "invigilator_registration_id", nullable = false)
+    InvigilatorRegistration invigilatorRegistration;
 
     @Column(name = "is_hall_invigilator")
     Boolean isHallInvigilator;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     Instant createdAt;
 
-    @Column(name = "is_assigned", nullable = false, columnDefinition = "boolean default false")
-    boolean isAssigned;
 }

@@ -58,19 +58,6 @@ public class AuthenController {
     @GetMapping("/user/info")
     public ResponseEntity<?> getUserInfo(Principal principal) {
         User user = userServiceImpl.getUserByEmail(principal.getName());
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
-        Collection<? extends GrantedAuthority> userGrantedAuthorities = user.getAuthorities();
-
-        for (GrantedAuthority authority : authorities) {
-            System.out.println(authority.getAuthority());
-        }
-//        for (GrantedAuthority authority : userGrantedAuthorities) {
-//            System.out.println(authority.getAuthority());
-//        }
-
         return ResponseEntity.ok().body(user);
     }
 

@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -54,6 +55,7 @@ public class User implements UserDetails {
     Boolean gender;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     Instant createdAt;
 
     @Column(name = "is_deleted")
@@ -63,6 +65,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "role_id")
     Role role;
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         com.fullsnacke.eimsfuhcmbe.enums.Role roleEnum = com.fullsnacke.eimsfuhcmbe.enums.Role.valueOf(role.getName().toUpperCase());

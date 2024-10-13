@@ -14,4 +14,6 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
     Set<InvigilatorRegistration> findByExamSlot_SubjectExam_SubjectId_SemesterId(Semester semesterId);
 
     Set<InvigilatorRegistration> findByExamSlot(ExamSlot examSlot);
+
+    Set<InvigilatorRegistration> findByInvigilatorAndExamSlot_IdIn(User invigilator, Set<Integer> examSlotIds);
 }

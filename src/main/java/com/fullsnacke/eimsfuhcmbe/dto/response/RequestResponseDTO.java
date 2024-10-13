@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @Data
 @Builder
@@ -18,8 +19,8 @@ import java.time.Instant;
 public class RequestResponseDTO {
     int requestId;
     int examSlotId;
-    Instant startAt;
-    Instant endAt;
+    ZonedDateTime startAt;
+    ZonedDateTime endAt;
     String semesterName;
     Instant createdAt;
     String reason;

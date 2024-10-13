@@ -65,7 +65,11 @@ public class JWTUtils {
                     .parseClaimsJws(token)
                     .getBody();
             //List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(claims.get("role", String.class));
-            User user = userRepository.findByEmail(claims.getSubject()).orElse(null);
+            User user = userRepository.findByEmailAAndIsDeleted(claims.getSubject(), false);
+            
+            if(user == null) {
+                return null;
+            }
 
             List<GrantedAuthority> authorities = (List<GrantedAuthority>) user.getAuthorities();
 

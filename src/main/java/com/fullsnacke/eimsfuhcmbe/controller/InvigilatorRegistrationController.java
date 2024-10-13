@@ -3,7 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
-import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
+import com.fullsnacke.eimsfuhcmbe.service.InvigilatorRegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,16 +18,16 @@ import java.util.Set;
 @RequestMapping("/invigilators")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class InvigilatorAssignmentController {
+public class InvigilatorRegistrationController {
 
-    InvigilatorAssignmentService invigilatorAssignmentService;
+    InvigilatorRegistrationService invigilatorRegistrationService;
 
     @PostMapping
     @Operation(summary = "Register Exam Slots", description = "Save the invigilator customEx for the exam slot")
     public ResponseEntity<InvigilatorRegistrationResponseDTO> registerExamSlot(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(invigilatorAssignmentService.registerExamSlot(request));
+                .body(invigilatorRegistrationService.registerExamSlot(request));
     }
 
     @GetMapping("/myinfo")
@@ -35,7 +35,7 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.getAllCurrentInvigilatorRegisteredSlots());
+                .body(invigilatorRegistrationService.getAllCurrentInvigilatorRegisteredSlots());
     }
 
     @GetMapping("/{fuId}")
@@ -43,7 +43,7 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(@PathVariable("fuId") String fuId){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.getAllRegisteredSlotsByInvigilator(fuId));
+                .body(invigilatorRegistrationService.getAllRegisteredSlotsByInvigilator(fuId));
     }
 
     @GetMapping("/semesterid={semesterId}/invigilator={fuId}")
@@ -51,7 +51,7 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlotsInSemesterByInvigilator(@PathVariable("semesterId") int semesterId, @PathVariable("fuId") String fuId){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.getAllRegisteredSlotsInSemesterByInvigilator(semesterId, fuId));
+                .body(invigilatorRegistrationService.getAllRegisteredSlotsInSemesterByInvigilator(semesterId, fuId));
     }
 
     @GetMapping("/myinfo/semesterid={semesterId}")
@@ -59,7 +59,7 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@PathVariable("semesterId") int semesterId){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.getAllCurrentInvigilatorRegisteredSlotsInSemester(semesterId));
+                .body(invigilatorRegistrationService.getAllCurrentInvigilatorRegisteredSlotsInSemester(semesterId));
     }
 
     @GetMapping("/semesterid={semesterId}")
@@ -67,7 +67,7 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<Set<RegisteredExamBySemesterResponseDTO>> getAllRegisteredSlotsInSemester(@PathVariable("semesterId") @RequestBody int semesterId){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.getRegisteredExamBySemester(semesterId));
+                .body(invigilatorRegistrationService.getRegisteredExamBySemester(semesterId));
     }
 
     @GetMapping("/examslotid={examSlotId}")
@@ -75,7 +75,7 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<ListInvigilatorsByExamSlotResponseDTO> listInvigilatorsByExamSlot(@PathVariable("examSlotId") int examSlotId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.listInvigilatorsByExamSlot(examSlotId));
+                .body(invigilatorRegistrationService.listInvigilatorsByExamSlot(examSlotId));
     }
 
     @PutMapping
@@ -83,15 +83,15 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<InvigilatorRegistrationResponseDTO> updateRegisteredSlot(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.updateRegisterExamSlot(request));
+                .body(invigilatorRegistrationService.updateRegisterExamSlot(request));
     }
 
     @DeleteMapping
     @Operation(summary = "Delete Registered Slot", description = "Delete the registered slot by fuId and semester")
-    public ResponseEntity<Boolean> deleteAssignmentBySemester(@RequestBody RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
+    public ResponseEntity<Boolean> deleteRegisteredSlotsBySemester(@RequestBody RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.deleteAssignmentBySemester(request));
+                .body(invigilatorRegistrationService.deleteRegisteredSlotsBySemester(request));
     }
 
     @DeleteMapping("/register")
@@ -99,7 +99,7 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<Set<ExamSlotDetail>> deleteRegisteredSlotByExamSlotId(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.deleteRegisteredSlotByExamSlotId(request));
+                .body(invigilatorRegistrationService.deleteRegisteredSlotByExamSlotId(request));
     }
 
     @DeleteMapping("/myinfo/register")
@@ -107,14 +107,14 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<Set<ExamSlotDetail>> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(request));
+                .body(invigilatorRegistrationService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(request));
     }
 
     @GetMapping("/register/semesterid={semesterId}")
     public ResponseEntity<RegisteredExamBySemesterResponseDTO> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId){
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(invigilatorAssignmentService.getAllExamSlotsInSemesterWithStatus(semesterId));
+                .body(invigilatorRegistrationService.getAllExamSlotsInSemesterWithStatus(semesterId));
     }
 
 

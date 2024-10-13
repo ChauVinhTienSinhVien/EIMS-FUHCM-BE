@@ -27,4 +27,5 @@ public class RequestResponseDTO {
     String status;
     String requestType;
     Instant updatedAt;
+    String note;
 }

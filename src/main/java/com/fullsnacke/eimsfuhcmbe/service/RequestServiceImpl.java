@@ -101,6 +101,16 @@ public class RequestServiceImpl implements RequestService {
         return responseDTO;
     }
 
+    public List<RequestResponseDTO> getAllRequestBySemester(int semesterId) {
+        List<Request> entity = requestRepository.findByExamSlot_SubjectExam_SubjectId_SemesterId_Id(semesterId);
+        return entity.stream()
+                .map(request -> {
+                    RequestResponseDTO responseDTO = requestMapper.toResponseDTO(request);
+                    responseDTO.setStatus(RequestStatusEnum.fromValue(request.getStatus()).name());
+                    return responseDTO;
+                })
+                .toList();
+    }
 
     private void setExamSlot(ExamSlot examSlot) {
         if (examSlot == null) {

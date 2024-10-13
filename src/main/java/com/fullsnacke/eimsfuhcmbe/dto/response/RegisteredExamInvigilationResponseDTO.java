@@ -13,5 +13,5 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisteredExamInvigilationResponseDTO {
     String fuId;
-    List<SemesterInvigilatorRegistrationResponseDTO> semesterInvigilatorAssignment;
+    List<SemesterInvigilatorRegistrationResponseDTO> semesterInvigilatorRegistration;
 }

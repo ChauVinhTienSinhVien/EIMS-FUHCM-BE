@@ -41,8 +41,10 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         if (examSlotInDB == null)
             throw new ExamSlotNotFoundException("ExamSlot not found with ID: " + id);
 
+        examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
+        examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
 
-        return examSlotRepository.save(examSlotInRequest);
+        return examSlotRepository.save(examSlotInDB);
     }
 
     @Override

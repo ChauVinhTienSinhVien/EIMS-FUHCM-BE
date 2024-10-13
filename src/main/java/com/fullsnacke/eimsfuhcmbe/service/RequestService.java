@@ -12,4 +12,5 @@ public interface RequestService {
     List<RequestResponseDTO> getAllRequestByInvigilatorId(String invigilatorId);
     RequestResponseDTO getRequestById(int requestId);
     RequestResponseDTO updateRequestStatus(int requestId, UpdateStatusRequestDTO status);
+    List<RequestResponseDTO> getAllRequestBySemester(int semesterId);
 }

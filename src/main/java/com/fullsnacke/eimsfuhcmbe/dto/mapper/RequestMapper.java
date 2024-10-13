@@ -14,7 +14,7 @@ import org.mapstruct.Named;
 public interface RequestMapper {
 
     @Mapping(target = "examSlot", source = "examSlotId", qualifiedByName = "examSlotIdToExamSlot")
-    @Mapping(target = "createdAt", expression = "java(java.time.Instant.now())")
+//    @Mapping(target = "createdAt", expression = "java(java.time.Instant.now())")
     @Mapping(target = "status", constant = "0")
     @Mapping(target = "requestType", source = "requestType")
     @Mapping(target = "createdBy", source = "invigilator")
@@ -32,6 +32,7 @@ public interface RequestMapper {
     @Mapping(target = "requestType", source = "requestType")
     @Mapping(target = "requestId", source = "id")
     @Mapping(target = "updatedAt", source = "updatedAt")
+    @Mapping(target = "note", source = "comment")
     RequestResponseDTO toResponseDTO(Request entity);
 
     @Named("examSlotIdToExamSlot")

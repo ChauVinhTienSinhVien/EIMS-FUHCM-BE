@@ -55,6 +55,14 @@ public class RequestController {
                 .body(requestService.getAllRequestByInvigilatorId(invigilatorId));
     }
 
+    @GetMapping("semesterid={semesterId}")
+    @Operation(summary = "Get all requests")
+    public ResponseEntity<List<RequestResponseDTO>> getAllRequestBySemester(@PathVariable("semesterId") int semesterId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.getAllRequestBySemester(semesterId));
+    }
+
     @PostMapping("requestid={requestId}")
     @Operation(summary = "Update request status", description = "Update request status by request id")
     public ResponseEntity<RequestResponseDTO> updateRequestStatus(@PathVariable int requestId, @RequestBody UpdateStatusRequestDTO status) {

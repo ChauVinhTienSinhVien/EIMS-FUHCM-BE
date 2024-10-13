@@ -3,7 +3,6 @@ package com.fullsnacke.eimsfuhcmbe.dto.mapper;
 
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
-import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorRegistration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,7 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
-public interface InvigilatorAssignmentMapper {
+public interface InvigilatorRegistrationMapper {
 
     @Mapping(target = "fuId", source = "invigilator.fuId")
     @Mapping(target = "firstName", source = "invigilator.firstName")
@@ -37,8 +36,8 @@ public interface InvigilatorAssignmentMapper {
     @Mapping(target = "status", ignore = true)
     ExamSlotDetail toExamSlotDetail(ExamSlot examSlot);
 
-    @Named("mapInvigilatorAssignments")
-    default Set<UserResponseDTO> mapInvigilatorAssignments(Set<InvigilatorRegistration> invigilatorRegistrations) {
+    @Named("mapInvigilatorRegistrations")
+    default Set<UserResponseDTO> mapInvigilatorRegistrations(Set<InvigilatorRegistration> invigilatorRegistrations) {
         return invigilatorRegistrations.stream()
                 .map(this::toUserResponseDTO)
                 .collect(Collectors.toSet());

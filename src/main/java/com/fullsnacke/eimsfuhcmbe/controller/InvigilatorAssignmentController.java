@@ -2,10 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.ListInvigilatorsByExamSlotResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemesterResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
@@ -95,6 +92,22 @@ public class InvigilatorAssignmentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorAssignmentService.deleteAssignmentBySemester(request));
+    }
+
+    @DeleteMapping("/register")
+    @Operation(summary = "Delete Registered Slot by ExamSlot Id")
+    public ResponseEntity<Set<ExamSlotDetail>> deleteRegisteredSlotByExamSlotId(@RequestBody InvigilatorAssignmentRequestDTO request) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.deleteRegisteredSlotByExamSlotId(request));
+    }
+
+    @DeleteMapping("/myinfo/register")
+    @Operation(summary = "Delete Registered Slot by ExamSlot Id")
+    public ResponseEntity<Set<ExamSlotDetail>> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestBody InvigilatorAssignmentRequestDTO request) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(invigilatorAssignmentService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(request));
     }
 
     @GetMapping("/register/semesterid={semesterId}")

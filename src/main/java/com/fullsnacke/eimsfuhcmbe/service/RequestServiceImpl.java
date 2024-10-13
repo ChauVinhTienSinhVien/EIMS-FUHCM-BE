@@ -2,11 +2,13 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.RequestStatusEnum;
+import com.fullsnacke.eimsfuhcmbe.enums.RequestTypeEnum;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
@@ -21,6 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -32,20 +36,21 @@ public class RequestServiceImpl implements RequestService {
 
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO createRequest(RequestRequestDTO request) {
-        if(request == null) {
+        if (request == null) {
             throw new CustomException(ErrorCode.REQUEST_EMPTY);
-        } else if(request.getExamSlotId() == null) {
+        } else if (request.getExamSlotId() == null) {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
-        } else if(request.getReason() == null || request.getReason().isEmpty()) {
+        } else if (request.getReason() == null || request.getReason().isEmpty()) {
             throw new CustomException(ErrorCode.REASON_EMPTY);
-        } else if(request.getRequestType() == null) {
-            throw new CustomException(ErrorCode.REQUEST_TYPE_EMPTY);
         }
-
+//        else if(request.getRequestType() == null) {
+//            throw new CustomException(ErrorCode.REQUEST_TYPE_EMPTY);
+//        }
         try {
             var currentUser = getCurrentUser();
             request.setInvigilator(currentUser);
-            System.out.println(request);
+            request.setRequestType(RequestTypeEnum.CANCEL.name());
+
             Request entity = requestMapper.toEntity(request);
             setExamSlot(entity.getExamSlot());
             requestRepository.save(entity);
@@ -58,6 +63,44 @@ public class RequestServiceImpl implements RequestService {
             throw new CustomException(ErrorCode.REQUEST_CREATION_FAILED);
         }
     }
+
+    public List<RequestResponseDTO> getAllRequestOfCurrentInvigilator() {
+        User currentUser = getCurrentUser();
+        List<Request> entity = requestRepository.findByCreatedBy(currentUser);
+
+        return getAllRequestsByInvigilator(currentUser);
+    }
+
+    public List<RequestResponseDTO> getAllRequestByInvigilatorId(String invigilatorId) {
+        User invigilator = userRepository.findByFuId(invigilatorId);
+        if (invigilator == null) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        return getAllRequestsByInvigilator(invigilator);
+    }
+
+    private List<RequestResponseDTO> getAllRequestsByInvigilator(User invigilator) {
+        List<Request> entity = requestRepository.findByCreatedBy(invigilator);
+
+        return entity.stream()
+                .map(request -> {
+                    RequestResponseDTO responseDTO = requestMapper.toResponseDTO(request);
+                    responseDTO.setStatus(RequestStatusEnum.fromValue(request.getStatus()).name());
+                    return responseDTO;
+                })
+                .toList();
+    }
+
+    public RequestResponseDTO getRequestById(int requestId) {
+        Request entity = requestRepository.findById(requestId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
+
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+        responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
+        return responseDTO;
+    }
+
 
     private void setExamSlot(ExamSlot examSlot) {
         if (examSlot == null) {
@@ -83,4 +126,18 @@ public class RequestServiceImpl implements RequestService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException(ErrorCode.USER_NOT_FOUND));
     }
+
+    public RequestResponseDTO updateRequestStatus(int requestId, UpdateStatusRequestDTO status) {
+        Request entity = requestRepository.findById(requestId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
+
+        entity.setStatus(RequestStatusEnum.fromName(status.getStatus()).getValue());
+        entity.setUpdatedAt(java.time.Instant.now());
+        requestRepository.save(entity);
+
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+        responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
+        return responseDTO;
+    }
+
 }

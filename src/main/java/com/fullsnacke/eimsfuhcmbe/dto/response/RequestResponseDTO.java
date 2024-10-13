@@ -18,8 +18,12 @@ import java.time.Instant;
 public class RequestResponseDTO {
     int requestId;
     int examSlotId;
+    Instant startAt;
+    Instant endAt;
+    String semesterName;
     Instant createdAt;
     String reason;
     String status;
     String requestType;
+    Instant updatedAt;
 }

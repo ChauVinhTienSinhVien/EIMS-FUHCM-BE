@@ -23,11 +23,15 @@ public interface RequestMapper {
 
 
     @Mapping(target = "examSlotId", source = "examSlot.id")
+    @Mapping(target = "startAt", source = "examSlot.startAt")
+    @Mapping(target = "endAt", source = "examSlot.endAt")
+    @Mapping(target = "semesterName", source = "examSlot.subjectExam.subjectId.semesterId.name")
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "reason", source = "reason")
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "requestType", source = "requestType")
     @Mapping(target = "requestId", source = "id")
+    @Mapping(target = "updatedAt", source = "updatedAt")
     RequestResponseDTO toResponseDTO(Request entity);
 
     @Named("examSlotIdToExamSlot")
@@ -36,9 +40,9 @@ public interface RequestMapper {
         examSlot.setId(examSlotId);
         return examSlot;
     }
-    @Named("intToString")
-    default String intToString(int value) {
-        RequestStatusEnum status = RequestStatusEnum.fromValue(value);
-        return String.valueOf(status);
-    }
+//    @Named("intToString")
+//    default String intToString(int value) {
+//        RequestStatusEnum status = RequestStatusEnum.fromValue(value);
+//        return String.valueOf(status);
+//    }
 }

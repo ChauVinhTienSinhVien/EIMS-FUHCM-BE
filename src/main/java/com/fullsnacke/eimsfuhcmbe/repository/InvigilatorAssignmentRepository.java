@@ -11,4 +11,5 @@ import java.util.Set;
 
 @Repository
 public interface InvigilatorAssignmentRepository extends JpaRepository<InvigilatorAssignment, Integer> {
+
 }

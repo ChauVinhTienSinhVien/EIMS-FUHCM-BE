@@ -55,7 +55,6 @@ public class ExamSlotHallServiceImpl implements ExamSlotHallService {
 
                 ExamSlotRoom examSlotRoom = new ExamSlotRoom();
                 examSlotRoom.setRoom(room);
-                examSlotRoom.setExamSlot(examSlot);
                 examSlotRoom.setExamSlotHall(examSlotHall);
                 examSlotRoomRepository.save(examSlotRoom);
             }

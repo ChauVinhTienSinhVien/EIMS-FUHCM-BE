@@ -2,10 +2,13 @@ package com.fullsnacke.eimsfuhcmbe.exception.handler;
 
 import com.fullsnacke.eimsfuhcmbe.dto.response.ApiResponse;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ErrorDTO;
+import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
+import com.fullsnacke.eimsfuhcmbe.exception.apierror.ApiError;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -27,9 +30,14 @@ import java.util.Date;
 import java.util.List;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    private ResponseEntity<Object> buildResponseEntity(ApiError apiError) {
+        return new ResponseEntity<>(apiError, apiError.getStatus());
+    }
 
     @ExceptionHandler(Exception.class) //Handles one or some specific types of exceptions
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -112,4 +120,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         .path(errorCode.getPath())
                         .build());
     }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    protected ResponseEntity<Object> handleEntityNotFound(
+            EntityNotFoundException ex) {
+        ApiError apiError = new ApiError(HttpStatus.NOT_FOUND);
+        apiError.setMessage(ex.getMessage());
+        return buildResponseEntity(apiError);
+    }
+
 }

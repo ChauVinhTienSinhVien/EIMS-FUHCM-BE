@@ -7,6 +7,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Role;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
+import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.user.UserNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.RoleRepository;
@@ -19,6 +20,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -45,6 +47,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByFuId(String fuId) {
+        User user = userRepository.findByFuId(fuId);
+        if(user == null){
+            throw new EntityNotFoundException(User.class, "fuId", fuId);
+        }
         return userRepository.findByFuId(fuId);
     }
 
@@ -56,16 +62,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        List<User> userList = userRepository.findAll();
+        List<User> nonDeletedUsers = new ArrayList<>();
+        for (User user : userList) {
+            if (user.getIsDeleted() == null || !user.getIsDeleted()) {
+                nonDeletedUsers.add(user);
+            }
+        }
+        if(userList.isEmpty()){
+            throw new EntityNotFoundException(User.class, "All", "All");
+        }
+        return nonDeletedUsers;
     }
 
     @Override
     public User updateUser(User userInRequest) {
         String fuId = userInRequest.getFuId();
-        User userInDb = userRepository.findByFuId(fuId);
+        User userInDb = userRepository.findByFuIdAndIsDeleted(fuId, false);
 
         if (userInDb == null) {
-            throw new UserNotFoundException("No User found with given fuId:" + fuId);
+            throw new EntityNotFoundException(User.class, "fuId", fuId);
         }
 
         userInDb.setFirstName(userInRequest.getFirstName());
@@ -80,11 +96,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String fuId) {
-        User userInDb = userRepository.findByFuId(fuId);
+        User userInDb = userRepository.findByFuIdAndIsDeleted(fuId, false);
         if(userInDb == null){
-            throw new UserNotFoundException("No User found with given fuId:" + fuId);
+            throw new EntityNotFoundException(User.class, "fuId", fuId);
         }
-        userRepository.delete(userInDb);
+        userInDb.setIsDeleted(true);
+        userRepository.save(userInDb);
     }
 
     @Override

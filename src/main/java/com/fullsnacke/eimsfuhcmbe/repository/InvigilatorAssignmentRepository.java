@@ -11,13 +11,4 @@ import java.util.Set;
 
 @Repository
 public interface InvigilatorAssignmentRepository extends JpaRepository<InvigilatorAssignment, Integer> {
-    Set<InvigilatorAssignment> findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(
-            User invigilator, Semester semesterId);
-
-    Set<InvigilatorAssignment> findByInvigilator(User invigilator);
-
-    Set<InvigilatorAssignment> findByExamSlot_SubjectExam_SubjectId_SemesterId(Semester semesterId);
-
-    Set<InvigilatorAssignment> findByExamSlot(ExamSlot examSlot);
-
 }

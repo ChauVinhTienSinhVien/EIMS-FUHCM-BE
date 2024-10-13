@@ -30,6 +30,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
         Cookie authCookie = cookies == null ? null : Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals("AUTH-TOKEN"))
                 .findAny().orElse(null);
+
         Authentication authentication;
         if (authCookie != null && (authentication = jwtUtils.verifyAndGetAuthentication(authCookie.getValue())) != null) {
             SecurityContextHolder.getContext().setAuthentication(authentication);

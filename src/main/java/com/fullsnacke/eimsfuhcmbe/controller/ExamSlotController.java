@@ -67,7 +67,9 @@ public class ExamSlotController {
             return ResponseEntity.noContent().build();
         } else {
             List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
+
             for (ExamSlot e:examSlotList) {
+                System.out.println(e.getStartAt());
                 ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
                 SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
                 examSlotResponseDTO.setSubjectExamId(subjectExam);

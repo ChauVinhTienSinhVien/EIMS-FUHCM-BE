@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.configuration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINT = {
@@ -45,7 +47,7 @@ public class SecurityConfig {
                 .requestMatchers(PUBLIC_ENDPOINT).permitAll()
                 .requestMatchers(loginUri,logoutUri).permitAll()
                 .anyRequest().authenticated());
-//                .anyRequest().permitAll());
+                //.anyRequest().permitAll());
         return http.build();
     }
 

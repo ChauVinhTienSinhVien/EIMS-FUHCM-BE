@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.configuration;
 
+import com.fullsnacke.eimsfuhcmbe.util.JWTUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -29,6 +30,7 @@ public class JWTRequestFilter extends OncePerRequestFilter {
         Cookie authCookie = cookies == null ? null : Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals("AUTH-TOKEN"))
                 .findAny().orElse(null);
+
         Authentication authentication;
         if (authCookie != null && (authentication = jwtUtils.verifyAndGetAuthentication(authCookie.getValue())) != null) {
             SecurityContextHolder.getContext().setAuthentication(authentication);

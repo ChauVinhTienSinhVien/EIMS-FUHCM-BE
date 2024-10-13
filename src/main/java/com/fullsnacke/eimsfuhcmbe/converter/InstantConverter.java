@@ -28,7 +28,7 @@ public class InstantConverter implements AttributeConverter<Instant, Instant> {
             return null;
         }
         ZonedDateTime utcDateTime = dbInstant.atZone(UTC);
-        ZonedDateTime utc7DateTime = utcDateTime.withZoneSameInstant(DEFAULT_ZONE);
-        return utc7DateTime.toInstant();
+        ZonedDateTime defaultZoneDateTime = utcDateTime.withZoneSameInstant(DEFAULT_ZONE);
+        return defaultZoneDateTime.toInstant();
     }
 }

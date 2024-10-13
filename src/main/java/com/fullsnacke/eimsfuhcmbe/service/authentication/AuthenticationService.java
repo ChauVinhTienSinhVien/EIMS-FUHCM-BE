@@ -1,6 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.service.authentication;
 
-import com.fullsnacke.eimsfuhcmbe.configuration.JWTUtils;
+import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
+import com.fullsnacke.eimsfuhcmbe.util.JWTUtils;
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
@@ -34,7 +35,6 @@ public class AuthenticationService {
                 .build();
     }
 
-
     public String loginOAuthGoogle(IdTokenRequestDto requestBody) {
         User user = verifyIDToken(requestBody.getIdToken());
 
@@ -45,7 +45,7 @@ public class AuthenticationService {
         User isIntheDB = userRepository.findByEmail(user.getEmail()).orElse(null);
 
         if (isIntheDB == null) {
-            throw  new IllegalArgumentException();
+            throw new EntityNotFoundException(User.class, "email", user.getEmail());
         }
 
         return jwtUtils.createToken(isIntheDB, false);

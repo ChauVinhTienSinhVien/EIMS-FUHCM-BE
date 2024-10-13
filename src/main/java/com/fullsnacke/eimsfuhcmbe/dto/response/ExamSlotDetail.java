@@ -20,4 +20,5 @@ public class ExamSlotDetail{
     ZonedDateTime startAt;
     ZonedDateTime endAt;
     String status;
+    String examType;
 }

@@ -48,21 +48,24 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request) {
+    public Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(Set<Integer> request) {
         User currentInvigilator = getCurrentUser();
         return deleteSelectedRegisteredSlots(currentInvigilator, request);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request) {
-        User invigilator = findInvigilatorByFuId(request.getFuId());
-        return deleteSelectedRegisteredSlots(invigilator, request);
-    }
+//    @Transactional(rollbackFor = Exception.class)
+//    public Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request) {
+//        User invigilator = findInvigilatorByFuId(request.getFuId());
+//        return deleteSelectedRegisteredSlots(invigilator, request);
+//    }
 
     @Transactional(rollbackFor = Exception.class)
-    protected Set<ExamSlotDetail> deleteSelectedRegisteredSlots(User invigilator, InvigilatorRegistrationRequestDTO request) {
+    protected Set<ExamSlotDetail> deleteSelectedRegisteredSlots(User invigilator, Set<Integer> request) {
+        System.out.println("request: " + request.stream().map(String::valueOf).collect(Collectors.joining(", ")));
+        System.out.println(invigilator.getFuId());
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
-                .findByInvigilatorAndExamSlot_IdIn(invigilator, request.getExamSlotId());
+                .findByInvigilator_FuIdAndExamSlot_IdIn(invigilator.getFuId(), request);
+        System.out.println("registrations: " + registrations);
         if (registrations.isEmpty()) {
             throw new CustomException(ErrorCode.NO_REGISTRATION_FOUND);
         }

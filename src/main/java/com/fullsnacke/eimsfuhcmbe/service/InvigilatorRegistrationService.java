@@ -27,8 +27,8 @@ public interface InvigilatorRegistrationService {
 
     RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId);
 
-    Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request);
+//    Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request);
 
-    Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request);
+    Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(Set<Integer> examSlotId);
 }
 

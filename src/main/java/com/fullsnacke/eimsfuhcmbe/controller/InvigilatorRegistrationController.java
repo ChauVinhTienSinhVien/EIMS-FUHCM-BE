@@ -3,13 +3,17 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomException;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorRegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -93,21 +97,30 @@ public class InvigilatorRegistrationController {
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.deleteRegisteredSlotsBySemester(request));
     }
-
-    @DeleteMapping("/register")
-    @Operation(summary = "Delete Registered Slot by ExamSlot Id")
-    public ResponseEntity<Set<ExamSlotDetail>> deleteRegisteredSlotByExamSlotId(@RequestBody InvigilatorRegistrationRequestDTO request) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.deleteRegisteredSlotByExamSlotId(request));
-    }
+//
+//    @DeleteMapping("/register")
+//    @Operation(summary = "Delete Registered Slot by ExamSlot Id")
+//    public ResponseEntity<Set<ExamSlotDetail>> deleteRegisteredSlotByExamSlotId(@RequestBody InvigilatorRegistrationRequestDTO request) {
+//        return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(invigilatorRegistrationService.deleteRegisteredSlotByExamSlotId(request));
+//    }
 
     @DeleteMapping("/myinfo/register")
     @Operation(summary = "Delete Registered Slot by ExamSlot Id")
-    public ResponseEntity<Set<ExamSlotDetail>> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestBody InvigilatorRegistrationRequestDTO request) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(request));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestParam Set<Integer> id) {
+        Logger log = LogManager.getLogger(InvigilatorRegistrationController.class);
+        log.info("Nhận yêu cầu xóa slot đã đăng ký với ID: {}", id);
+
+        try {
+            Set<ExamSlotDetail> result = invigilatorRegistrationService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(id);
+            log.info("Đã xóa thành công {} slot", result.size());
+            return ResponseEntity.ok(result);
+        } catch (CustomException e) {
+            log.error("Lỗi khi xóa slot đã đăng ký: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @GetMapping("/register/semesterid={semesterId}")

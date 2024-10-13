@@ -51,6 +51,27 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
     @Transactional(rollbackFor = Exception.class)
+    public Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorAssignmentRequestDTO request) {
+        User invigilator = findInvigilatorByFuId(request.getFuId());
+        Set<InvigilatorAssignment> assignments = invigilatorAssignmentRepository
+                .findByInvigilatorAndExamSlot_IdIn(invigilator, request.getExamSlotId());
+        if (assignments.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_ASSIGNMENTS_FOUND);
+        }
+
+        try {
+            invigilatorAssignmentRepository.deleteAll(assignments);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.DELETE_ASSIGNMENTS_FAILED);
+        }
+
+        return invigilatorAssignmentMapper
+                .mapExamSlotDetails(assignments
+                        .stream().map(InvigilatorAssignment::getExamSlot)
+                        .collect(Collectors.toSet()));
+    }
+
+    @Transactional(rollbackFor = Exception.class)
     public InvigilatorAssignmentResponseDTO registerExamSlot(InvigilatorAssignmentRequestDTO request) {
 
         User invigilator = findInvigilatorByFuId(request.getFuId());

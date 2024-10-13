@@ -28,7 +28,8 @@ public enum ErrorCode{
     REQUEST_TYPE_EMPTY("Request type is empty or null.", HttpStatus.BAD_REQUEST),
     REASON_EMPTY("Reason is empty or null.", HttpStatus.BAD_REQUEST),
     NO_REQUEST("No requests have been sent yet.", HttpStatus.NOT_FOUND),
-    ;
+    DELETE_ASSIGNMENTS_FAILED("Failed to delete assignments.", HttpStatus.INTERNAL_SERVER_ERROR),
+    NO_ASSIGNMENTS_FOUND("No assignments found.", HttpStatus.NOT_FOUND), ;
 
     private String message;
     private HttpStatusCode statusCode;

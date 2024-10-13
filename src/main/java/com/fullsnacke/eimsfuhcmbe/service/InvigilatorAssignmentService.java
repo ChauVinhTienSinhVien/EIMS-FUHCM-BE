@@ -2,10 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.ListInvigilatorsByExamSlotResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemesterResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 
 import java.util.Set;
 
@@ -29,5 +26,7 @@ public interface InvigilatorAssignmentService {
     ListInvigilatorsByExamSlotResponseDTO listInvigilatorsByExamSlot(int examSlotId);
 
     RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId);
+
+    Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorAssignmentRequestDTO request);
 }
 

@@ -20,4 +20,6 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
 
     Set<InvigilatorAssignment> findByExamSlot(ExamSlot examSlot);
 
+    Set<InvigilatorAssignment> findByInvigilatorAndExamSlot_IdIn(User invigilator, Set<Integer> examSlotIds);
+
 }

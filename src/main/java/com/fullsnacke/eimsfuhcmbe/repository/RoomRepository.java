@@ -8,5 +8,6 @@ import java.util.List;
 public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     List<Room> findByRoomNameLike(String roomName);
+    Room findRoomById(Integer id);
 
 }

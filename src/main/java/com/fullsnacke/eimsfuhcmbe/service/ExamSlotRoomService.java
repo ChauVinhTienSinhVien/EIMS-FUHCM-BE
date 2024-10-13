@@ -13,5 +13,4 @@ public interface ExamSlotRoomService {
     ExamSlotRoom deleteExamSlotRoom(int examSlotRoomId);
     ExamSlotRoom getExamSlotRoomById(int examSlotRoomId);
 
-
 }

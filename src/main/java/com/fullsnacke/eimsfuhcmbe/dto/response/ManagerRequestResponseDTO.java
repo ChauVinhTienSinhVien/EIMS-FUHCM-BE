@@ -2,15 +2,13 @@ package com.fullsnacke.eimsfuhcmbe.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
-import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.entity.Subject;
+import com.fullsnacke.eimsfuhcmbe.enums.RequestTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-import java.time.Instant;
-import java.time.ZonedDateTime;
 
 @Data
 @Builder
@@ -18,16 +16,14 @@ import java.time.ZonedDateTime;
 @NoArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RequestResponseDTO {
-    int requestId;
-    int examSlotId;
-    ZonedDateTime startAt;
-    ZonedDateTime endAt;
-    String semesterName;
-    Instant createdAt;
+public class ManagerRequestResponseDTO {
+    String requestId;
+    String fuId;
+    String email;
     String reason;
+    ExamSlotDetail examSlotDetail;
+    SubjectResponseDTO subject;
     String status;
-    String requestType;
-    Instant updatedAt;
     String note;
+    String requestType = RequestTypeEnum.CANCEL.name();
 }

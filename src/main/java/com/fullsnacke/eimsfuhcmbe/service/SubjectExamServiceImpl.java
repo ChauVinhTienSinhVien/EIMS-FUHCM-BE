@@ -82,5 +82,29 @@ public class SubjectExamServiceImpl implements SubjectExamService{
         return subjectExamList;
     }
 
+    @Override
+    public List<SubjectExam> cloneSubjectExamFromPreviousSemester(Semester semester, Semester previousSemester) {
+        List<Subject> oldSubjectList = subjectRepository.findBySemesterId(previousSemester);
+        List<Subject> newSubjectList = subjectRepository.findBySemesterId(semester);
+
+        List<SubjectExam> subjectExamList = new ArrayList<>();
+        for (int i = 0; i < oldSubjectList.size(); i++) {
+            Subject oldSubject = oldSubjectList.get(i);
+            Subject newSubject = newSubjectList.get(i);
+            List<SubjectExam> subjectExams = subjectExamRepository.findSubjectExamsBySubjectId(oldSubject);
+
+            for (SubjectExam subjectExam: subjectExams) {
+                System.out.println(subjectExam.getSubjectId().getName());
+                SubjectExam newSubjectExam = new SubjectExam();
+                newSubjectExam.setSubjectId(newSubject);
+                newSubjectExam.setExamType(subjectExam.getExamType());
+                newSubjectExam.setDuration(subjectExam.getDuration());
+                newSubjectExam.setStaffId(subjectExam.getStaffId());
+                subjectExamList.add(newSubjectExam);
+            }
+        }
+        return subjectExamRepository.saveAll(subjectExamList);
+    }
+
 
 }

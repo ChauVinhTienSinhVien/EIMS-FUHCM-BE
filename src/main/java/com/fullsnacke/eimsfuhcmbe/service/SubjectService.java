@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 
 import java.util.List;
@@ -14,4 +15,7 @@ public interface SubjectService {
     void deleteSubject(int id);
     List<Subject> findSubjectBySemesterId(int id);
 
+    List<Subject> cloneSubjectFromPreviousSemester(Semester previousSemester,Semester semester);
+
+    List<Subject> addListOfSubjects(List<Subject> subjects);
 }

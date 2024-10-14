@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -65,7 +64,11 @@ public class JWTUtils {
                     .parseClaimsJws(token)
                     .getBody();
             //List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(claims.get("role", String.class));
-            User user = userRepository.findByEmail(claims.getSubject()).orElse(null);
+            User user = userRepository.findByEmailAndIsDeleted(claims.getSubject(), false);
+            
+            if(user == null) {
+                return null;
+            }
 
             List<GrantedAuthority> authorities = (List<GrantedAuthority>) user.getAuthorities();
 

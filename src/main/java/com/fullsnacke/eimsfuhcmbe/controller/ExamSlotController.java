@@ -39,6 +39,9 @@ public class ExamSlotController {
     private ExamSlotMapper examSlotMapper;
 
     @Autowired
+    private SubjectExamRepository examRepository;
+
+    @Autowired
     private SubjectExamRepository subjectExamRepository;
 
     @GetMapping
@@ -85,6 +88,7 @@ public class ExamSlotController {
     public ResponseEntity<ExamSlotResponseDTO> createExamSlot(@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
 
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
@@ -93,6 +97,9 @@ public class ExamSlotController {
         examSlot.setCreatedAt(Instant.now());
         examSlot.setCreatedBy(currentUser);
         examSlot.setUpdatedBy(currentUser);
+        SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
+        examSlot.setSubjectExam(subjectExam);
+
         examSlot.setStatus(ExamSlotStatus.NEEDS_ROOM_ASSIGNMENT.getValue());
         ExamSlot createdExamSlot = examSlotServiceImpl.createExamSlot(examSlot);
         URI uri = URI.create("/examslots/" + createdExamSlot.getId());

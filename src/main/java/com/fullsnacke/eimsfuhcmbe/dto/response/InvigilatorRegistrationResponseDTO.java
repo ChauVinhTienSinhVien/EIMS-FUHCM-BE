@@ -1,5 +1,6 @@
-package com.fullsnacke.eimsfuhcmbe.dto.request;
+package com.fullsnacke.eimsfuhcmbe.dto.response;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,7 +12,8 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InvigilatorAssignmentRequestDTO {
+public class InvigilatorRegistrationResponseDTO {
     String fuId;
-    Set<Integer> examSlotId;
+    Semester semester;
+    Set<ExamSlotDetail> examSlots;
 }

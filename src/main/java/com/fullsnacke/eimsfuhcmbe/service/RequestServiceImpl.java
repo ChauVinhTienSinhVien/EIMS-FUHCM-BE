@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
@@ -101,6 +102,16 @@ public class RequestServiceImpl implements RequestService {
         return responseDTO;
     }
 
+    public List<ManagerRequestResponseDTO> getAllRequestBySemester(int semesterId) {
+        List<Request> entity = requestRepository.findByExamSlot_SubjectExam_SubjectId_SemesterId_Id(semesterId);
+        return entity.stream()
+                .map(request -> {
+                    ManagerRequestResponseDTO responseDTO = requestMapper.toManagerRequestResponseDTO(request);
+                    responseDTO.setStatus(RequestStatusEnum.fromValue(request.getStatus()).name());
+                    return responseDTO;
+                })
+                .toList();
+    }
 
     private void setExamSlot(ExamSlot examSlot) {
         if (examSlot == null) {

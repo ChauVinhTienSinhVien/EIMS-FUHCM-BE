@@ -58,6 +58,7 @@ public class AuthenController {
     @GetMapping("/user/info")
     public ResponseEntity<?> getUserInfo(Principal principal) {
         User user = userServiceImpl.getUserByEmail(principal.getName());
+        System.out.println(user.getFuId());
         return ResponseEntity.ok().body(user);
     }
 

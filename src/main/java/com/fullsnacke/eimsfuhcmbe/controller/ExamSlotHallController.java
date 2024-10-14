@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotHallMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotHallRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotHallResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotHall;
@@ -18,29 +19,40 @@ public class ExamSlotHallController {
     @Autowired
     private ExamSlotHallServiceImpl examSlotHallService;
 
+    @Autowired
+    private ExamSlotHallMapper examSlotHallMapper;
+
     @GetMapping
     @Operation(summary = "Retrieve all exam slot halls", description = "Fetches a list of all exam slot halls from the system. If no exam slot halls are found, it will return a 204 No Content response.")
-//    public List<ExamSlotHallResponseDTO> getAllExamSlotHall() {
-//        List<ExamSlotHallResponseDTO> examSlotHallResponseDTOList = new ArrayList<>();
-//
-//
-//
-//        return examSlotHallResponseDTOList;
-//    }
-    public List<ExamSlotHall> getAllExamSlotHall() {
-        return examSlotHallService.getAllExamSlotHall();
+    public List<ExamSlotHallResponseDTO> getAllExamSlotHall() {
+        List<ExamSlotHallResponseDTO> examSlotHallResponseDTOList = new ArrayList<>();
+
+        List<ExamSlotHall> examSlotHallList = examSlotHallService.getAllExamSlotHall();
+        for (ExamSlotHall examSlotHall : examSlotHallList) {
+            ExamSlotHallResponseDTO examSlotHallResponseDTO = examSlotHallMapper.toDto(examSlotHall);
+            examSlotHallResponseDTOList.add(examSlotHallResponseDTO);
+        }
+
+        return examSlotHallResponseDTOList;
     }
 
     @PostMapping
     @Operation(summary = "Create a new exam slot hall", description = "Creates a new exam slot hall in the system.")
-//    public ExamSlotHallResponseDTO addExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {
-//        ExamSlotHall examSlotHall = examSlotHallService.addExamSlotHall(requestDTO);
-//        return new ExamSlotHallResponseDTO();
-//    }
-    public List<ExamSlotHall> addExamSlotHalls(@RequestBody ExamSlotHallRequestDTO requestDTO) {
+    public List<ExamSlotHallResponseDTO> addExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {
+        List<ExamSlotHall> examSlotHallList = examSlotHallService.addExamSlotHalls(requestDTO);
 
-        return examSlotHallService.addExamSlotHalls(requestDTO);
+        List<ExamSlotHallResponseDTO> examSlotHallResponseDTOList = new ArrayList<>();
+        for (ExamSlotHall examSlotHall : examSlotHallList) {
+            ExamSlotHallResponseDTO examSlotHallResponseDTO = examSlotHallMapper.toDto(examSlotHall);
+            examSlotHallResponseDTOList.add(examSlotHallResponseDTO);
+        }
+
+        return examSlotHallResponseDTOList;
     }
+//    public List<ExamSlotHall> addExamSlotHalls(@RequestBody ExamSlotHallRequestDTO requestDTO) {
+//
+//        return examSlotHallService.addExamSlotHalls(requestDTO);
+//    }
 
 
 }

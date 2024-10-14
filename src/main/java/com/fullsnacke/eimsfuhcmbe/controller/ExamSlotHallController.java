@@ -3,8 +3,12 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotHallMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotHallRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotHallResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotHall;
+import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotHallServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.service.ExamSlotService;
+import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +25,11 @@ public class ExamSlotHallController {
 
     @Autowired
     private ExamSlotHallMapper examSlotHallMapper;
+
+    @Autowired
+    private ExamSlotRepository examSlotRepository;
+    @Autowired
+    private ExamSlotServiceImpl examSlotService;
 
     @GetMapping
     @Operation(summary = "Retrieve all exam slot halls", description = "Fetches a list of all exam slot halls from the system. If no exam slot halls are found, it will return a 204 No Content response.")
@@ -46,7 +55,9 @@ public class ExamSlotHallController {
             ExamSlotHallResponseDTO examSlotHallResponseDTO = examSlotHallMapper.toDto(examSlotHall);
             examSlotHallResponseDTOList.add(examSlotHallResponseDTO);
         }
-
+        ExamSlot examSlot = examSlotRepository.findExamSlotById(requestDTO.getExamSlotId());
+        examSlot.setStatus(1);
+        examSlotService.updateExamSlotExamSlot(examSlot);
         return examSlotHallResponseDTOList;
     }
 //    public List<ExamSlotHall> addExamSlotHalls(@RequestBody ExamSlotHallRequestDTO requestDTO) {

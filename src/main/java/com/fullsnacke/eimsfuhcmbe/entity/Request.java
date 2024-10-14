@@ -61,4 +61,7 @@ public class Request {
     @Column(name = "request_type", nullable = false, length = 50)
     String requestType;
 
+    //ai request, reason,
+    //Ngày môn thi gì, code name, type, ngày thi, 1 list những người chưa được assign slot đó
+
 }

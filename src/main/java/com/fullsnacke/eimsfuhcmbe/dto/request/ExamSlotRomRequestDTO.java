@@ -1,4 +1,4 @@
-package com.fullsnacke.eimsfuhcmbe.dto.response;
+package com.fullsnacke.eimsfuhcmbe.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,14 +8,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ExamSlotRoomResponseDTO {
+public class ExamSlotRomRequestDTO {
 
     Integer examSlotRoomId;
-    Integer examSlotId;
+    Integer examHallId;
     String roomId;
     String roomInvigilatorFuId;
-    String roomInvigilatorName;
-    String hallInvigilatorFuId;
-    String hallInvigilatorName;
 
 }

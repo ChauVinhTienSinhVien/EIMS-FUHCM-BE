@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,6 +54,14 @@ public class RequestController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(requestService.getAllRequestByInvigilatorId(invigilatorId));
+    }
+
+    @GetMapping("semesterid={semesterId}")
+    @Operation(summary = "Get all requests")
+    public ResponseEntity<List<ManagerRequestResponseDTO>> getAllRequestBySemester(@PathVariable("semesterId") int semesterId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.getAllRequestBySemester(semesterId));
     }
 
     @PostMapping("requestid={requestId}")

@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotRoom;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRoomRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,12 +26,22 @@ public class ExamSlotRoomServiceImpl implements ExamSlotRoomService {
 
     @Override
     public ExamSlotRoom addExamSlotRooms(List<ExamSlotRoom> examSlotRooms) {
-        return null;
+        ExamSlotRoom examSlotRoom = new ExamSlotRoom();
+        // ...
+        return examSlotRoomRepository.save(examSlotRoom);
     }
 
     @Override
     public ExamSlotRoom updateExamSlotRoom(ExamSlotRoom examSlotRoom) {
-        return null;
+        ExamSlotRoom examSlotRoomInDB = examSlotRoomRepository.findExamSlotRoomById(examSlotRoom.getId());
+
+        if (examSlotRoomInDB == null) {
+            throw new EntityNotFoundException("Exam Slot Room not found");
+        }
+
+        // ...
+
+        return examSlotRoomRepository.save(examSlotRoom);
     }
 
     @Override
@@ -40,6 +51,6 @@ public class ExamSlotRoomServiceImpl implements ExamSlotRoomService {
 
     @Override
     public ExamSlotRoom getExamSlotRoomById(int examSlotRoomId) {
-        return null;
+        return examSlotRoomRepository.findExamSlotRoomById(examSlotRoomId);
     }
 }

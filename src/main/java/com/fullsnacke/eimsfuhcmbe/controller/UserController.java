@@ -55,6 +55,7 @@ public class UserController {
     @Operation(summary = "Add a user", description = "Add a new user")
     public ResponseEntity<UserResponseDTO> addUser(@RequestBody @Valid UserRequestDTO userRequestDTO){
         User user = userMapper.toEntity(userRequestDTO);
+        user.setIsDeleted(false);
         User addedUser = userServiceImpl.add(user);
         URI uri = URI.create("/users" + user.getFuId());
         UserResponseDTO userResponseDTO = userMapper.toDto(addedUser);
@@ -68,6 +69,9 @@ public class UserController {
         List<User> userList = userRequestDTOList.stream()
                 .map(userRequestDTO -> userMapper.toEntity(userRequestDTO))
                 .toList();
+        for(User user: userList){
+            user.setIsDeleted(false);
+        }
         List<User> addedUsers = userServiceImpl.saveAll(userList);
         List<UserResponseDTO> userResponseDTOList = addedUsers.stream()
                 .map(user -> userMapper.toDto(user))

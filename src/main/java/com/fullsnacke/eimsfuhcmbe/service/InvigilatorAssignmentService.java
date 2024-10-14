@@ -1,5 +1,9 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
-public interface InvigilatorAssignmentService {
+import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotRoom;
 
+import java.util.List;
+
+public interface InvigilatorAssignmentService {
+    List<ExamSlotRoom> assignInvigilatorToRoom(int semesterId);
 }

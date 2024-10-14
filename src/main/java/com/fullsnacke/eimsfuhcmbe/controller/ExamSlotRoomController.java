@@ -36,9 +36,10 @@ public class ExamSlotRoomController {
     public ResponseEntity<ExamSlotRoomResponseDTO> getExamSlotRoomById(@PathVariable int id) {
         ExamSlotRoom examSlotRoom = examSlotRoomService.getExamSlotRoomById(id);
 
-        ExamSlotRoomResponseDTO examSlotRoomResponseDTO = ExamSlotRoomMapper.toDto(examSlotRoom);
+//        ExamSlotRoomResponseDTO examSlotRoomResponseDTO = ExamSlotRoomMapper.toDto(examSlotRoom);
+//        return ResponseEntity.ok(examSlotRoomResponseDTO);
 
-        return ResponseEntity.ok(examSlotRoomResponseDTO);
+        return null;
     }
 
     @PostMapping

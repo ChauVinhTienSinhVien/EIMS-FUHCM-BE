@@ -83,9 +83,18 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public InvigilatorRegistrationResponseDTO registerExamSlot(InvigilatorRegistrationRequestDTO request) {
+    public InvigilatorRegistrationResponseDTO registerExamSlotWithoutFuId(InvigilatorRegistrationRequestDTO request) {
+        User invigilator = getCurrentUser();
+        return registerExamSlot(invigilator, request);
+    }
 
+    @Transactional(rollbackFor = Exception.class)
+    public InvigilatorRegistrationResponseDTO registerExamSlotWithFuId(InvigilatorRegistrationRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
+        return registerExamSlot(invigilator, request);
+    }
+
+    private InvigilatorRegistrationResponseDTO registerExamSlot(User invigilator, InvigilatorRegistrationRequestDTO request) {
 
         Set<Integer> requestExamSlotId = request.getExamSlotId();
 

@@ -33,6 +33,7 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
 
     List<InvigilatorRegistration> findByExamSlotInOrderByCreatedAtAsc(List<ExamSlot> examSlot);
 
-
+    @Query("SELECT ir FROM InvigilatorRegistration ir WHERE ir.examSlot IN :examSlots AND ir.id NOT IN (SELECT ia.invigilatorRegistration.id FROM InvigilatorAssignment ia)")
+    List<InvigilatorRegistration> findUnassignedRegistrationsByExamSlotInOrderByCreatedAtAsc(List<ExamSlot> examSlots);
 
 }

@@ -25,31 +25,6 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     ExamSlotRoomRepository examSlotRoomRepository;
     ExamSlotHallRepository examSlotHallRepository;
 
-//    @Transactional(rollbackFor = Exception.class)
-//    public List<ExamSlotRoom> assignInvigilators(int semesterId) {
-//        Semester semester = (Semester) semesterRepository.findById(semesterId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
-//        System.out.println("Semester: " + semester.getName());
-//
-//        List<ExamSlot> examSlots = examSlotRepository.findExamSlotBySubjectExam_SubjectId_SemesterId(semester);
-//        System.out.println("Exam Slots: " + examSlots.stream().map(ExamSlot::getId).collect(Collectors.toSet()));
-//
-//        for (ExamSlot examSlot : examSlots) {
-//            List<InvigilatorRegistration> invigilatorRegistrations = invigilatorRegistrationRepository
-//                    .findByExamSlotOrderByCreatedAtAsc(examSlot);
-//            System.out.println("Invigilator Registrations: " + invigilatorRegistrations.stream().map(InvigilatorRegistration::getInvigilator).map(User::getFuId).toList());
-//            System.out.println("Registration size: " + invigilatorRegistrations.size());
-//            List<ExamSlotHall> examSlotHalls = examSlotHallRepository.findByExamSlot(examSlot);
-//            System.out.println("Exam Slot Halls: " + examSlotHalls.stream().map(ExamSlotHall::getId).collect(Collectors.toSet()));
-//            List<ExamSlotRoom> examSlotRooms = examSlotRoomRepository.findByExamSlotHall_ExamSlot(examSlot);
-//            System.out.println("Exam Slot Rooms: " + examSlotRooms.stream().map(ExamSlotRoom::getRoom).map(Room::getRoomName).collect(Collectors.toSet()));
-//
-//            assignInvigilatorsToRoom(invigilatorRegistrations, examSlotRooms);
-//            assignInvigilatorsToHalls(invigilatorRegistrations, examSlotHalls);
-//        }
-//        return examSlotRoomRepository.findByExamSlotHall_ExamSlotIn(examSlots);
-//    }
-
     @Transactional(rollbackFor = Exception.class)
     public List<ExamSlotRoom> assignInvigilators(int semesterId) {
         Semester semester = semesterRepository.findById(semesterId)
@@ -58,7 +33,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         List<ExamSlot> examSlots = examSlotRepository.findExamSlotBySubjectExam_SubjectId_SemesterId(semester);
 
         Map<Integer, List<InvigilatorRegistration>> registrationMap = invigilatorRegistrationRepository
-                .findByExamSlotInOrderByCreatedAtAsc(examSlots)
+                .findUnassignedRegistrationsByExamSlotInOrderByCreatedAtAsc(examSlots)
                 .stream()
                 .collect(Collectors.groupingBy(reg -> reg.getExamSlot().getId()));
 
@@ -66,6 +41,10 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         registrationMap.forEach((examSlotId, registrations) -> {
             System.out.println("ExamSlot ID: " + examSlotId + ", Registrations: " + registrations.size());
         });
+
+        if(registrationMap.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_INVIGILATOR_REGISTRATION);
+        }
 
         Map<Integer, List<ExamSlotHall>> hallMap = examSlotHallRepository
                 .findByExamSlotIn(examSlots)
@@ -104,12 +83,13 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return examSlotRoomRepository.findByExamSlotHall_ExamSlotIn(examSlots);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     protected void assignInvigilatorsToRoom(List<InvigilatorRegistration> registrations, List<ExamSlotRoom> examSlotRooms) {
         List<ExamSlotRoom> availableRooms = examSlotRooms.stream()
                 .filter(room -> room.getRoomInvigilator() == null)
-                .collect(Collectors.toList());
+                .toList();
 
-        int assignmentCount = Math.min(examSlotRooms.size(), availableRooms.size());
+        int assignmentCount = Math.min(registrations.size(), availableRooms.size());
         List<InvigilatorAssignment> assignments = new ArrayList<>();
         List<ExamSlotRoom> roomsToUpdate = new ArrayList<>();
 
@@ -129,8 +109,13 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                     "\nGiám thị: " + registration.getInvigilator().getFuId());
         }
 
-        invigilatorAssignmentRepository.saveAll(assignments);
-        examSlotRoomRepository.saveAll(roomsToUpdate);
+        try {
+            invigilatorAssignmentRepository.saveAll(assignments);
+            examSlotRoomRepository.saveAll(roomsToUpdate);
+        } catch (Exception e) {
+            System.out.println("Lỗi khi phân công giám thị cho phòng: " + e.getMessage());
+            throw new CustomException(ErrorCode.FAILD_TO_CLASSIFY_INVIGILATOR);
+        }
 
         registrations.subList(0, assignmentCount).clear();
     }
@@ -139,9 +124,9 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     protected void assignInvigilatorsToHalls(List<InvigilatorRegistration> registrations, List<ExamSlotHall> examSlotHalls) {
         List<ExamSlotHall> availableHalls = examSlotHalls.stream()
                 .filter(hall -> hall.getHallInvigilator() == null)
-                .collect(Collectors.toList());
+                .toList();
 
-        int assignmentCount = Math.min(examSlotHalls.size(), availableHalls.size());
+        int assignmentCount = Math.min(registrations.size(), availableHalls.size());
         List<InvigilatorAssignment> assignments = new ArrayList<>();
         List<ExamSlotHall> hallsToUpdate = new ArrayList<>();
 
@@ -161,72 +146,15 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                     "\nGiám thị: " + registration.getInvigilator().getFuId());
         }
 
-        invigilatorAssignmentRepository.saveAll(assignments);
-        examSlotHallRepository.saveAll(hallsToUpdate);
+        try {
+            invigilatorAssignmentRepository.saveAll(assignments);
+            examSlotHallRepository.saveAll(hallsToUpdate);
+        } catch (Exception e) {
+            System.out.println("Lỗi khi phân công giám thị cho hội trường: " + e.getMessage());
+            throw new CustomException(ErrorCode.FAILD_TO_CLASSIFY_INVIGILATOR);
+        }
 
         registrations.subList(0, assignmentCount).clear();
     }
-
-//    @Transactional(rollbackFor = Exception.class)
-//    protected void assignInvigilatorsToRoom(List<InvigilatorRegistration> registrations, List<ExamSlotRoom> examSlotRooms) {
-//        List<InvigilatorRegistration> availableInvigilators = new ArrayList<>(registrations);
-//        List<ExamSlotRoom> availableRooms = new ArrayList<>(examSlotRooms);
-//
-//        for (int i = 0; i < availableRooms.size() && availableRooms.size() <= availableInvigilators.size(); i++) {
-//            ExamSlotRoom room = examSlotRooms.get(i);
-//            InvigilatorRegistration registration = availableInvigilators.get(i);
-//
-//            InvigilatorAssignment assignment = InvigilatorAssignment.builder()
-//                    .invigilatorRegistration(registration)
-//                    .isHallInvigilator(false)
-//                    .build();
-//            assignments.add(assignment);
-//            try {
-//                invigilatorAssignmentRepository.save(assignment);
-//                room.setRoomInvigilator(assignment);
-//                examSlotRoomRepository.save(room);
-//                System.out.println("Phòng: " + room.getRoom().getRoomName());
-//                System.out.println("Phân công: " + registration.getInvigilator().getFuId());
-//            } catch (Exception e) {
-//                System.out.println("Lỗi khi phân công giám thị cho phòng: " + e.getMessage());
-//                throw new CustomException(ErrorCode.FAILD_TO_CLASSIFY_INVIGILATOR);
-//            }
-//        }
-//        System.out.println("Remaining Invigilator Registration Size Before Classify Room: " + registrations.size());
-//        registrations.removeAll(availableInvigilators.subList(0, Math.min(availableRooms.size(), availableInvigilators.size())));
-//        System.out.println("Remaining Invigilator Registration Size After Classify Room: " + registrations.size());
-//    }
-//
-//    @Transactional(rollbackFor = Exception.class)
-//    protected void assignInvigilatorsToHalls
-//    (List<InvigilatorRegistration> registrations, List<ExamSlotHall> examSlotHalls) {
-//        List<InvigilatorRegistration> availableInvigilators = new ArrayList<>(registrations);
-//        List<ExamSlotHall> availableHalls = new ArrayList<>(examSlotHalls);
-//
-//        System.out.println("Remaining Invigilator Registration Size Before Classify Room: " + registrations.size());
-//
-//        for (int i = 0; i < availableHalls.size() && availableHalls.size() <= availableInvigilators.size(); i++) {
-//            ExamSlotHall hall = examSlotHalls.get(i);
-//            InvigilatorRegistration registration = availableInvigilators.get(i);
-//
-//            InvigilatorAssignment assignment = InvigilatorAssignment.builder()
-//                    .invigilatorRegistration(registration)
-//                    .isHallInvigilator(true)
-//                    .build();
-//
-//            try {
-//                invigilatorAssignmentRepository.save(assignment);
-//                hall.setHallInvigilator(assignment);
-//                examSlotHallRepository.save(hall);
-//                System.out.println("Hội trường: " + hall.getId());
-//                System.out.println("Phân công: " + registration.getInvigilator().getFuId());
-//            } catch (Exception e) {
-//                System.out.println("Lỗi khi phân công giám thị cho hội trường: " + e.getMessage());
-//                throw new CustomException(ErrorCode.FAILD_TO_CLASSIFY_INVIGILATOR);
-//            }
-//        }
-//        registrations.removeAll(availableInvigilators.subList(0, Math.min(availableHalls.size(), availableInvigilators.size())));
-//        System.out.println("Remaining Invigilator Registration Size After Classify Room: " + registrations.size());
-//    }
 
 }

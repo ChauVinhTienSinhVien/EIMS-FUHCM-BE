@@ -28,10 +28,18 @@ public class InvigilatorRegistrationController {
 
     @PostMapping
     @Operation(summary = "Register Exam Slots", description = "Save the invigilator customEx for the exam slot")
-    public ResponseEntity<InvigilatorRegistrationResponseDTO> registerExamSlot(@RequestBody InvigilatorRegistrationRequestDTO request) {
+    public ResponseEntity<InvigilatorRegistrationResponseDTO> registerExamSlotWithoutFuId(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(invigilatorRegistrationService.registerExamSlot(request));
+                .body(invigilatorRegistrationService.registerExamSlotWithoutFuId(request));
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "Register Exam Slots", description = "Save the invigilator customEx for the exam slot")
+    public ResponseEntity<InvigilatorRegistrationResponseDTO> registerExamSlotWithFuId(@RequestBody InvigilatorRegistrationRequestDTO request) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(invigilatorRegistrationService.registerExamSlotWithFuId(request));
     }
 
     @GetMapping("/myinfo")

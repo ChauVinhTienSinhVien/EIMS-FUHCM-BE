@@ -19,6 +19,6 @@ public class InvigilatorAssignmentController {
 
     @GetMapping("classify/semesterid={semesterId}")
     public ResponseEntity<?> assignInvigilatorToRoom(@PathVariable("semesterId") int semesterId) {
-        return ResponseEntity.ok(invigilatorAssignmentService.assignInvigilatorToRoom(semesterId));
+        return ResponseEntity.ok(invigilatorAssignmentService.assignInvigilators(semesterId));
     }
 }

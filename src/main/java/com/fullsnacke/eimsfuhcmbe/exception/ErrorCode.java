@@ -30,7 +30,7 @@ public enum ErrorCode{
     NO_REQUEST("No requests have been sent yet.", HttpStatus.NOT_FOUND),
     DELETE_REGISTRATIONS_FAILED("Failed to delete registrations.", HttpStatus.INTERNAL_SERVER_ERROR),
     NO_REGISTRATION_FOUND("No registration found.", HttpStatus.NOT_FOUND),
-
+    FAILD_TO_CLASSIFY_INVIGILATOR("Failed to classify invigilator.", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     private String message;

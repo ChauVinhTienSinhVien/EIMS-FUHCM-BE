@@ -2,12 +2,26 @@ package com.fullsnacke.eimsfuhcmbe.repository;
 
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Set;
 
 public interface InvigilatorRegistrationRepository extends JpaRepository<InvigilatorRegistration, Integer> {
     Set<InvigilatorRegistration> findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(
             User invigilator, Semester semesterId);
+
+    @Query("SELECT ir FROM InvigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "JOIN FETCH es.subjectExam se " +
+            "JOIN FETCH se.subjectId s " +
+            "WHERE ir.invigilator.id = :invigilatorId " +
+            "AND s.semesterId.id = :semesterId")
+    Set<InvigilatorRegistration> findRegistrationsWithDetailsByInvigilatorAndSemester(
+            @Param("invigilatorId") Integer invigilatorId,
+            @Param("semesterId") Integer semesterId
+    );
 
     Set<InvigilatorRegistration> findByInvigilator(User invigilator);
 
@@ -17,6 +31,8 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
 
     Set<InvigilatorRegistration> findByInvigilator_FuIdAndExamSlot_IdIn(String fuId, Set<Integer> examSlotIds);
 
-    Set<InvigilatorRegistration> findByExamSlotOrderByCreatedAtAsc(ExamSlot examSlot);
+    List<InvigilatorRegistration> findByExamSlotInOrderByCreatedAtAsc(List<ExamSlot> examSlot);
+
+
 
 }

@@ -34,6 +34,8 @@ public interface InvigilatorRegistrationMapper {
     @Mapping(target = "startAt", source = "startAt")
     @Mapping(target = "endAt", source = "endAt")
     @Mapping(target = "status", ignore = true)
+    @Mapping(target = "requiredInvigilators", source = "requiredInvigilators")
+    @Mapping(target = "numberOfRegistered", ignore = true)
     ExamSlotDetail toExamSlotDetail(ExamSlot examSlot);
 
     @Named("mapInvigilatorRegistrations")

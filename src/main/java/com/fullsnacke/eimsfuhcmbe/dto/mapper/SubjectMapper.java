@@ -15,6 +15,7 @@ public interface SubjectMapper {
     Subject toEntity(SubjectRequestDTO dto);
 
     @Mapping(target = "semesterName", source = "semesterId.name")
+    @Mapping(target = "semesterId", source = "semesterId.id")
     SubjectResponseDTO toDto(Subject entity);
 
     @Named("intToSemester")

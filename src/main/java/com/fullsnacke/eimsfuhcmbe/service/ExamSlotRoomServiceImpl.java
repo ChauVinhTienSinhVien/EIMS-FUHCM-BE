@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -17,6 +19,11 @@ public class ExamSlotRoomServiceImpl implements ExamSlotRoomService {
     @Override
     public List<ExamSlotRoom> getAllExamSlotRoom() {
         return examSlotRoomRepository.findAll();
+    }
+
+    @Override
+    public List<String> getAllUnavailableRooms(ZonedDateTime startAt, ZonedDateTime endAt) {
+        return examSlotRoomRepository.findAvailableRooms(startAt, endAt);
     }
 
     @Override

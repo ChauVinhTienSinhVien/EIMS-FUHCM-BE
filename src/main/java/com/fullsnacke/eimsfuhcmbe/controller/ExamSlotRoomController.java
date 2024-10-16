@@ -1,6 +1,5 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
-import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotHallMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotRoomMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRomRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +40,12 @@ public class ExamSlotRoomController {
 //        return ResponseEntity.ok(examSlotRoomResponseDTO);
 
         return null;
+    }
+
+    @GetMapping("/unavailable-rooms")
+    @Operation(summary = "Find available rooms within a time range", description = "Returns a list of rooms that are available for booking within a given time range.")
+    public List<String> getAllAvailableRooms(@RequestParam ZonedDateTime startAt, @RequestParam ZonedDateTime endAt) {
+        return examSlotRoomService.getAllUnavailableRooms(startAt, endAt);
     }
 
     @PostMapping

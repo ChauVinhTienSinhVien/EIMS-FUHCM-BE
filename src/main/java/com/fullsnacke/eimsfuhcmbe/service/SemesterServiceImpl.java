@@ -44,7 +44,6 @@ public class SemesterServiceImpl implements SemesterService {
         Semester lastestSemester =  semesterRepository.findFirstByOrderByStartAtDesc();
         Semester createdSemester = semesterRepository.save(semester);
         configServiceImpl.cloneLastedSemesterConfig(createdSemester, lastestSemester);
-        List<Subject> subjectList = subjectServiceImpl.cloneSubjectFromPreviousSemester(createdSemester, lastestSemester);
         subjectExamServiceImpl.cloneSubjectExamFromPreviousSemester(createdSemester, lastestSemester);
         return createdSemester;
     }

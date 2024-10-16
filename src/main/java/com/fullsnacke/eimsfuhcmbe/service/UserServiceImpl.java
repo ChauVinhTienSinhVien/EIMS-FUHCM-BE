@@ -34,8 +34,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User add(User user) {
+        User userInDb = userRepository.findByEmailAndIsDeleted(user.getEmail(),false);
+        if (userInDb != null) {
+            throw new AuthenticationProcessException(ErrorCode.USER_ALREADY_EXISTS);
+        }
         Role role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found"));
         user.setRole(role);
+
         return userRepository.save(user);
     }
 
@@ -62,17 +67,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        List<User> userList = userRepository.findAll();
-        List<User> nonDeletedUsers = new ArrayList<>();
-        for (User user : userList) {
-            if (user.getIsDeleted() == null || !user.getIsDeleted()) {
-                nonDeletedUsers.add(user);
-            }
-        }
-        if(userList.isEmpty()){
-            throw new EntityNotFoundException(User.class, "All", "All");
-        }
-        return nonDeletedUsers;
+        return userRepository.findAllByIsDeleted(false);
     }
 
     @Override
@@ -89,7 +84,7 @@ public class UserServiceImpl implements UserService {
         userInDb.setGender(userInRequest.getGender());
         userInDb.setDepartment(userInRequest.getDepartment());
         userInDb.setPhoneNumber(userInRequest.getPhoneNumber());
-        userInDb.setRole(roleRepository.findById(userInRequest.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found")));
+        userInDb.setRole(roleRepository.findById(userInRequest.getRole().getId()).orElseThrow(() -> new EntityNotFoundException(Role.class, "id", userInRequest.getRole().getId().toString())));
 
         return userRepository.save(userInDb);
     }

@@ -87,32 +87,19 @@ public class ConfigServiceImpl implements ConfigService{
         return configRepository.saveAll(configList);
     }
 
+    @Transactional
     public void cloneLastedSemesterConfig(Semester semester, Semester lastestSemester){
-
-        Config hourlyRateConfig = new Config();
-        Config allowedSlotConfig = new Config();
-
-        List<Config> configList = configRepository.findBySemesterId(lastestSemester.getId());
-
-        for (Config config : configList) {
-            if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
-                hourlyRateConfig.setConfigType(config.getConfigType());
-                hourlyRateConfig.setUnit(config.getUnit());
-                hourlyRateConfig.setValue(config.getValue());
-            } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
-                allowedSlotConfig.setConfigType(config.getConfigType());
-                allowedSlotConfig.setUnit(config.getUnit());
-                allowedSlotConfig.setValue(config.getValue());
-            }
-        }
-
+        List<Config> oldConfigList = configRepository.findBySemesterId(lastestSemester.getId());
         List<Config> newConfigList = new ArrayList<>();
 
-        hourlyRateConfig.setSemester(semester);
-        allowedSlotConfig.setSemester(semester);
-
-        newConfigList.add(hourlyRateConfig);
-        newConfigList.add(allowedSlotConfig);
+        for (Config config : oldConfigList) {
+            Config newConfig = new Config();
+            newConfig.setConfigType(config.getConfigType());
+            newConfig.setUnit(config.getUnit());
+            newConfig.setValue(config.getValue());
+            newConfig.setSemester(semester);
+            newConfigList.add(newConfig);
+        }
 
         configRepository.saveAll(newConfigList);
     }

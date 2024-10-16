@@ -31,7 +31,7 @@ public enum ErrorCode{
     DELETE_REGISTRATIONS_FAILED("Failed to delete registrations.", HttpStatus.INTERNAL_SERVER_ERROR),
     NO_REGISTRATION_FOUND("No registration found.", HttpStatus.NOT_FOUND),
 
-    ;
+    USER_ALREADY_EXISTS("User Already Exist", HttpStatus.CONFLICT);
 
     private String message;
     private HttpStatusCode statusCode;

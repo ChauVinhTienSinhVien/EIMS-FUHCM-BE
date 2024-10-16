@@ -1,7 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotRoomMapper;
-import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRomRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRoomRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotRoom;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotRoomService;
@@ -21,14 +21,24 @@ public class ExamSlotRoomController {
     @Autowired
     private ExamSlotRoomService examSlotRoomService;
 
+    @Autowired
+    private ExamSlotRoomMapper examSlotRoomMapper;
+
     @GetMapping
     @Operation(summary = "Retrieve all exam slot rooms", description = "Fetches a list of all exam slot rooms from the system. If no exam slot rooms are found, it will return a 204 No Content response.")
-    public List<ExamSlotRoom> getAllExamSlotRooms() {
+    public List<ExamSlotRoomResponseDTO> getAllExamSlotRooms() {
 
         List<ExamSlotRoomResponseDTO> examSlotRoomResponseDTOList = new ArrayList<>();
         // ...
+        List<ExamSlotRoom> examSlotRoomList = examSlotRoomService.getAllExamSlotRoom();
 
-        return examSlotRoomService.getAllExamSlotRoom();
+        for (ExamSlotRoom examSlotRoom : examSlotRoomList) {
+            ExamSlotRoomResponseDTO examSlotRoomResponseDTO = examSlotRoomMapper.toDto(examSlotRoom);
+            examSlotRoomResponseDTOList.add(examSlotRoomResponseDTO);
+        }
+
+        return examSlotRoomResponseDTOList;
+//        return examSlotRoomService.getAllExamSlotRoom();
     }
 
     @GetMapping("/{id}")
@@ -50,7 +60,7 @@ public class ExamSlotRoomController {
 
     @PostMapping
     @Operation(summary = "Create a new exam slot room", description = "Creates a new exam slot room in the system.")
-    public ResponseEntity<ExamSlotRoom> addExamSlotRoom(@RequestBody ExamSlotRomRequestDTO examSlotRomRequestDTO) {
+    public ResponseEntity<ExamSlotRoom> addExamSlotRoom(@RequestBody ExamSlotRoomRequestDTO examSlotRomRequestDTO) {
 //        ExamSlotRoom examSlotRoom = examSlotRoomService.addExamSlotRoom(examSlotRomRequestDTO);
         return null;
     }

@@ -2,7 +2,9 @@ package com.fullsnacke.eimsfuhcmbe.enums;
 
 public enum ConfigUnit {
     VND("vnd"),
-    SLOT("slot");
+    SLOT("slot"),
+    MINUTE("minute"),
+    ROOM("room");
 
     private final String value;
 

@@ -30,7 +30,6 @@ public class ConfigController {
     @Operation(summary = "Get all configs", description = "Retrieve a list of all configuarations")
     public ResponseEntity<List<Config>> getAllConfigs(){
         List<Config> configList = configServiceImpl.getAllConfig();
-
         if(configList.isEmpty()){
             return ResponseEntity.noContent().build();
         }else{
@@ -69,19 +68,45 @@ public class ConfigController {
         return ResponseEntity.created(uri).body(configResponseDto);
     }
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Update a allowed-slot config", description = "Update allowed-slot configuration")
+    @PostMapping("/time-before-exam")
+    @Operation(summary = "Add a config time-before-exam", description = "Add a new time-before-exam configuration")
+    public ResponseEntity<ConfigResponseDto> addTimeBeforeExamConfig(@RequestBody ConfigRequestDto configRequestDto){
+        Config config = configMapper.toEntity(configRequestDto);
+
+        config.setConfigType(ConfigType.TIME_BEFORE_EXAM.getValue());
+        config.setUnit(ConfigUnit.MINUTE.getValue());
+
+        Config addedConfig = configServiceImpl.addConfig(config);
+        URI uri = URI.create("/configs/" + addedConfig.getId());
+
+        ConfigResponseDto configResponseDto = configMapper.toDto(addedConfig);
+        return ResponseEntity.created(uri).body(configResponseDto);
+    }
+
+    @PostMapping("/invigilator-room")
+    @Operation(summary = "Add a config invigilator-room", description = "Add a new invigilator-room configuration")
+    public ResponseEntity<ConfigResponseDto> addInvigilatorRoomConfig(@RequestBody ConfigRequestDto configRequestDto){
+        Config config = configMapper.toEntity(configRequestDto);
+
+        config.setConfigType(ConfigType.INVIGILATOR_ROOM.getValue());
+        config.setUnit(ConfigUnit.ROOM.getValue());
+
+        Config addedConfig = configServiceImpl.addConfig(config);
+        URI uri = URI.create("/configs/" + addedConfig.getId());
+
+        ConfigResponseDto configResponseDto = configMapper.toDto(addedConfig);
+        return ResponseEntity.created(uri).body(configResponseDto);
+    }
+
+    @PutMapping("{id}")
+    @Operation(summary = "Update a config", description = "Update a configuration")
     public ResponseEntity<ConfigResponseDto> updateAllowedSlotConfig(@PathVariable Integer id, @RequestBody ConfigRequestDto configRequestDto){
         Config config = configMapper.toEntity(configRequestDto);
         config.setId(id);
 
         Config updatedConfig = configServiceImpl.updateConfig(config);
-
-        System.out.println(updatedConfig.getId());
-
         ConfigResponseDto configResponseDto = configMapper.toDto(updatedConfig);
 
-        System.out.println(configResponseDto.getId());
         return ResponseEntity.ok(configResponseDto);
     }
 

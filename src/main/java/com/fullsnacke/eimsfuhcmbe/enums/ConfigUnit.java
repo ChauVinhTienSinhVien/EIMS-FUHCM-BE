@@ -4,7 +4,8 @@ public enum ConfigUnit {
     VND("vnd"),
     SLOT("slot"),
     MINUTE("minute"),
-    ROOM("room");
+    ROOM("room"),
+    DAY("day");
 
     private final String value;
 

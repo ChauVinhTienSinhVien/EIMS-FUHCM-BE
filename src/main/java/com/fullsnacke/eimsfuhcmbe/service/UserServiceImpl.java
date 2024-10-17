@@ -34,11 +34,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User add(User user) {
-        User userInDb = userRepository.findByEmailAndIsDeleted(user.getEmail(),false);
+        User userInDb = userRepository.findUserByEmail(user.getEmail());
+
         if (userInDb != null) {
-            throw new AuthenticationProcessException(ErrorCode.USER_ALREADY_EXISTS);
+            if (userInDb.getIsDeleted()) {
+                userInDb.setIsDeleted(false);
+                return userRepository.save(userInDb);
+            } else {
+                throw new AuthenticationProcessException(ErrorCode.USER_ALREADY_EXISTS);
+            }
         }
-        Role role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found"));
+
+        Role role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new EntityNotFoundException(Role.class, "id", user.getRole().getId().toString()));
         user.setRole(role);
 
         return userRepository.save(user);
@@ -47,7 +54,20 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public List<User> saveAll(List<User> users) {
-        return userRepository.saveAll(users);
+        List<User> result = new ArrayList<>();
+        for (User user : users) {
+            User existingUser = userRepository.findUserByEmail(user.getEmail());
+            if (existingUser != null) {
+                if (existingUser.getIsDeleted()) {
+                    existingUser.setIsDeleted(false);
+                    result.add(userRepository.save(existingUser));
+                }
+            } else {
+                user.setIsDeleted(false);
+                result.add(userRepository.save(user));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -61,8 +81,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND));
+        User user =  userRepository.findByEmailAndIsDeleted(email, false);
+        if(user == null){
+            throw new EntityNotFoundException(User.class, "email", email);
+        }
+        return user;
     }
 
     @Override

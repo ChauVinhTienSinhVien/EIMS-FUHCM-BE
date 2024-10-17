@@ -5,9 +5,11 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.RoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Room;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.room.RoomNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.service.RoomServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -27,6 +29,7 @@ public class RoomController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all rooms", description = "Retrieve a list of all rooms")
     public ResponseEntity<List<Room>> getAllRooms() {
         List<Room> roomList = roomServiceImpl.getAllRoom();
         if (roomList.isEmpty()) {
@@ -37,6 +40,7 @@ public class RoomController {
     }
 
     @PostMapping
+    @Operation(summary = "Add a room", description = "Add a new room")
     public ResponseEntity<RoomResponseDTO> createRoom(@RequestBody @Valid RoomRequestDTO roomRequestDTO) {
         Room room = modelMapper.map(roomRequestDTO, Room.class);
         Room createdRoom = roomServiceImpl.createRoom(room);
@@ -46,6 +50,7 @@ public class RoomController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update a room", description = "Update a room by ID")
     public ResponseEntity<RoomResponseDTO> updateRoom(@PathVariable("id") int id, @RequestBody @Valid RoomRequestDTO roomRequestDTO) {
         Room room = modelMapper.map(roomRequestDTO, Room.class);
         try {
@@ -58,6 +63,7 @@ public class RoomController {
     }
 
     @GetMapping("/{name}")
+    @Operation(summary = "Get room by name", description = "Retrieve a room by name")
     public ResponseEntity<List<RoomResponseDTO>> findByRoomName(@PathVariable("name") String name) {
         List<Room> roomList = roomServiceImpl.findByRoomName(name);
         if (roomList == null) {

@@ -12,9 +12,11 @@ import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectRepository;
 import com.fullsnacke.eimsfuhcmbe.service.SubjectExamServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +43,7 @@ public class SubjectExamController {
     private SemesterRepository semesterRepository;
 
     @GetMapping
+    @Operation(summary = "Get all subject exams", description = "Retrieve a list of all subject exams")
     public ResponseEntity<List<SubjectExamResponseDTO>> getAllSubjectExams() {
         List<SubjectExam> subjectExamList = subjectExamServiceImpl.getAllSubjectExam();
         if (subjectExamList.isEmpty()) {
@@ -56,6 +59,7 @@ public class SubjectExamController {
     }
 
     @PostMapping
+    @Operation(summary = "Add a subject exam", description = "Add a new subject exam")
     public ResponseEntity<?> createSubjectExam(@RequestBody @Valid SubjectExamRequestDTO subjectExamRequestDTO) {
         SubjectExam subjectExam = subjectExamMapper.toEntity(subjectExamRequestDTO);
 
@@ -75,6 +79,7 @@ public class SubjectExamController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update a subject exam", description = "Update a subject exam")
     public ResponseEntity<SubjectExamResponseDTO> updateSubjectExam(@PathVariable("id") int id, @RequestBody @Valid SubjectExamRequestDTO subjectExamRequestDTO) {
         SubjectExam subjectExam = subjectExamMapper.toEntity(subjectExamRequestDTO);
         try {
@@ -94,6 +99,7 @@ public class SubjectExamController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get a subject exam by id", description = "Retrieve a subject exam by id")
     public ResponseEntity<SubjectExamResponseDTO> findSubjectExamById(@PathVariable("id") int id) {
         SubjectExam subjectExam = subjectExamServiceImpl.findSubjectExamById(id);
         if (subjectExam == null) {
@@ -104,6 +110,7 @@ public class SubjectExamController {
     }
 
     @GetMapping("/by-semester/{semesterId}")
+    @Operation(summary = "Get subject exams by semester id", description = "Retrieve a list of subject exams by semester id")
     public ResponseEntity<List<SubjectExamResponseDTO>> findSubjectExamBySemesterId(@PathVariable("semesterId") int semesterId) {
         List<SubjectExam> subjectExamList = subjectExamServiceImpl.getSubjectExamsBySemesterId(semesterId);
 

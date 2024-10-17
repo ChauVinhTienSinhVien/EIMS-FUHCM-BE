@@ -21,4 +21,8 @@ public class SubjectExamResponseDTO {
 
     String subjectCode;
 
+    String semesterName;
+
+    int semesterId;
+
 }

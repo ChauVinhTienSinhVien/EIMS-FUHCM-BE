@@ -4,10 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.ZonedDateTime;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,13 +11,7 @@ import java.time.ZonedDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ExamSlotDetail{
-    int examSlotId;
-    ZonedDateTime startAt;
-    ZonedDateTime endAt;
-    String status;
-    String examType;
-    Integer requiredInvigilators;
-    int numberOfRegistered;
-
+public class InvigilatorAssignmentResponseDTO {
+    ExamSlotDetail examSlotDetail;
+//    Map<Integer, InvigilatorDetail> invigilatorDetails;
 }

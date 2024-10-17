@@ -7,7 +7,9 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 import java.util.Set;
 
 public interface InvigilatorRegistrationService {
-    InvigilatorRegistrationResponseDTO registerExamSlot(InvigilatorRegistrationRequestDTO request);
+    InvigilatorRegistrationResponseDTO registerExamSlotWithFuId(InvigilatorRegistrationRequestDTO request);
+
+    InvigilatorRegistrationResponseDTO registerExamSlotWithoutFuId(InvigilatorRegistrationRequestDTO request);
 
     RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlots();
 

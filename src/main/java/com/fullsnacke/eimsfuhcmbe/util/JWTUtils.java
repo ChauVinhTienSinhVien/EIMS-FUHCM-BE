@@ -72,7 +72,7 @@ public class JWTUtils {
 
             List<GrantedAuthority> authorities = (List<GrantedAuthority>) user.getAuthorities();
 
-            return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, authorities);
+            return new UsernamePasswordAuthenticationToken(user, token, authorities);
         } catch (JwtException | IllegalArgumentException ignored) {
             return null;
         }

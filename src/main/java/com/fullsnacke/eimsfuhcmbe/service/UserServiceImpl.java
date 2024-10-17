@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        User user =  userRepository.findByEmailAndIsDeleted(email, false);
+        User user =  userRepository.findUserByEmailAndIsDeleted(email, false);
         if(user == null){
             throw new EntityNotFoundException(User.class, "email", email);
         }

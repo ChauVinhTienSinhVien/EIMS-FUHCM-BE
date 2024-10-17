@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.dto.request.AuthenticationRequest;
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
@@ -38,6 +39,25 @@ public class AuthenController {
                 .secure(false)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("google/login")
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest requestBody, HttpServletResponse response) {
+        String authToken = authenticationService.login(requestBody);
+        final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", authToken)
+                .httpOnly(true)
+                .maxAge(7 * 24 * 3600)
+                .path("/")
+                .secure(false)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody AuthenticationRequest requestBody) {
+        authenticationService.changePassword(requestBody);
         return ResponseEntity.ok().build();
     }
 

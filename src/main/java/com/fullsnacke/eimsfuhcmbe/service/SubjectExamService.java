@@ -12,5 +12,5 @@ public interface SubjectExamService {
     SubjectExam updateSubjectExam(SubjectExam subjectExam);
     SubjectExam findSubjectExamById(int id);
     List<SubjectExam> getSubjectExamsBySemesterId(int semesterId);
-
+    List<SubjectExam> cloneSubjectExamFromPreviousSemester(Semester previousSemester, Semester semester);
 }

@@ -6,6 +6,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectExamRepository;
@@ -38,6 +39,9 @@ public class ExamSlotController {
     private ExamSlotMapper examSlotMapper;
 
     @Autowired
+    private SubjectExamRepository examRepository;
+
+    @Autowired
     private SubjectExamRepository subjectExamRepository;
 
     @GetMapping
@@ -50,8 +54,8 @@ public class ExamSlotController {
             List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
             for (ExamSlot e:examSlotList) {
                 ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
-                SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-                examSlotResponseDTO.setSubjectExamId(subjectExam);
+//                SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+//                examSlotResponseDTO.setSubjectExamId(subjectExam.getId());
                 examSlotResponseDTOList.add(examSlotResponseDTO);
             }
             return ResponseEntity.ok(examSlotResponseDTOList);
@@ -71,8 +75,8 @@ public class ExamSlotController {
             for (ExamSlot e:examSlotList) {
                 System.out.println(e.getStartAt());
                 ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
-                SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-                examSlotResponseDTO.setSubjectExamId(subjectExam);
+//                SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+//                examSlotResponseDTO.setSubjectExamId(subjectExam);
                 examSlotResponseDTOList.add(examSlotResponseDTO);
             }
             return ResponseEntity.ok(examSlotResponseDTOList);
@@ -84,6 +88,7 @@ public class ExamSlotController {
     public ResponseEntity<ExamSlotResponseDTO> createExamSlot(@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
 
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
@@ -92,13 +97,16 @@ public class ExamSlotController {
         examSlot.setCreatedAt(Instant.now());
         examSlot.setCreatedBy(currentUser);
         examSlot.setUpdatedBy(currentUser);
-        examSlot.setStatus(1);
+        SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
+        examSlot.setSubjectExam(subjectExam);
+
+        examSlot.setStatus(ExamSlotStatus.NEEDS_ROOM_ASSIGNMENT.getValue());
         ExamSlot createdExamSlot = examSlotServiceImpl.createExamSlot(examSlot);
         URI uri = URI.create("/examslots/" + createdExamSlot.getId());
         System.out.println(createdExamSlot.getCreatedAt());
         ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(createdExamSlot);
-        SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-        examSlotResponseDTO.setSubjectExamId(subjectExam);
+//        SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+//        examSlotResponseDTO.setSubjectExamId(subjectExam);
         return ResponseEntity.created(uri).body(examSlotResponseDTO);
     }
 
@@ -109,8 +117,8 @@ public class ExamSlotController {
         for (ExamSlotRequestDTO e:examSlotRequestDTOList) {
             ExamSlot examSlot = examSlotServiceImpl.createExamSlot(examSlotMapper.toEntity(e));
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
-            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-            examSlotResponseDTO.setSubjectExamId(subjectExam);
+//            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId());
+//            examSlotResponseDTO.setSubjectExamId(subjectExam);
             examSlotResponseDTOList.add(examSlotResponseDTO);
         }
         return ResponseEntity.ok(examSlotResponseDTOList);
@@ -123,8 +131,8 @@ public class ExamSlotController {
             ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
             ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlotExamSlot(examSlot);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
-            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-            examSlotResponseDTO.setSubjectExamId(subjectExam);
+//            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+//            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
         } catch (ExamSlotNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -139,8 +147,8 @@ public class ExamSlotController {
             return ResponseEntity.notFound().build();
         } else {
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
-            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-            examSlotResponseDTO.setSubjectExamId(subjectExam);
+//            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
+//            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
         }
     }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,6 +61,32 @@ public class SubjectServiceImpl implements SubjectService {
     public List<Subject> findSubjectBySemesterId(int semesterId) {
         Semester semester = semesterRepository.findSemesterById(semesterId);
         return subjectRepository.findBySemesterId(semester);
+    }
+
+    @Override
+    @Transactional
+    public List<Subject> cloneSubjectFromPreviousSemester(Semester semester, Semester previousSemester) {
+        System.out.println(previousSemester);
+        List<Subject> previousSemesterSubjects = subjectRepository.findBySemesterId(previousSemester);
+        List<Subject> newSemesterSubjects = new ArrayList<>();
+
+        for (Subject subject: previousSemesterSubjects) {
+            Subject newSubject = new Subject();
+
+            newSubject.setSemesterId(semester);
+            newSubject.setName(subject.getName());
+            newSubject.setCode(subject.getCode());
+
+            newSemesterSubjects.add(newSubject);
+        }
+
+        subjectRepository.saveAll(newSemesterSubjects);
+        return newSemesterSubjects;
+    }
+
+    @Override
+    public List<Subject> addListOfSubjects(List<Subject> subjects) {
+        return subjectRepository.saveAll(subjects);
     }
 
 

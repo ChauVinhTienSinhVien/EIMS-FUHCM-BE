@@ -43,7 +43,6 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
-
         return examSlotRepository.save(examSlotInDB);
     }
 

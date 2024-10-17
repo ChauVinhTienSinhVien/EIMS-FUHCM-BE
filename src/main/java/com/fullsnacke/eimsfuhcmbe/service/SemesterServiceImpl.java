@@ -3,6 +3,8 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.dto.request.SemesterRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Config;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
+import com.fullsnacke.eimsfuhcmbe.entity.Subject;
+import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.semester.SemesterNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
@@ -20,12 +22,15 @@ public class SemesterServiceImpl implements SemesterService {
 
     private SemesterRepository semesterRepository;
     private ConfigServiceImpl configServiceImpl;
+    private SubjectServiceImpl subjectServiceImpl;
+    private SubjectExamServiceImpl subjectExamServiceImpl;
 
     @Autowired
-    public SemesterServiceImpl(SemesterRepository semesterRepository, ConfigServiceImpl configServiceImpl) {
-
+    public SemesterServiceImpl(SemesterRepository semesterRepository, ConfigServiceImpl configServiceImpl, SubjectServiceImpl subjectServiceImpl, SubjectExamServiceImpl subjectExamServiceImpl) {
         this.semesterRepository = semesterRepository;
         this.configServiceImpl   = configServiceImpl;
+        this.subjectServiceImpl  = subjectServiceImpl;
+        this.subjectExamServiceImpl = subjectExamServiceImpl;
     }
 
     @Override
@@ -39,6 +44,7 @@ public class SemesterServiceImpl implements SemesterService {
         Semester lastestSemester =  semesterRepository.findFirstByOrderByStartAtDesc();
         Semester createdSemester = semesterRepository.save(semester);
         configServiceImpl.cloneLastedSemesterConfig(createdSemester, lastestSemester);
+        subjectExamServiceImpl.cloneSubjectExamFromPreviousSemester(createdSemester, lastestSemester);
         return createdSemester;
     }
 
@@ -62,6 +68,11 @@ public class SemesterServiceImpl implements SemesterService {
     @Override
     public Semester findSemesterById(int id) {
         return semesterRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public Semester getPreviousSemester(Semester semester) {
+        return semesterRepository.findSemesterById(1);
     }
 
     @Override

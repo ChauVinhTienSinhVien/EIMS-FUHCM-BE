@@ -94,7 +94,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     //NGAN
     @ExceptionHandler(value = CustomException.class)
-    ResponseEntity<ApiResponse> handlingCustomException(CustomException exception, HttpServletRequest request){
+    ResponseEntity<ApiResponse<?>> handlingCustomException(CustomException exception, HttpServletRequest request){
         ErrorCode errorCode = exception.getErrorCode();
         if(errorCode.getPath() == null){
             errorCode.setPath(request.getServletPath());

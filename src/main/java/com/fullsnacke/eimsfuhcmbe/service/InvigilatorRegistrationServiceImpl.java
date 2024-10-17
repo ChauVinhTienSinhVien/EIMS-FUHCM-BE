@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
@@ -36,6 +37,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     UserRepository userRepository;
     SemesterRepository semesterRepository;
     ConfigService configService;
+    ConfigurationHolder configurationHolder;
     InvigilatorRegistrationMapper invigilatorRegistrationMapper;
 
     @Transactional(rollbackFor = Exception.class)
@@ -105,8 +107,8 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
         Semester semester = representativeExamSlot.getSubjectExam().getSubjectId().getSemesterId();
 
-        int allowedSlot = Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue());
-
+        //int allowedSlot = Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue());
+        int allowedSlot = configurationHolder.getAllowedSlot();
         if (requestExamSlotId.size() > allowedSlot) {
             throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);
         }

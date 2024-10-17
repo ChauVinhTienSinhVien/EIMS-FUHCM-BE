@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Null;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Instant;
+
 @Setter
 @Getter
 @Builder
@@ -28,9 +30,14 @@ public class UserResponseDTO {
     @NotNull
     @Email
     String email;
+
     String phoneNumber;
+
     String department;
+
     Boolean gender;
+
+    Instant createdAt;
 
     int role;
 }

@@ -22,7 +22,7 @@ public class ExamSlotHall {
     @JoinColumn(name = "examslot_id", nullable = false)
     ExamSlot examSlot;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "hall_invigilator_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "hall_invigilator_id")
     InvigilatorAssignment hallInvigilator;
 }

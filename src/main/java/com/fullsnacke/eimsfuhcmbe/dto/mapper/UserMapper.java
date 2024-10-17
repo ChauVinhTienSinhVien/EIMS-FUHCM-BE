@@ -15,6 +15,7 @@ public interface UserMapper {
     User toEntity(UserRequestDTO dto);
 
     @Mapping(target = "role", source = "role", qualifiedByName = "roleToInt")
+    @Mapping(target = "createdAt", source = "createdAt")
     UserResponseDTO toDto(User entity);
 
     @Named("intToRole")

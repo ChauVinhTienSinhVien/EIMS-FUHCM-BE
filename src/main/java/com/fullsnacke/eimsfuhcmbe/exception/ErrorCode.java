@@ -69,7 +69,7 @@ public enum ErrorCode{
     // Registration Management
     DELETE_REGISTRATIONS_FAILED("Failed to delete registrations.", HttpStatus.INTERNAL_SERVER_ERROR),
     NO_REGISTRATION_FOUND("No registration found.", HttpStatus.NOT_FOUND),
-
+  
     // Invigilator Assignment
     FAILD_TO_CLASSIFY_INVIGILATOR("Failed to classify invigilator.", HttpStatus.INTERNAL_SERVER_ERROR),
     NO_INVIGILATOR_REGISTRATION("No invigilator registration found.", HttpStatus.NOT_FOUND),

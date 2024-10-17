@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.dto.response;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +21,15 @@ public class ExamSlotResponseDTO {
 
     Integer id;
 
-    SubjectExam subjectExamId;
+    SubjectExamDTO subjectExamDTO;
+
+//    Integer subjectExamId; // subjectExam.id
+//
+//    String examType; // subjectExam.examType
+//
+//    String subjectName; //subjectExam.duration
+//
+//    String subjectCode; //subjectExam.subjectId.code
 
     ZonedDateTime startAt;
 
@@ -32,7 +41,7 @@ public class ExamSlotResponseDTO {
 
     Integer createdBy;
 
-    Integer status;
+    ExamSlotStatus status;
 
     Integer updatedBy;
 

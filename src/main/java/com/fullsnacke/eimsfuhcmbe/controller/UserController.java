@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.UserMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UserRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
@@ -35,6 +36,9 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private ConfigurationHolder configurationHolder;
+
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")
     @Operation(summary = "Get all users", description = "Retrieve a list of all users")
@@ -46,8 +50,13 @@ public class UserController {
         }else{
             List<UserResponseDTO> userResponseDTOList;
             userResponseDTOList = userList.stream().map(user -> userMapper.toDto(user)).toList();
+            for (UserResponseDTO userResponseDTO : userResponseDTOList) {
+                System.out.println(userResponseDTO.getCreatedAt());
+            }
             return ResponseEntity.ok(userResponseDTOList);
         }
+
+
     }
 
     @PostMapping
@@ -55,6 +64,7 @@ public class UserController {
     @Operation(summary = "Add a user", description = "Add a new user")
     public ResponseEntity<UserResponseDTO> addUser(@RequestBody @Valid UserRequestDTO userRequestDTO){
         User user = userMapper.toEntity(userRequestDTO);
+        user.setIsDeleted(false);
         User addedUser = userServiceImpl.add(user);
         URI uri = URI.create("/users" + user.getFuId());
         UserResponseDTO userResponseDTO = userMapper.toDto(addedUser);
@@ -68,6 +78,9 @@ public class UserController {
         List<User> userList = userRequestDTOList.stream()
                 .map(userRequestDTO -> userMapper.toEntity(userRequestDTO))
                 .toList();
+        for(User user: userList){
+            user.setIsDeleted(false);
+        }
         List<User> addedUsers = userServiceImpl.saveAll(userList);
         List<UserResponseDTO> userResponseDTOList = addedUsers.stream()
                 .map(user -> userMapper.toDto(user))

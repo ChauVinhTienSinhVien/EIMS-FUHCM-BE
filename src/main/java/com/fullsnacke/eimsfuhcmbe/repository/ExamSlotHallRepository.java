@@ -11,5 +11,7 @@ import java.util.List;
 @Repository
 public interface ExamSlotHallRepository extends JpaRepository<ExamSlotHall, Integer> {
     List<ExamSlotHall> findByExamSlot(ExamSlot examSlot);
+    List<ExamSlotHall> findByExamSlotIn (List<ExamSlot> examSlots);
     ExamSlotHall findExamSlotHallById(int id);
+
 }

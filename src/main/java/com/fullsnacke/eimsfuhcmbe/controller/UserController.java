@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.UserMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UserRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
@@ -35,6 +36,8 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+
+
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")
     @Operation(summary = "Get all users", description = "Retrieve a list of all users")
@@ -48,6 +51,8 @@ public class UserController {
             userResponseDTOList = userList.stream().map(user -> userMapper.toDto(user)).toList();
             return ResponseEntity.ok(userResponseDTOList);
         }
+
+
     }
 
     @PostMapping

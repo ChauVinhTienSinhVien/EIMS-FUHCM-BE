@@ -38,11 +38,13 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     public ExamSlot updateExamSlotExamSlot(ExamSlot examSlotInRequest) {
         int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
+
         if (examSlotInDB == null)
             throw new ExamSlotNotFoundException("ExamSlot not found with ID: " + id);
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
+
         return examSlotRepository.save(examSlotInDB);
     }
 

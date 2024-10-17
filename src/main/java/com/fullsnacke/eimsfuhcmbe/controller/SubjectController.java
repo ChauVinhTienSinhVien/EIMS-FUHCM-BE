@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -29,6 +30,7 @@ public class SubjectController {
     private SubjectMapper subjectMapper;
 
     @GetMapping
+    @Operation(summary = "Get all subjects", description = "Retrieve a list of all subjects")
     public ResponseEntity<List<SubjectResponseDTO>> getAllSubjects() {
         List<Subject> subjectList = subjectServiceImpl.getAllSubjects();
         if (subjectList.isEmpty()) {
@@ -44,6 +46,7 @@ public class SubjectController {
     }
 
     @PostMapping
+    @Operation(summary = "Add a subject", description = "Add a new subject")
     public ResponseEntity<?> createSubject(@RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
         Subject subject = subjectMapper.toEntity(subjectRequestDTO);
 
@@ -63,7 +66,7 @@ public class SubjectController {
     }
 
     @PostMapping("/bulk")
-    @Operation()
+    @Operation(summary = "Add multiple subjects", description = "Add multiple subjects")
     public ResponseEntity<List<SubjectResponseDTO>> importSubjects(@RequestBody @Valid List<SubjectRequestDTO> subjectRequestDTOList) {
         List<Subject> subjectList = subjectRequestDTOList.stream()
                 .map(subjectRequestDTO ->subjectMapper.toEntity(subjectRequestDTO))
@@ -81,6 +84,7 @@ public class SubjectController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update a subject", description = "Update an existing subject")
     public ResponseEntity<?> updateSubject(@PathVariable("id") int id, @RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
         try {
 
@@ -101,6 +105,7 @@ public class SubjectController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get a subject by id", description = "Retrieve a subject by id")
     public ResponseEntity<SubjectResponseDTO> findBySubjectCode(@PathVariable("id") int id) {
         Subject subject = subjectServiceImpl.findSubjectById(id);
         if (subject == null) {
@@ -111,6 +116,7 @@ public class SubjectController {
     }
 
     @GetMapping("/by-semester/{semesterId}")
+    @Operation(summary = "Get subjects by semester id", description = "Retrieve a list of subjects by semester id")
     public ResponseEntity<List<SubjectResponseDTO>> getSubjectBySemesterId(@PathVariable("semesterId") int semesterId) {
         List<Subject> subjectList = subjectServiceImpl.findSubjectBySemesterId(semesterId);
 

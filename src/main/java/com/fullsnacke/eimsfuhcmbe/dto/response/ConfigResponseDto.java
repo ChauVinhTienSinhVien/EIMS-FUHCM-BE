@@ -4,6 +4,7 @@ import lombok.*;
 
 @Getter
 @Setter
+@Builder
 public class ConfigResponseDto {
     private Integer id;
 

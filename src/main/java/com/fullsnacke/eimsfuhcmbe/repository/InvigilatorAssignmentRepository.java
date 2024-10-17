@@ -24,4 +24,6 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
             @Param("fuId") String fuId
     );
 
+
+
 }

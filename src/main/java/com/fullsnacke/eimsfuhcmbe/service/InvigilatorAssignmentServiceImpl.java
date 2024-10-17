@@ -175,22 +175,34 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public boolean exchangeInvigilators(ExchangeInvigilatorsRequestDTO request) {
+    public void exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request) {
+        System.out.println("Old: " + requestEntity.getCreatedBy().getFuId());
 
-        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository.findByExamSlotIdAndInvigilatorFuId(request.getExamSlotId(), request.getOldInvigilatorFuId())
-                .orElseThrow(() -> new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND));
+        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository
+                .findByExamSlotIdAndInvigilatorFuId(requestEntity.getExamSlot().getId(), requestEntity.getCreatedBy().getFuId())
+                .orElseThrow(() -> {
+                    System.out.println("Không tìm thấy phân công cho giám thị cũ: " + requestEntity.getCreatedBy().getFuId());
+                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
+                });
 
-        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository.findByExamSlotIdAndInvigilatorFuId(request.getExamSlotId(), request.getNewInvigilatorFuId())
-                .orElseThrow(() -> new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND));
+        System.out.println("Old Assignment: " + oldAssignment.getId());
+
+        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository
+                .findByExamSlotIdAndInvigilatorFuId(requestEntity.getExamSlot().getId(), request.getNewInvigilatorFuId())
+                .orElseThrow(() -> {
+                    System.out.println("Không tìm thấy đăng ký cho giám thị mới: " + request.getNewInvigilatorFuId());
+                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
+                });
+
+        System.out.println("New Invigilator: " + newInvigilator.getId());
 
         try {
             oldAssignment.setInvigilatorRegistration(newInvigilator);
             invigilatorAssignmentRepository.save(oldAssignment);
         } catch (Exception e) {
+            System.out.println("Lỗi khi cập nhật phân công: " + e.getMessage());
             throw new CustomException(ErrorCode.EXCHANGE_INVIGILATORS_FAILED);
         }
-
-        return true;
     }
 
 

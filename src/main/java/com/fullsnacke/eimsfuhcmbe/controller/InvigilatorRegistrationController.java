@@ -93,6 +93,7 @@ public class InvigilatorRegistrationController {
     @GetMapping("/examslotid={examSlotId}")
     @Operation(summary = "Get All Invigilators", description = "Get all the invigilators by exam slot")
     public ResponseEntity<ListInvigilatorsByExamSlotResponseDTO> listInvigilatorsByExamSlot(@PathVariable("examSlotId") int examSlotId) {
+        System.out.println("examSlotId = " + examSlotId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.listInvigilatorsByExamSlot(examSlotId));

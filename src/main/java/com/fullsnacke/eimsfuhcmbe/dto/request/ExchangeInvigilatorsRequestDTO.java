@@ -10,9 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ExchangeInvigilatorsRequestDTO {
-    int examSlotId;
-    String oldInvigilatorFuId;
     String newInvigilatorFuId;
     int requestId;
-    String status; //REJECTED or ACCEPTED
+    String status; //REJECTED or APPROVED
 }

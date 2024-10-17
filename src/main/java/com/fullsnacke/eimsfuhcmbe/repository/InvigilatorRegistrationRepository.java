@@ -26,6 +26,11 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
 
     Set<InvigilatorRegistration> findByInvigilator(User invigilator);
 
+    @Query("SELECT ir FROM InvigilatorRegistration ir " +
+            "JOIN FETCH ir.invigilator i " +
+            "WHERE i.fuId = :fuId")
+    Optional<InvigilatorRegistration> findByFuId( @Param("fuId") String fuId);
+
     Set<InvigilatorRegistration> findByExamSlot_SubjectExam_SubjectId_SemesterId(Semester semesterId);
 
     Set<InvigilatorRegistration> findByExamSlot(ExamSlot examSlot);

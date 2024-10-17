@@ -71,7 +71,10 @@ public class RequestController {
     //MANAGER
     @PutMapping
     @Operation(summary = "Update request status", description = "Update request status by request id")
-    public ResponseEntity<?> updateRequestStatus(ExchangeInvigilatorsRequestDTO request) {
+    public ResponseEntity<?> updateRequestStatus(@RequestBody ExchangeInvigilatorsRequestDTO request) {
+        System.out.println("Request ID: " + request.getRequestId());
+        System.out.println("Request Status: " + request.getStatus());
+        System.out.println("Request newInvigilatorFuId: " + request.getNewInvigilatorFuId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(requestService.updateRequestStatus(request));

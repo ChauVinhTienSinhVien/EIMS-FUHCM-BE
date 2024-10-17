@@ -2,12 +2,12 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
-import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
+import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorRegistration;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.RequestStatusEnum;
@@ -16,6 +16,7 @@ import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
+import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorRegistrationRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.RequestRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import lombok.AccessLevel;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +39,8 @@ public class RequestServiceImpl implements RequestService {
     RequestMapper requestMapper;
     ExamSlotRepository examSlotRepository;
     InvigilatorAssignmentService invigilatorAssignmentService;
+    InvigilatorRegistrationService invigilatorRegistrationService;
+    private final InvigilatorRegistrationRepository invigilatorRegistrationRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO createRequest(RequestRequestDTO request) {
@@ -117,15 +121,44 @@ public class RequestServiceImpl implements RequestService {
     }
 
     public RequestResponseDTO updateRequestStatus(ExchangeInvigilatorsRequestDTO request) {
+        //find request by id
+        System.out.println("Request ID: " + request.getRequestId());
         Request entity = requestRepository.findById(request.getRequestId())
                 .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
 
+        //convert status to enum
         RequestStatusEnum status = RequestStatusEnum.fromName(request.getStatus());
-        if(status == null) {
+        if (status == null) {
             throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
         }
-        if(status == RequestStatusEnum.APPROVED) {
-            invigilatorAssignmentService.exchangeInvigilators(request);
+
+        //update status
+        if (status == RequestStatusEnum.APPROVED) {
+            //CREATE INVIGILATOR REGISTRATION
+            InvigilatorRegistration registration = invigilatorRegistrationRepository.findByExamSlotIdAndInvigilatorFuId(entity.getExamSlot().getId(), request.getNewInvigilatorFuId())
+                    .orElseGet(() -> {
+                        InvigilatorRegistrationRequestDTO registrationRequest = InvigilatorRegistrationRequestDTO.builder()
+                                .fuId(request.getNewInvigilatorFuId())
+                                .examSlotId(Set.of(entity.getExamSlot().getId()))
+                                .build();
+
+                        invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
+                        return null;
+                    });
+//            if (invigilatorRegistrationRepository.findByFuId(request.getNewInvigilatorFuId()) == null) {
+//                System.out.println("Chưa tạo");
+//                InvigilatorRegistrationRequestDTO registrationRequest = InvigilatorRegistrationRequestDTO.builder()
+//                        .fuId(request.getNewInvigilatorFuId())
+//                        .examSlotId(Set.of(entity.getExamSlot().getId()))
+//                        .build();
+//
+//                invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
+//            }
+            if (registration != null) {
+                System.out.println("Khac null" + registration.getInvigilator().getFuId());
+                System.out.println("Khac exid null" + registration.getExamSlot().getId());
+            }
+            invigilatorAssignmentService.exchangeInvigilators(entity, request);
         }
         entity.setStatus(status.getValue());
         entity.setUpdatedAt(java.time.Instant.now());
@@ -138,6 +171,7 @@ public class RequestServiceImpl implements RequestService {
 
 
     //-----------------------------PRIVATE METHOD--------------------------------
+
     private void setExamSlot(ExamSlot examSlot) {
         if (examSlot == null) {
             throw new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND);
@@ -162,7 +196,6 @@ public class RequestServiceImpl implements RequestService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException(ErrorCode.USER_NOT_FOUND));
     }
-
 
 
 }

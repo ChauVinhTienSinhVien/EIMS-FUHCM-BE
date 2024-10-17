@@ -46,7 +46,6 @@ public class ExamSlotController {
     private SubjectExamRepository subjectExamRepository;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('examslot:read')")
     @Operation(summary = "Retrieve all exam slots", description = "Fetches a list of all exam slots from the system. If no exam slots are found, it will return a 204 No Content response.")
     public ResponseEntity<List<ExamSlotResponseDTO>> getAllExamSlots() {
         List<ExamSlot> examSlotList = examSlotServiceImpl.getAllExamSlot();
@@ -65,7 +64,6 @@ public class ExamSlotController {
     }
 
     @GetMapping("/by-semester/{semesterId}")
-    @PreAuthorize("hasAuthority('examslot:read')")
     @Operation(summary = "Retrieve all exam slots by semester ID", description = "Fetches a list of all exam slots from the system based on the semester ID. If no exam slots are found, it will return a 204 No Content response.")
     public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsBySemesterId(@PathVariable("semesterId") int semesterId) {
         List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsBySemesterId(semesterId);
@@ -87,7 +85,6 @@ public class ExamSlotController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('examslot:create')")
     @Operation(summary = "Create a new exam slot", description = "Creates a new exam slot based on the provided data in the request body. The created exam slot is returned with a 201 Created response.")
     public ResponseEntity<ExamSlotResponseDTO> createExamSlot(@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
@@ -115,7 +112,6 @@ public class ExamSlotController {
     }
 
     @PostMapping("/bulk")
-    @PreAuthorize("hasAuthority('examslot:create')")
     @Operation(summary = "Bulk import exam slots", description = "Accepts a list of exam slot data in the request body and creates multiple exam slots in the system. Returns a list of the created exam slots.")
     public ResponseEntity<List<ExamSlotResponseDTO>> importExamSlot(@RequestBody @Valid List<ExamSlotRequestDTO> examSlotRequestDTOList) {
         List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
@@ -130,7 +126,6 @@ public class ExamSlotController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('examslot:update')")
     @Operation(summary = "Update an exam slot", description = "Updates an existing exam slot by its ID with the new data provided in the request body. Returns the updated exam slot or a 404 Not Found response if the slot doesn't exist.")
     public ResponseEntity<ExamSlotResponseDTO> updateExamSlot(@PathVariable("id") int id,@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         try{
@@ -146,7 +141,6 @@ public class ExamSlotController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('examslot:read')")
     @Operation(summary = "Retrieve an exam slot by ID", description = "Fetches a specific exam slot based on its ID. Returns the exam slot data if found, otherwise returns a 404 Not Found.")
     public ResponseEntity<ExamSlotResponseDTO> getExamSlotById(@PathVariable("id") int id) {
         ExamSlot examSlot = examSlotServiceImpl.findById(id);
@@ -161,7 +155,6 @@ public class ExamSlotController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('examslot:delete')")
     @Operation(summary = "Delete an exam slot by ID", description = "Deletes a specific exam slot based on its ID. Returns a 204 No Content if successful, or a 404 Not Found if the exam slot does not exist.")
     public ResponseEntity<?> deleteExamSlotById(@PathVariable("id") int id) {
         try {

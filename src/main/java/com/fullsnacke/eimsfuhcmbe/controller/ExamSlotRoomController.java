@@ -26,7 +26,6 @@ public class ExamSlotRoomController {
     private ExamSlotRoomMapper examSlotRoomMapper;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('examslotroom:read')")
     @Operation(summary = "Retrieve all exam slot rooms", description = "Fetches a list of all exam slot rooms from the system. If no exam slot rooms are found, it will return a 204 No Content response.")
     public List<ExamSlotRoomResponseDTO> getAllExamSlotRooms() {
 

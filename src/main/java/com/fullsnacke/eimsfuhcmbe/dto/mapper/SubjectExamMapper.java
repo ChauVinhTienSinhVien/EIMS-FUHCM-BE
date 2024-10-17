@@ -17,6 +17,8 @@ public interface SubjectExamMapper {
 
     @Mapping(target = "subjectName", source = "subjectId.name")
     @Mapping(target = "subjectCode", source = "subjectId.code")
+    @Mapping(target = "semesterName", source = "subjectId.semesterId.name")
+    @Mapping(target = "semesterId", source = "subjectId.semesterId.id")
     SubjectExamResponseDTO toDto(SubjectExam entity);
 
     @Named("intToSubject")

@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,12 +39,29 @@ public interface InvigilatorRegistrationMapper {
     @Mapping(target = "numberOfRegistered", ignore = true)
     ExamSlotDetail toExamSlotDetail(ExamSlot examSlot);
 
+    @Mapping(target = "examSlotId", source = "id")
+    @Mapping(target = "startAt", source = "startAt")
+    @Mapping(target = "endAt", source = "endAt")
+    ExamSlotDetail toExamSlotDetailBasic(ExamSlot examSlot);
+
     @Named("mapInvigilatorRegistrations")
     default Set<UserResponseDTO> mapInvigilatorRegistrations(Set<InvigilatorRegistration> invigilatorRegistrations) {
         return invigilatorRegistrations.stream()
                 .map(this::toUserResponseDTO)
                 .collect(Collectors.toSet());
     }
+    @Named("mapBasicInvigilatorRegistration")
+    default List<UserResponseDTO> mapBasicInvigilatorRegistration(List<InvigilatorRegistration> invigilatorRegistrations) {
+        return invigilatorRegistrations.stream()
+                .map(reg -> UserResponseDTO.builder()
+                        .fuId(reg.getInvigilator().getFuId())
+                        .firstName(reg.getInvigilator().getFirstName())
+                        .lastName(reg.getInvigilator().getLastName())
+                        .email(reg.getInvigilator().getEmail())
+                        .build())
+                .toList();
+    }
+
 
     default Set<ExamSlotDetail> mapExamSlotDetails(Set<ExamSlot> examSlots) {
         return examSlots.stream()

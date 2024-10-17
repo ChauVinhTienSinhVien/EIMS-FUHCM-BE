@@ -1,10 +1,8 @@
-package com.fullsnacke.eimsfuhcmbe.dto.request;
+package com.fullsnacke.eimsfuhcmbe.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Getter
 @Setter
@@ -13,7 +11,7 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class InvigilatorRegistrationRequestDTO {
-    String fuId;
-    Set<Integer> examSlotId;;
+public class InvigilatorAssignmentResponseDTO {
+    ExamSlotDetail examSlotDetail;
+//    Map<Integer, InvigilatorDetail> invigilatorDetails;
 }

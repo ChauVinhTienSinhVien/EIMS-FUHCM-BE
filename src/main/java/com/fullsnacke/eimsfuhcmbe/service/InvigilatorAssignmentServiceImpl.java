@@ -1,5 +1,8 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
@@ -9,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,11 +25,13 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     SemesterRepository semesterRepository;
     InvigilatorRegistrationRepository invigilatorRegistrationRepository;
     InvigilatorAssignmentRepository invigilatorAssignmentRepository;
+    InvigilatorRegistrationMapper invigilatorRegistrationMapper;
     ExamSlotRepository examSlotRepository;
     ExamSlotRoomRepository examSlotRoomRepository;
     ExamSlotHallRepository examSlotHallRepository;
 
     @Transactional(rollbackFor = Exception.class)
+    @ExceptionHandler(CustomException.class)
     public List<ExamSlotRoom> assignInvigilators(int semesterId) {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
@@ -156,5 +162,37 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         registrations.subList(0, assignmentCount).clear();
     }
+
+
+    public List<UserResponseDTO> getUnassignedInvigilators(int examSlotId) {
+        if(examSlotId <= 0) {
+            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
+        }
+
+        List<InvigilatorRegistration> unassignedList = invigilatorRegistrationRepository.findUnassignedRegistrationsByExamSlot_IdOrderByCreatedAtAsc(examSlotId);
+
+        return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(unassignedList);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public boolean exchangeInvigilators(ExchangeInvigilatorsRequestDTO request) {
+
+        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository.findByExamSlotIdAndInvigilatorFuId(request.getExamSlotId(), request.getOldInvigilatorFuId())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND));
+
+        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository.findByExamSlotIdAndInvigilatorFuId(request.getExamSlotId(), request.getNewInvigilatorFuId())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND));
+
+        try {
+            oldAssignment.setInvigilatorRegistration(newInvigilator);
+            invigilatorAssignmentRepository.save(oldAssignment);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.EXCHANGE_INVIGILATORS_FAILED);
+        }
+
+        return true;
+    }
+
+
 
 }

@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ConfigMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ConfigRequestDto;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ConfigResponseDto;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -26,14 +28,23 @@ public class ConfigController {
     @Autowired
     ConfigMapper configMapper;
 
+    @Autowired
+    private ConfigurationHolder configurationHolder;
+
     @GetMapping
     @Operation(summary = "Get all configs", description = "Retrieve a list of all configuarations")
-    public ResponseEntity<List<Config>> getAllConfigs(){
+    public ResponseEntity<List<ConfigResponseDto>> getAllConfigs(){
         List<Config> configList = configServiceImpl.getAllConfig();
-        if(configList.isEmpty()){
+        List<ConfigResponseDto> configResponseDtoList = new ArrayList<>();
+        for (Config config: configList) {
+            ConfigResponseDto configResponseDto = configMapper.toDto(config);
+            configResponseDtoList.add(configResponseDto);
+        }
+
+        if(configResponseDtoList.isEmpty()){
             return ResponseEntity.noContent().build();
         }else{
-            return ResponseEntity.ok(configList);
+            return ResponseEntity.ok(configResponseDtoList);
         }
     }
 
@@ -98,9 +109,24 @@ public class ConfigController {
         return ResponseEntity.created(uri).body(configResponseDto);
     }
 
+    @PostMapping("/bulk")
+    @Operation(summary = "Add multiple configs", description = "Add multiple configurations")
+    public ResponseEntity<List<ConfigResponseDto>> addConfigs(@RequestBody List<ConfigRequestDto> configRequestDtoList){
+        List<Config> configList = configRequestDtoList.stream()
+                .map(configRequestDto -> configMapper.toEntity(configRequestDto))
+                .toList();
+
+        List<Config> addedConfigs = configServiceImpl.addAllConfigs(configList);
+        List<ConfigResponseDto> configResponseDtoList = addedConfigs.stream()
+                .map(config -> configMapper.toDto(config))
+                .toList();
+
+        return ResponseEntity.ok(configResponseDtoList);
+    }
+
     @PutMapping("{id}")
     @Operation(summary = "Update a config", description = "Update a configuration")
-    public ResponseEntity<ConfigResponseDto> updateAllowedSlotConfig(@PathVariable Integer id, @RequestBody ConfigRequestDto configRequestDto){
+    public ResponseEntity<ConfigResponseDto> updateConfig(@PathVariable Integer id, @RequestBody ConfigRequestDto configRequestDto){
         Config config = configMapper.toEntity(configRequestDto);
         config.setId(id);
 
@@ -112,13 +138,17 @@ public class ConfigController {
 
     @GetMapping("/semester/{semesterId}")
     @Operation(summary = "Get all configs by semester", description = "Retrieve a list of all configuarations by semester")
-    public ResponseEntity<List<Config>> getConfigBySemesterId(@PathVariable Integer semesterId){
+    public ResponseEntity<List<ConfigResponseDto>> getConfigBySemesterId(@PathVariable Integer semesterId){
         List<Config> configList = configServiceImpl.getConfigBySemesterId(semesterId);
 
-        if(configList.isEmpty()){
+        List<ConfigResponseDto> configResponseDtoList = configList.stream()
+                .map(config -> configMapper.toDto(config))
+                .toList();
+
+        if(configResponseDtoList.isEmpty()){
             return ResponseEntity.noContent().build();
         }else{
-            return ResponseEntity.ok(configList);
+            return ResponseEntity.ok(configResponseDtoList);
         }
     }
 }

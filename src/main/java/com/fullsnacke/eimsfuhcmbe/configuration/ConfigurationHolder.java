@@ -47,11 +47,23 @@ public class ConfigurationHolder {
         return Double.parseDouble(conStringStringMap.get(ConfigType.HOURLY_RATE.getValue()));
     }
 
-    public int getTimeBeforExam(){
+    public int getTimeBeforeExam(){
         return Integer.parseInt(conStringStringMap.get(ConfigType.TIME_BEFORE_EXAM.getValue()));
     }
 
     public String getInvigilatorRoom(){
         return conStringStringMap.get(ConfigType.INVIGILATOR_ROOM.getValue());
     }
+    public int getTimeBeforeOpenRegistration(){
+        return Integer.parseInt(conStringStringMap.get(ConfigType.TIME_BEFORE_OPEN_REGISTRATION.getValue()));
+    }
+
+    public int getTimeBeforeCloseRegistration(){
+        return Integer.parseInt(conStringStringMap.get(ConfigType.TIME_BEFORE_CLOSE_REGISTRATION.getValue()));
+    }
+
+    public int getTimeBeforeCloseRequest(){
+        return Integer.parseInt(conStringStringMap.get(ConfigType.TIME_BEFORE_CLOSE_REQUEST.getValue()));
+    }
+
 }

@@ -14,7 +14,7 @@ public interface ConfigMapper {
     Config toEntity(ConfigRequestDto dto);
 
     @Mapping(target = "id", source = "id")
-    @Mapping(target = "semester", source = "semester", qualifiedByName = "semesterToString")
+    @Mapping(target = "semester", source = "semester", qualifiedByName = "semesterToInt")
     ConfigResponseDto toDto(Config entity);
 
     @Named("intToSemester")
@@ -22,6 +22,11 @@ public interface ConfigMapper {
         Semester semester = new Semester();
         semester.setId(semesterId);
         return semester;
+    }
+
+    @Named("semesterToInt")
+    default int semesterToInt(Semester semester) {
+        return semester.getId();
     }
 
     @Named("semesterToString")

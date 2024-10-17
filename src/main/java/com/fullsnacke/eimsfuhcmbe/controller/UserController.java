@@ -36,8 +36,7 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private ConfigurationHolder configurationHolder;
+
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")
@@ -50,9 +49,6 @@ public class UserController {
         }else{
             List<UserResponseDTO> userResponseDTOList;
             userResponseDTOList = userList.stream().map(user -> userMapper.toDto(user)).toList();
-            for (UserResponseDTO userResponseDTO : userResponseDTOList) {
-                System.out.println(userResponseDTO.getCreatedAt());
-            }
             return ResponseEntity.ok(userResponseDTOList);
         }
 

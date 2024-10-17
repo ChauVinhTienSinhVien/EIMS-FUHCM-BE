@@ -57,6 +57,14 @@ public class ConfigServiceImpl implements ConfigService{
     }
 
     @Override
+    @Transactional
+    public List<Config> addAllConfigs(List<Config> configList) {
+        List<Config> addedConfigs = configRepository.saveAll(configList);
+        configurationHolder.reloadConfigurations();
+        return addedConfigs;
+    }
+
+    @Override
     public Config getConfigBySemesterIdAndConfigType(Integer semesterId, String configType) {
         Config config = configRepository.findBySemesterIdAndConfigType(semesterId, configType);
         if(config == null){
@@ -68,11 +76,7 @@ public class ConfigServiceImpl implements ConfigService{
     @Override
     public Config updateConfig(Config config) {
         Config configInDb = configRepository.findById(config.getId()).orElseThrow(() -> new RuntimeException("Config not found"));
-        Semester semester = semesterRepository.findById(config.getSemester().getId()).orElseThrow(() -> new RuntimeException("Semester not found"));
-        configInDb.setConfigType(config.getConfigType());
-        configInDb.setUnit(config.getUnit());
         configInDb.setValue(config.getValue());
-        configInDb.setSemester(semester);
         Config updaConfig = configRepository.save(configInDb);
         configurationHolder.reloadConfigurations();
         return updaConfig;

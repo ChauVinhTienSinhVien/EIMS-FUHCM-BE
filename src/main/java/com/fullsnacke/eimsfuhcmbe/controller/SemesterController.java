@@ -56,6 +56,8 @@ public class SemesterController {
         } else {
             return ResponseEntity.ok(semesterResponseDTOS);
         }
+
+
     }
 
     @PostMapping
@@ -82,40 +84,9 @@ public class SemesterController {
         semesterUpdate.setStartAt(semesterRequestDTO.getStartAt());
         semesterUpdate.setEndAt(semesterRequestDTO.getEndAt());
 
-        List<Config> configList = configServiceImpl.getConfigBySemesterId(semester.getId());
-
-        for (Config config : configList) {
-            if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
-                config.setValue(semesterRequestDTO.getHourlyConfig());
-            } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
-                config.setValue(semesterRequestDTO.getAllowedSlotConfig());
-            }
-        }
-
-        configServiceImpl.updateAllConfig(configList);
-
-        try {
-            Semester updatedSemester = semesterServiceImpl.updateSemester(semesterUpdate, id);
-            //SemesterResponseDTO semesterResponseDTO = modelMapper.map(updatedSemester, SemesterResponseDTO.class);
-
-            SemesterResponseDTO semesterResponseDTO = new SemesterResponseDTO();
-            semesterResponseDTO.setId(updatedSemester.getId());
-            semesterResponseDTO.setName(updatedSemester.getName());
-            semesterResponseDTO.setStartAt(updatedSemester.getStartAt());
-            semesterResponseDTO.setEndAt(updatedSemester.getEndAt());
-
-            for (Config config : configList) {
-                if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
-                    semesterResponseDTO.setHourlyConfig(config.getValue());
-                } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
-                    semesterResponseDTO.setAllowedSlotConfig(Integer.parseInt(config.getValue()));
-                }
-            }
-
-            return ResponseEntity.ok(semesterResponseDTO);
-        } catch (SemesterNotFoundException exception) {
-            return ResponseEntity.notFound().build();
-        }
+        Semester updatedSemester = semesterServiceImpl.updateSemester(semesterUpdate, id);
+        SemesterResponseDTO semesterResponseDTO = modelMapper.map(updatedSemester, SemesterResponseDTO.class);
+        return ResponseEntity.ok(semesterResponseDTO);
     }
 
     @GetMapping("/{name}")

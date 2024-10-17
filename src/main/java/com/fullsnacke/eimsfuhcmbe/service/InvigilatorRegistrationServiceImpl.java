@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import static com.fullsnacke.eimsfuhcmbe.enums.ConfigType.*;
@@ -44,7 +45,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     public boolean deleteRegisteredSlotsBySemester(RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
         Semester semester = getSemesterById(request.getSemesterId());
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
-                .findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(
+                .findByInvigilatorAndSemesterWithDetails(
                         findInvigilatorByFuId(request.getFuId()), semester);
         invigilatorRegistrationRepository.deleteAll(registrations);
         return true;
@@ -67,7 +68,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         System.out.println("request: " + request.stream().map(String::valueOf).collect(Collectors.joining(", ")));
         System.out.println(invigilator.getFuId());
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
-                .findByInvigilator_FuIdAndExamSlot_IdIn(invigilator.getFuId(), request);
+                .findByInvigilatorFuIdAndExamSlotIdsWithDetails(invigilator.getFuId(), request);
         System.out.println("registrations: " + registrations);
         if (registrations.isEmpty()) {
             throw new CustomException(ErrorCode.NO_REGISTRATION_FOUND);
@@ -132,7 +133,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     public RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsByInvigilator(String fuId) {
         User invigilator = findInvigilatorByFuId(fuId);
 
-        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository.findByInvigilator(invigilator);
+        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository.findByInvigilatorWithDetails(invigilator);
 
         List<SemesterInvigilatorRegistrationResponseDTO> semesterInvigilatorRegistrationList = new ArrayList<>();
 
@@ -178,7 +179,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         Semester semester = getSemesterById(semesterId);
 
         Set<ExamSlot> examSlots = invigilatorRegistrationRepository
-                .findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(invigilator, semester)
+                .findByInvigilatorAndSemesterWithDetails(invigilator, semester)
                 .stream()
                 .map(InvigilatorRegistration::getExamSlot)
                 .collect(Collectors.toSet());
@@ -224,7 +225,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         Semester semester = getSemesterById(semesterId);
 
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
-                .findByExamSlot_SubjectExam_SubjectId_SemesterId(semester);
+                .findBySemesterWithDetails(semester);
 
         Map<String, RegisteredExamBySemesterResponseDTO> registeredExamBySemesterMap = new HashMap<>();
 
@@ -260,11 +261,15 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     public RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId) {
         User currentUser = getCurrentUser();
         Semester semester = getSemesterById(semesterId);
+        int openRegistration = configurationHolder.getTimeBeforeOpenRegistration();
+
+        // Tính toán ngày bắt đầu
+        ZonedDateTime endDay = ZonedDateTime.now().plusDays(openRegistration);
 
         // Chuyển đổi allExamSlots từ List sang Set
-        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotBySubjectExam_SubjectId_SemesterId(semester));
+        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotsBySemesterAndBeforeEndDate(semester, endDay));
 
-        Set<InvigilatorRegistration> registeredSlots = invigilatorRegistrationRepository.findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(currentUser, semester);
+        Set<InvigilatorRegistration> registeredSlots = invigilatorRegistrationRepository.findByInvigilatorAndSemesterWithDetails(currentUser, semester);
 
         // Tạo một Set để lưu trữ kết quả cuối cùng
         Set<ExamSlotDetail> examSlotDetails = new HashSet<>();
@@ -349,7 +354,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
     private void deleteExistingRegistration(User invigilator, Semester semester) {
         Set<InvigilatorRegistration> existingRegistrations = invigilatorRegistrationRepository
-                .findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(invigilator, semester);
+                .findByInvigilatorAndSemesterWithDetails(invigilator, semester);
         invigilatorRegistrationRepository.deleteAll(existingRegistrations);
     }
 

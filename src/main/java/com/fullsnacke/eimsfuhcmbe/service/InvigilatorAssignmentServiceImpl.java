@@ -10,6 +10,8 @@ import com.fullsnacke.eimsfuhcmbe.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentService {
 
+    Logger logger = LoggerFactory.getLogger(InvigilatorAssignmentServiceImpl.class);
+
     SemesterRepository semesterRepository;
     InvigilatorRegistrationRepository invigilatorRegistrationRepository;
     InvigilatorAssignmentRepository invigilatorAssignmentRepository;
@@ -31,12 +35,11 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     ExamSlotHallRepository examSlotHallRepository;
 
     @Transactional(rollbackFor = Exception.class)
-    @ExceptionHandler(CustomException.class)
     public List<ExamSlotRoom> assignInvigilators(int semesterId) {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
 
-        List<ExamSlot> examSlots = examSlotRepository.findExamSlotBySubjectExam_SubjectId_SemesterId(semester);
+        List<ExamSlot> examSlots = examSlotRepository.findExamSlotsBySemesterWithDetails(semester);
 
         Map<Integer, List<InvigilatorRegistration>> registrationMap = invigilatorRegistrationRepository
                 .findUnassignedRegistrationsByExamSlotInOrderByCreatedAtAsc(examSlots)
@@ -182,7 +185,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .findByExamSlotIdAndInvigilatorFuId(requestEntity.getExamSlot().getId(), requestEntity.getCreatedBy().getFuId())
                 .orElseThrow(() -> {
                     System.out.println("Không tìm thấy phân công cho giám thị cũ: " + requestEntity.getCreatedBy().getFuId());
-                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
+                    return new CustomException(ErrorCode.OLD_INVIGILATOR_NOT_FOUND);
                 });
 
         System.out.println("Old Assignment: " + oldAssignment.getId());

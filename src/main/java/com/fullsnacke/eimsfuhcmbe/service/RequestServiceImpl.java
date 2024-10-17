@@ -22,11 +22,13 @@ import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +36,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RequestServiceImpl implements RequestService {
+    org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RequestServiceImpl.class);
     RequestRepository requestRepository;
     UserRepository userRepository;
     RequestMapper requestMapper;
@@ -67,7 +70,7 @@ public class RequestServiceImpl implements RequestService {
             responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
             return responseDTO;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error occurred while creating request", e);
             throw new CustomException(ErrorCode.REQUEST_CREATION_FAILED);
         }
     }
@@ -120,6 +123,7 @@ public class RequestServiceImpl implements RequestService {
                 .toList();
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO updateRequestStatus(ExchangeInvigilatorsRequestDTO request) {
         //find request by id
         System.out.println("Request ID: " + request.getRequestId());
@@ -127,9 +131,13 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
 
         //convert status to enum
+        System.out.println("Status entity: " + entity.getStatus());
+        RequestStatusEnum entityStatus = RequestStatusEnum.fromValue(entity.getStatus());
         RequestStatusEnum status = RequestStatusEnum.fromName(request.getStatus());
         if (status == null) {
             throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
+        } else if (entityStatus != RequestStatusEnum.PENDING) {
+            throw new CustomException(ErrorCode.REQUEST_ALREADY_PROCESSED);
         }
 
         //update status
@@ -145,23 +153,12 @@ public class RequestServiceImpl implements RequestService {
                         invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
                         return null;
                     });
-//            if (invigilatorRegistrationRepository.findByFuId(request.getNewInvigilatorFuId()) == null) {
-//                System.out.println("Chưa tạo");
-//                InvigilatorRegistrationRequestDTO registrationRequest = InvigilatorRegistrationRequestDTO.builder()
-//                        .fuId(request.getNewInvigilatorFuId())
-//                        .examSlotId(Set.of(entity.getExamSlot().getId()))
-//                        .build();
-//
-//                invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
-//            }
-            if (registration != null) {
-                System.out.println("Khac null" + registration.getInvigilator().getFuId());
-                System.out.println("Khac exid null" + registration.getExamSlot().getId());
-            }
+
             invigilatorAssignmentService.exchangeInvigilators(entity, request);
         }
         entity.setStatus(status.getValue());
-        entity.setUpdatedAt(java.time.Instant.now());
+        entity.setUpdatedAt(Instant.now());
+
         requestRepository.save(entity);
 
         RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
@@ -194,7 +191,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
 

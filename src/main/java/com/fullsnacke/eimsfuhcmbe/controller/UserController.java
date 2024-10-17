@@ -41,11 +41,18 @@ public class UserController {
     public ResponseEntity<List<UserResponseDTO>> getAllUsers(){
         List<User> userList = userServiceImpl.getAllUsers();
 
+        for (User user : userList) {
+            System.out.println(user.getCreatedAt());
+        }
+
         if(userList.isEmpty()){
             return ResponseEntity.noContent().build();
         }else{
             List<UserResponseDTO> userResponseDTOList;
             userResponseDTOList = userList.stream().map(user -> userMapper.toDto(user)).toList();
+            for (UserResponseDTO userResponseDTO : userResponseDTOList) {
+                System.out.println(userResponseDTO.getCreatedAt());
+            }
             return ResponseEntity.ok(userResponseDTOList);
         }
     }

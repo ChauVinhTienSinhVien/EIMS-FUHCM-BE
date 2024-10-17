@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
@@ -12,6 +13,6 @@ public interface RequestService {
     List<RequestResponseDTO> getAllRequestOfCurrentInvigilator();
     List<RequestResponseDTO> getAllRequestByInvigilatorId(String invigilatorId);
     RequestResponseDTO getRequestById(int requestId);
-    RequestResponseDTO updateRequestStatus(int requestId, UpdateStatusRequestDTO status);
+    RequestResponseDTO updateRequestStatus(ExchangeInvigilatorsRequestDTO request);
     List<ManagerRequestResponseDTO> getAllRequestBySemester(int semesterId);
 }

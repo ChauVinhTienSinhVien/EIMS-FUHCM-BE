@@ -1,8 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.Date;

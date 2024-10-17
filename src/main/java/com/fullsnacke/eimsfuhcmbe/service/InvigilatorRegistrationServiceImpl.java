@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
@@ -85,9 +86,18 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public InvigilatorRegistrationResponseDTO registerExamSlot(InvigilatorRegistrationRequestDTO request) {
+    public InvigilatorRegistrationResponseDTO registerExamSlotWithoutFuId(InvigilatorRegistrationRequestDTO request) {
+        User invigilator = getCurrentUser();
+        return registerExamSlot(invigilator, request);
+    }
 
+    @Transactional(rollbackFor = Exception.class)
+    public InvigilatorRegistrationResponseDTO registerExamSlotWithFuId(InvigilatorRegistrationRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
+        return registerExamSlot(invigilator, request);
+    }
+
+    private InvigilatorRegistrationResponseDTO registerExamSlot(User invigilator, InvigilatorRegistrationRequestDTO request) {
 
         Set<Integer> requestExamSlotId = request.getExamSlotId();
 
@@ -274,6 +284,8 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
             ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
             examSlotDetail.setStatus(status);
             examSlotDetails.add(examSlotDetail);
+            examSlotDetail.setNumberOfRegistered((int) count);
+            examSlotDetail.setRequiredInvigilators(examSlot.getRequiredInvigilators());
         }
 
         return RegisteredExamBySemesterResponseDTO.builder()
@@ -360,8 +372,9 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
     private Set<ExamSlotDetail> isAnyExamSlotOverlapping(User invigilator, Semester semester, Set<Integer> examSlotIds) {
         //Lấy ra các examSlot đã được đăng ký trước đó của invigilator hiện tại
-        Set<InvigilatorRegistration> existingRegistrations = invigilatorRegistrationRepository
-                .findByInvigilatorAndExamSlot_SubjectExam_SubjectId_SemesterId(invigilator, semester);
+        Set<InvigilatorRegistration> existingRegistrations =
+                invigilatorRegistrationRepository.findRegistrationsWithDetailsByInvigilatorAndSemester(
+                        invigilator.getId(), semester.getId());
 
         if (existingRegistrations.size() + examSlotIds.size() > allowedSlot(semester)) {
             throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);

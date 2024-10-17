@@ -1,8 +1,10 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.entity.Config;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
+import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class ConfigServiceImpl implements ConfigService{
     @Autowired
     private SemesterRepository semesterRepository;
 
+    @Autowired
+    ConfigurationHolder configurationHolder;
+
     @Override
     public Config addConfig(Config config) {
         Semester semester = semesterRepository.findById(config.getSemester().getId()).orElseThrow(() -> new RuntimeException("Semester not found"));
@@ -32,7 +37,9 @@ public class ConfigServiceImpl implements ConfigService{
             }
         }
         config.setSemester(semester);
-        return configRepository.save(config);
+        Config addedConfig = configRepository.save(config);
+        configurationHolder.reloadConfigurations();
+        return addedConfig;
     }
 
     @Override
@@ -44,7 +51,7 @@ public class ConfigServiceImpl implements ConfigService{
     public List<Config> getConfigBySemesterId(Integer semesterId) {
         List<Config> configList = configRepository.findBySemesterId(semesterId);
         if(configList.isEmpty()){
-            throw new RuntimeException("Config not found");
+            throw new EntityNotFoundException(Config.class, "Config not found");
         }
         return configList;
     }
@@ -53,7 +60,7 @@ public class ConfigServiceImpl implements ConfigService{
     public Config getConfigBySemesterIdAndConfigType(Integer semesterId, String configType) {
         Config config = configRepository.findBySemesterIdAndConfigType(semesterId, configType);
         if(config == null){
-            throw new RuntimeException("Config not found");
+            throw new EntityNotFoundException(Config.class, "Config not found");
         }
         return config;
     }
@@ -66,25 +73,31 @@ public class ConfigServiceImpl implements ConfigService{
         configInDb.setUnit(config.getUnit());
         configInDb.setValue(config.getValue());
         configInDb.setSemester(semester);
-        return configRepository.save(configInDb);
+        Config updaConfig = configRepository.save(configInDb);
+        configurationHolder.reloadConfigurations();
+        return updaConfig;
     }
 
     @Override
     public void deleteConfig(Integer id) {
-        Config config = configRepository.findById(id).orElseThrow(() -> new RuntimeException("Config not found"));
+        Config config = configRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Config.class, "Config not found"));
         configRepository.deleteById(config.getId());
     }
 
     @Override
     @Transactional
     public List<Config> addAllConfig(List<Config> configList) {
-        return configRepository.saveAll(configList);
+        List<Config> updatedConfigs =  configRepository.saveAll(configList);
+        configurationHolder.reloadConfigurations();
+        return updatedConfigs;
     }
 
     @Override
     @Transactional
     public List<Config> updateAllConfig(List<Config> configList) {
-        return configRepository.saveAll(configList);
+        List<Config> updatedConfigs =  configRepository.saveAll(configList);
+        configurationHolder.reloadConfigurations();
+        return updatedConfigs;
     }
 
     @Transactional

@@ -8,6 +8,7 @@ import com.fullsnacke.eimsfuhcmbe.service.ExamSlotRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
@@ -25,6 +26,7 @@ public class ExamSlotRoomController {
     private ExamSlotRoomMapper examSlotRoomMapper;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('examslotroom:read')")
     @Operation(summary = "Retrieve all exam slot rooms", description = "Fetches a list of all exam slot rooms from the system. If no exam slot rooms are found, it will return a 204 No Content response.")
     public List<ExamSlotRoomResponseDTO> getAllExamSlotRooms() {
 

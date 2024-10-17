@@ -11,6 +11,7 @@ import com.fullsnacke.eimsfuhcmbe.service.ExamSlotService;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class ExamSlotHallController {
     private ExamSlotServiceImpl examSlotService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('examslothall:read')")
     @Operation(summary = "Retrieve all exam slot halls", description = "Fetches a list of all exam slot halls from the system. If no exam slot halls are found, it will return a 204 No Content response.")
     public List<ExamSlotHallResponseDTO> getAllExamSlotHall() {
         List<ExamSlotHallResponseDTO> examSlotHallResponseDTOList = new ArrayList<>();
@@ -46,6 +48,7 @@ public class ExamSlotHallController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('examslothall:create')")
     @Operation(summary = "Create a new exam slot hall", description = "Creates a new exam slot hall in the system.")
     public List<ExamSlotHallResponseDTO> addExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {
         List<ExamSlotHall> examSlotHallList = examSlotHallService.addExamSlotHalls(requestDTO);

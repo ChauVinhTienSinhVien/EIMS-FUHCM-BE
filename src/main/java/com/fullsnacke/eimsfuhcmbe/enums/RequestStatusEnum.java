@@ -20,15 +20,6 @@ public enum RequestStatusEnum {
         return null;
     }
 
-    public static RequestStatusEnum fromName(String name) {
-        for (RequestStatusEnum status : RequestStatusEnum.values()) {
-            if (status.name().equalsIgnoreCase(name)) {
-                return status;
-            }
-        }
-        return null;
-    }
-
     public int getValue() {
         return value;
     }

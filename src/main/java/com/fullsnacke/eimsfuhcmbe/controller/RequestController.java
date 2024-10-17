@@ -10,12 +10,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/requests")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -72,9 +74,9 @@ public class RequestController {
     @PutMapping
     @Operation(summary = "Update request status", description = "Update request status by request id")
     public ResponseEntity<?> updateRequestStatus(@RequestBody ExchangeInvigilatorsRequestDTO request) {
-        System.out.println("Request ID: " + request.getRequestId());
-        System.out.println("Request Status: " + request.getStatus());
-        System.out.println("Request newInvigilatorFuId: " + request.getNewInvigilatorFuId());
+        log.info("Request ID: {}", request.getRequestId());
+        log.info("Request Status: {}", request.getStatus());
+        log.info("Request newInvigilatorFuId: {}", request.getNewInvigilatorFuId());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(requestService.updateRequestStatus(request));

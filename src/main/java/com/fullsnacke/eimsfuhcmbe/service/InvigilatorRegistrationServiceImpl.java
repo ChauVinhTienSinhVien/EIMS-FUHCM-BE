@@ -18,6 +18,7 @@ import com.fullsnacke.eimsfuhcmbe.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.slf4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,8 @@ import static com.fullsnacke.eimsfuhcmbe.enums.ConfigType.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrationService {
+
+    Logger log = org.slf4j.LoggerFactory.getLogger(InvigilatorRegistrationServiceImpl.class);
 
     InvigilatorRegistrationRepository invigilatorRegistrationRepository;
     ExamSlotRepository examSlotRepository;
@@ -65,11 +68,11 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
     @Transactional(rollbackFor = Exception.class)
     protected Set<ExamSlotDetail> deleteSelectedRegisteredSlots(User invigilator, Set<Integer> request) {
-        System.out.println("request: " + request.stream().map(String::valueOf).collect(Collectors.joining(", ")));
-        System.out.println(invigilator.getFuId());
+        log.info("request: {}", request.stream().map(String::valueOf).collect(Collectors.joining(", ")));
+        log.info("invigilator: {}", invigilator.getFuId());
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
                 .findByInvigilatorFuIdAndExamSlotIdsWithDetails(invigilator.getFuId(), request);
-        System.out.println("registrations: " + registrations);
+        log.info("registrations: {}", registrations);
         if (registrations.isEmpty()) {
             throw new CustomException(ErrorCode.NO_REGISTRATION_FOUND);
         }

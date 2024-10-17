@@ -22,13 +22,12 @@ import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -36,14 +35,16 @@ import java.util.Set;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RequestServiceImpl implements RequestService {
-    org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RequestServiceImpl.class);
+
+    Logger log = org.slf4j.LoggerFactory.getLogger(RequestServiceImpl.class);
+
     RequestRepository requestRepository;
     UserRepository userRepository;
     RequestMapper requestMapper;
     ExamSlotRepository examSlotRepository;
     InvigilatorAssignmentService invigilatorAssignmentService;
     InvigilatorRegistrationService invigilatorRegistrationService;
-    private final InvigilatorRegistrationRepository invigilatorRegistrationRepository;
+    InvigilatorRegistrationRepository invigilatorRegistrationRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO createRequest(RequestRequestDTO request) {
@@ -59,6 +60,7 @@ public class RequestServiceImpl implements RequestService {
 //        }
         try {
             var currentUser = getCurrentUser();
+            log.info("Current User: {}", currentUser.getFuId());
             request.setInvigilator(currentUser);
             request.setRequestType(RequestTypeEnum.CANCEL.name());
 
@@ -126,17 +128,23 @@ public class RequestServiceImpl implements RequestService {
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO updateRequestStatus(ExchangeInvigilatorsRequestDTO request) {
         //find request by id
-        System.out.println("Request ID: " + request.getRequestId());
+        log.info("Request ID: {}", request.getRequestId());
         Request entity = requestRepository.findById(request.getRequestId())
                 .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
 
         //convert status to enum
-        System.out.println("Status entity: " + entity.getStatus());
+        log.info("Status entity: {}", entity.getStatus());
         RequestStatusEnum entityStatus = RequestStatusEnum.fromValue(entity.getStatus());
-        RequestStatusEnum status = RequestStatusEnum.fromName(request.getStatus());
-        if (status == null) {
+        RequestStatusEnum status;
+        try {
+            status = RequestStatusEnum.valueOf(request.getStatus());
+            log.info("Status: {}", status);
+        } catch (Exception e) {
             throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
-        } else if (entityStatus != RequestStatusEnum.PENDING) {
+        }
+
+        log.info("Status: {}", status);
+        if (entityStatus != RequestStatusEnum.PENDING) {
             throw new CustomException(ErrorCode.REQUEST_ALREADY_PROCESSED);
         }
 
@@ -156,13 +164,17 @@ public class RequestServiceImpl implements RequestService {
 
             invigilatorAssignmentService.exchangeInvigilators(entity, request);
         }
+        //update request
         entity.setStatus(status.getValue());
-        entity.setUpdatedAt(Instant.now());
+//        entity.setUpdatedAt(Instant.now());
+        entity.setComment(request.getNote());
 
+        //save update request
         requestRepository.save(entity);
 
+        //convert to response dto
         RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
-        responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
+        responseDTO.setStatus(status.name());
         return responseDTO;
     }
 

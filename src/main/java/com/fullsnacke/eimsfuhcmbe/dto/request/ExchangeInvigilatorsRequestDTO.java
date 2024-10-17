@@ -13,4 +13,5 @@ public class ExchangeInvigilatorsRequestDTO {
     String newInvigilatorFuId;
     int requestId;
     String status; //REJECTED or APPROVED
+    String note;
 }

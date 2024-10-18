@@ -66,7 +66,7 @@ public class ExamSlotController {
 
     @GetMapping("/using-rooms/{examSlotId}")
     @Operation(summary = "Find rooms that are currently in use", description = "Returns a list of rooms that are currently in use.")
-    public List<List<String>> getAllUsingRooms(@PathVariable int examSlotId) {
+    public List<List<Integer>> getAllUsingRooms(@PathVariable int examSlotId) {
         return examSlotServiceImpl.getHallForExamSlot(examSlotId);
     }
 

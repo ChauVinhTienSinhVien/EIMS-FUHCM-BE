@@ -72,22 +72,22 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     }
 
     @Override
-    public List<List<String>> getHallForExamSlot(int examSlotId) {
+    public List<List<Integer>> getHallForExamSlot(int examSlotId) {
         ExamSlot examSlot = examSlotRepository.findExamSlotById(examSlotId);
         List<ExamSlotHall> examSlotHallList = examSlotHallRepository.findByExamSlot(examSlot);
         if (examSlotHallList == null) {
             return new ArrayList<>();
         }
 
-        List<List<String>> result = new ArrayList<>();
+        List<List<Integer>> result = new ArrayList<>();
         for (ExamSlotHall hall : examSlotHallList) {
             List<ExamSlotRoom> rooms = examSlotRoomRepository.findByExamSlotHall(hall);
             if (rooms == null) {
                 return new ArrayList<>();
             }
-            List<String> roomNames = new ArrayList<>();
+            List<Integer> roomNames = new ArrayList<>();
             for (ExamSlotRoom room : rooms) {
-                roomNames.add(room.getRoom().getRoomName());
+                roomNames.add(room.getRoom().getId());
             }
             result.add(roomNames);
         }

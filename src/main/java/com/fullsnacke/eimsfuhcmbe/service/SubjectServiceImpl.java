@@ -5,6 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,7 +97,7 @@ public class SubjectServiceImpl implements SubjectService {
         if (subject != null) {
             subjectRepository.delete(subject);
         } else {
-            throw new SubjectNotFoundException("Subject not found with ID: " + id);
+            throw new EntityNotFoundException("Subject not found with ID: " + id);
         }
     }
 }

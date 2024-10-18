@@ -23,5 +23,4 @@ public class ExamSlotDetail{
     String examType;
     Integer requiredInvigilators;
     int numberOfRegistered;
-
 }

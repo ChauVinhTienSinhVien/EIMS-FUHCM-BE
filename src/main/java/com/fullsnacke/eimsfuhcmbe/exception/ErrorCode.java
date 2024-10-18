@@ -65,6 +65,8 @@ public enum ErrorCode{
     REASON_EMPTY("Reason is empty or null.", HttpStatus.BAD_REQUEST),
     NO_REQUEST("No requests have been sent yet.", HttpStatus.NOT_FOUND),
     REQUEST_STATUS_INVALID("Request status is invalid.", HttpStatus.BAD_REQUEST),
+    REQUEST_ALREADY_PROCESSED("Request has already been processed. It cannot be reprocessed.", HttpStatus.CONFLICT),
+    OLD_INVIGILATOR_NOT_FOUND("Old invigilator not found.", HttpStatus.NOT_FOUND),
 
     // Registration Management
     DELETE_REGISTRATIONS_FAILED("Failed to delete registrations.", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -75,6 +77,7 @@ public enum ErrorCode{
     NO_INVIGILATOR_REGISTRATION("No invigilator registration found.", HttpStatus.NOT_FOUND),
     INVIGILATOR_NOT_FOUND("Invigilator not found.", HttpStatus.NOT_FOUND),
     EXCHANGE_INVIGILATORS_FAILED("Failed to exchange invigilators.", HttpStatus.INTERNAL_SERVER_ERROR),
+    ASSIGNMENT_NOT_FOUND("Assignment not found.", HttpStatus.NOT_FOUND),
 
     // HTTP Handling
     HTTP_MESSAGE_NOT_READABLE("Failed to read request.", HttpStatus.BAD_REQUEST),

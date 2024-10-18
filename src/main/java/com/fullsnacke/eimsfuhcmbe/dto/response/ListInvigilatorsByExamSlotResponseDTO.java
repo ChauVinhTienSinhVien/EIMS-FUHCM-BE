@@ -17,5 +17,5 @@ public class ListInvigilatorsByExamSlotResponseDTO {
     int examSlotId;
     ZonedDateTime startAt;
     ZonedDateTime endAt;
-    Set<UserResponseDTO> userResponseDTOSet;
+    Set<UserRegistrationResponseDTO> userRegistrationResponseDTOSet;
 }

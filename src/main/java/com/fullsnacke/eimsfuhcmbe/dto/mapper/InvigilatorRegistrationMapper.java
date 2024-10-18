@@ -21,14 +21,14 @@ public interface InvigilatorRegistrationMapper {
     @Mapping(target = "email", source = "invigilator.email")
     @Mapping(target = "phoneNumber", source = "invigilator.phoneNumber")
     @Mapping(target = "department", source = "invigilator.department")
-    @Mapping(target = "role", source = "invigilator.role.id")
+    @Mapping(target = "registrationId", source = "id")
     @Mapping(target = "gender", source = "invigilator.gender")
-    UserResponseDTO toUserResponseDTO(InvigilatorRegistration invigilatorRegistration);
+    UserRegistrationResponseDTO toUserRegistrationResponseDto(InvigilatorRegistration invigilatorRegistration);
 
     @Mapping(target = "examSlotId", source = "id")
     @Mapping(target = "startAt", source = "startAt")
     @Mapping(target = "endAt", source = "endAt")
-    @Mapping(target = "userResponseDTOSet", ignore = true)
+    @Mapping(target = "userRegistrationResponseDTOSet", ignore = true)
     ListInvigilatorsByExamSlotResponseDTO toListInvigilatorsByExamSlotResponseDTO(ExamSlot examSlot);
 
     @Mapping(target = "examSlotId", source = "id")
@@ -45,15 +45,16 @@ public interface InvigilatorRegistrationMapper {
     ExamSlotDetail toExamSlotDetailBasic(ExamSlot examSlot);
 
     @Named("mapInvigilatorRegistrations")
-    default Set<UserResponseDTO> mapInvigilatorRegistrations(Set<InvigilatorRegistration> invigilatorRegistrations) {
+    default Set<UserRegistrationResponseDTO> mapInvigilatorRegistrations(Set<InvigilatorRegistration> invigilatorRegistrations) {
         return invigilatorRegistrations.stream()
-                .map(this::toUserResponseDTO)
+                .map(this::toUserRegistrationResponseDto)
                 .collect(Collectors.toSet());
     }
     @Named("mapBasicInvigilatorRegistration")
-    default List<UserResponseDTO> mapBasicInvigilatorRegistration(List<InvigilatorRegistration> invigilatorRegistrations) {
+    default List<UserRegistrationResponseDTO> mapBasicInvigilatorRegistration(List<InvigilatorRegistration> invigilatorRegistrations) {
         return invigilatorRegistrations.stream()
-                .map(reg -> UserResponseDTO.builder()
+                .map(reg -> UserRegistrationResponseDTO.builder()
+                        .registrationId(reg.getId())
                         .fuId(reg.getInvigilator().getFuId())
                         .firstName(reg.getInvigilator().getFirstName())
                         .lastName(reg.getInvigilator().getLastName())

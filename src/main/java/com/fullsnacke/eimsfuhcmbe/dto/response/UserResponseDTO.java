@@ -35,7 +35,9 @@ public class UserResponseDTO {
 
     String department;
 
-    Boolean gender;
+    boolean gender;
+
+    boolean isPasswordSet;
 
     Instant createdAt;
 

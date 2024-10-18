@@ -8,6 +8,7 @@ import com.fullsnacke.eimsfuhcmbe.util.JWTUtils;
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
+import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 public class AuthenticationService {
@@ -111,9 +113,9 @@ public class AuthenticationService {
     }
 
     public void changePassword(ChangePasswordRequestDTO requestBody) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
+        Optional<User> userOptional = SecurityUntil.getLoggedInUser();
 
+        String currentUserEmail = userOptional.map(User::getEmail).orElse(null);
         User user = userRepository.findByEmail(currentUserEmail).orElse(null);
 
         if (user == null) {
@@ -130,9 +132,9 @@ public class AuthenticationService {
     }
 
     public void addPassword(AuthenticationRequestDTO requestBody) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
+        Optional<User> userOptional = SecurityUntil.getLoggedInUser();
 
+        String currentUserEmail = userOptional.map(User::getEmail).orElse(null);
         User user = userRepository.findByEmail(currentUserEmail).orElse(null);
 
         if (user == null) {

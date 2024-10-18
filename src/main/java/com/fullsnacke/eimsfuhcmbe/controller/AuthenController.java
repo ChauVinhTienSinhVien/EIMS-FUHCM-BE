@@ -1,9 +1,11 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.UserMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.AuthenticationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ChangePasswordRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
 import com.fullsnacke.eimsfuhcmbe.dto.response.AuthenticationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
@@ -25,6 +27,8 @@ public class AuthenController {
     AuthenticationService authenticationService;
     @Autowired
     private UserServiceImpl userServiceImpl;
+    @Autowired
+    private UserMapper userMapper;
 
     @PostMapping("/google/login")
     public ResponseEntity<AuthenticationResponseDTO> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
@@ -82,10 +86,10 @@ public class AuthenController {
     }
 
     @GetMapping("/user/info")
-    public ResponseEntity<?> getUserInfo(Principal principal) {
+    public ResponseEntity<UserResponseDTO> getUserInfo(Principal principal) {
         User user = userServiceImpl.getUserByEmail(principal.getName());
-        System.out.println(user.getFuId());
-        return ResponseEntity.ok().body(user);
+        UserResponseDTO userResponseDTO = userMapper.toDto(user);
+        return ResponseEntity.ok().body(userResponseDTO);
     }
 
 }

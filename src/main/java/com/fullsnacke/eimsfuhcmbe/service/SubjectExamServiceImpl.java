@@ -10,6 +10,7 @@ import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectExamRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -106,5 +107,14 @@ public class SubjectExamServiceImpl implements SubjectExamService{
         return subjectExamRepository.saveAll(subjectExamList);
     }
 
+    @Override
+    public void deleteSubjectExam(int id) {
+        SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(id);
+        if (subjectExam != null) {
+            subjectExamRepository.delete(subjectExam);
+        } else {
+            throw new EntityNotFoundException("SubjectExam not found with ID: " + id);
+        }
+    }
 
 }

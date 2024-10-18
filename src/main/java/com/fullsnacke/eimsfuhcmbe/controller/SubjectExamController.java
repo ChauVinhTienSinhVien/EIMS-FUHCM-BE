@@ -126,4 +126,15 @@ public class SubjectExamController {
         return ResponseEntity.ok(subjectExamResponseDTOList);
     }
 
+    @DeleteMapping
+    @Operation(summary = "Delete a subject exam", description = "Delete a subject exam")
+    public ResponseEntity<?> deleteSubjectExam(@PathVariable("id") int id) {
+        try {
+            subjectExamServiceImpl.deleteSubjectExam(id);
+            return ResponseEntity.noContent().build();
+        } catch (SubjectExamNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

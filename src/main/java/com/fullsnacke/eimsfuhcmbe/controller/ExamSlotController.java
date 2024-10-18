@@ -169,6 +169,45 @@ public class ExamSlotController {
         }
     }
 
+    @PutMapping("/manager-update/{id}")
+    @Operation(summary = "Update an exam slot", description = "Updates an existing exam slot by its ID with the new data provided in the request body. Returns the updated exam slot or a 404 Not Found response if the slot doesn't exist.")
+    public ResponseEntity<ExamSlotResponseDTO> managerUpdateExamSlot(@PathVariable("id") int id,@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
+        try{
+            ExamSlot existingExamSlot = examSlotServiceImpl.findById(id);
+            if (existingExamSlot == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            if (existingExamSlot.getUpdatedBy() != null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+
+
+            ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+
+            User currentUser = userServiceImpl.getUserByEmail(email);
+
+            examSlot.setCreatedAt(existingExamSlot.getCreatedAt());
+            examSlot.setCreatedBy(existingExamSlot.getCreatedBy());
+            examSlot.setUpdatedBy(currentUser);
+            examSlot.setUpdatedAt(existingExamSlot.getUpdatedAt());
+            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
+            examSlot.setSubjectExam(subjectExam);
+
+            ExamSlot updateExamSlot =  examSlotServiceImpl.managerUpdateExamSlot(examSlot, id);
+            ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
+
+            return ResponseEntity.ok(examSlotResponseDTO);
+        } catch (ExamSlotNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
     @GetMapping("/{id}")
     @Operation(summary = "Retrieve an exam slot by ID", description = "Fetches a specific exam slot based on its ID. Returns the exam slot data if found, otherwise returns a 404 Not Found.")
     public ResponseEntity<ExamSlotResponseDTO> getExamSlotById(@PathVariable("id") int id) {

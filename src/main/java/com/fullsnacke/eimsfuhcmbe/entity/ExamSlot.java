@@ -61,7 +61,6 @@ public class ExamSlot {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "updated_by")
-    @LastModifiedBy
     User updatedBy;
 
     @Column(name = "updated_at")

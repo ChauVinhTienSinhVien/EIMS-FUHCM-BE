@@ -54,10 +54,12 @@ public interface ExamSlotRoomMapper {
     @Mapping(source = "room.floor", target = "floor")
     @Mapping(source = "room.campus", target = "campus")
 
+    @Mapping(source = "roomInvigilator.id", target = "roomInvigilatorAssignmentId")
     @Mapping(source = "roomInvigilator.invigilatorRegistration.invigilator.fuId", target = "roomInvigilatorFuId")
     @Mapping(source = "roomInvigilator.invigilatorRegistration.invigilator.firstName", target = "roomInvigilatorFirstName")
     @Mapping(source = "roomInvigilator.invigilatorRegistration.invigilator.lastName", target = "roomInvigilatorLastName")
 
+    @Mapping(source = "examSlotHall.hallInvigilator.id", target = "hallInvigilatorAssignmentId")
     @Mapping(source = "examSlotHall.hallInvigilator.invigilatorRegistration.invigilator.fuId", target = "hallInvigilatorFuId")
     @Mapping(source = "examSlotHall.hallInvigilator.invigilatorRegistration.invigilator.firstName", target = "hallInvigilatorFirstName")
     @Mapping(source = "examSlotHall.hallInvigilator.invigilatorRegistration.invigilator.lastName", target = "hallInvigilatorLastName")

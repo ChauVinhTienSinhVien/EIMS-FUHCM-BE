@@ -46,10 +46,12 @@ public class ExamSlotRoomResponseDTO {
     int floor;
     String campus;
 
+    int roomInvigilatorAssignmentId;
     String roomInvigilatorFuId;
     String roomInvigilatorFirstName;
     String roomInvigilatorLastName;
 
+    int hallInvigilatorAssignmentId;
     String hallInvigilatorFuId;
     String hallInvigilatorFirstName;
     String hallInvigilatorLastName;

@@ -1,7 +1,9 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotRoomMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
@@ -32,14 +34,16 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     InvigilatorRegistrationMapper invigilatorRegistrationMapper;
     ExamSlotRepository examSlotRepository;
     ExamSlotRoomRepository examSlotRoomRepository;
+    ExamSlotRoomMapper examSlotRoomMapper;
     ExamSlotHallRepository examSlotHallRepository;
 
     @Transactional(rollbackFor = Exception.class)
-    public List<ExamSlotRoom> assignInvigilators(int semesterId) {
-        Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
-
-        List<ExamSlot> examSlots = examSlotRepository.findExamSlotsBySemesterWithDetails(semester);
+    public List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds) {
+        if(examSlotIds.isEmpty()) {
+            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
+        }
+//        List<ExamSlot> examSlots = examSlotRepository.findExamSlotsBySemesterWithDetails(semester);
+        List<ExamSlot> examSlots = examSlotRepository.findByIdIn(examSlotIds);
 
         Map<Integer, List<InvigilatorRegistration>> registrationMap = invigilatorRegistrationRepository
                 .findUnassignedRegistrationsByExamSlotInOrderByCreatedAtAsc(examSlots)
@@ -47,7 +51,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .collect(Collectors.groupingBy(reg -> reg.getExamSlot().getId()));
         log.info("Registration Map: {}", registrationMap);
         registrationMap.forEach((examSlotId, registrations) -> {
-            log.info("ExamSlot ID: {}, Registrations: {}", examSlotId, registrations.size());
+            log.info("ExamSlot ID: {}, Registrations Size: {}", examSlotId, registrations.size());
         });
 
         if(registrationMap.isEmpty()) {
@@ -88,7 +92,13 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             assignInvigilatorsToHalls(registrations, halls);
         }
 
-        return examSlotRoomRepository.findByExamSlotHall_ExamSlotIn(examSlots);
+        Set<Integer> examSlotRoomIds = roomMap.values().stream()
+                .flatMap(List::stream)
+                .map(ExamSlotRoom::getId)
+                .collect(Collectors.toSet());
+        return examSlotRoomRepository.findByIdIn(examSlotRoomIds).stream()
+                .map(examSlotRoomMapper::toDto)
+                .toList();
     }
 
     @Transactional(rollbackFor = Exception.class)

@@ -2,7 +2,6 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
-import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
@@ -23,7 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.Instant;
+
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,6 +91,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     @Transactional(rollbackFor = Exception.class)
     public InvigilatorRegistrationResponseDTO registerExamSlotWithoutFuId(InvigilatorRegistrationRequestDTO request) {
         User invigilator = getCurrentUser();
+
         return registerExamSlot(invigilator, request);
     }
 
@@ -117,7 +117,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
             throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);
         }
 
-        Set<ExamSlotDetail> slotDetails = checkForOverlappingSlots(invigilator, semester, requestExamSlotId);
+        Set<ExamSlotDetail> slotDetails = validateAndGetNonOverlappingExamSlotsDetail(invigilator, semester, requestExamSlotId);
 
         Set<InvigilatorRegistration> registrations = createRegistrations(invigilator, requestExamSlotId);
 
@@ -214,7 +214,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
         deleteExistingRegistration(invigilator, semester);
 
-        Set<ExamSlotDetail> slotDetails = checkForOverlappingSlots(invigilator, semester, requestExamSlotId);
+        Set<ExamSlotDetail> slotDetails = validateAndGetNonOverlappingExamSlotsDetail(invigilator, semester, requestExamSlotId);
 
         Set<InvigilatorRegistration> registrations = createRegistrations(invigilator, requestExamSlotId);
 
@@ -326,15 +326,6 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
                 .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
     }
 
-    private Set<ExamSlotDetail> checkForOverlappingSlots(User invigilator, Semester semester, Set<Integer> examSlots) {
-
-        Set<ExamSlotDetail> examSlotDetails = isAnyExamSlotOverlapping(invigilator, semester, examSlots);
-        if (examSlotDetails == null) {
-            throw new CustomException(ErrorCode.OVERLAP_SLOT);
-        }
-        return examSlotDetails;
-    }
-
     private Set<InvigilatorRegistration> createRegistrations(User invigilator, Set<Integer> examSlotIds) {
         return examSlotIds.stream()
                 .map(examSlotId -> examSlotRepository.findById(examSlotId)
@@ -342,7 +333,6 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
                 .map(examSlot -> InvigilatorRegistration.builder()
                         .invigilator(invigilator)
                         .examSlot(examSlot)
-//                        .createdAt(Instant.now())
                         .build())
                 .collect(Collectors.toSet());
     }
@@ -378,11 +368,9 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
-    private Set<ExamSlotDetail> isAnyExamSlotOverlapping(User invigilator, Semester semester, Set<Integer> examSlotIds) {
+    private Set<ExamSlotDetail> validateAndGetNonOverlappingExamSlotsDetail(User invigilator, Semester semester, Set<Integer> examSlotIds) {
         //Lấy ra các examSlot đã được đăng ký trước đó của invigilator hiện tại
-        Set<InvigilatorRegistration> existingRegistrations =
-                invigilatorRegistrationRepository.findRegistrationsWithDetailsByInvigilatorAndSemester(
-                        invigilator.getId(), semester.getId());
+        Set<InvigilatorRegistration> existingRegistrations = getExistingRegistrations(invigilator, semester);
 
         if (existingRegistrations.size() + examSlotIds.size() > allowedSlot(semester)) {
             throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);
@@ -391,30 +379,50 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         Set<ExamSlot> newExamSlots = new HashSet<>(examSlotRepository.findAllById(examSlotIds));
         Set<ExamSlotDetail> examSlotDetails = new HashSet<>();
 
+        validateNewExamSlots(newExamSlots, examSlotDetails);
+
+        checkOverlapWithExistingRegistrations(existingRegistrations, newExamSlots);
+        return examSlotDetails;
+    }
+
+    private Set<InvigilatorRegistration> getExistingRegistrations(User invigilator, Semester semester) {
+        return invigilatorRegistrationRepository.findRegistrationsWithDetailsByInvigilatorAndSemester(
+                invigilator.getId(), semester.getId());
+    }
+
+    private void validateNewExamSlots(Set<ExamSlot> newExamSlots, Set<ExamSlotDetail> examSlotDetails) {
         for (ExamSlot newSlot : newExamSlots) {
-            if (newSlot.getRequiredInvigilators() <= 0) {
-                throw new CustomException(ErrorCode.EXAM_SLOT_FULL);
-            }
-            for (ExamSlot otherSlot : newExamSlots) {
-                if (newSlot.getId().intValue() != otherSlot.getId().intValue() && isOverlapping(newSlot, otherSlot)) {
-                    throw new CustomException(ErrorCode.OVERLAP_SLOT_IN_LIST);
-                }
-            }
+            validateRequiredInvigilators(newSlot);
+            checkOverlapWithinNewSlots(newSlot, newExamSlots);
             examSlotDetails.add(invigilatorRegistrationMapper.toExamSlotDetail(newSlot));
         }
+    }
 
-        //Check overlap in existing registrations
+    private void validateRequiredInvigilators(ExamSlot slot) {
+        if (slot.getRequiredInvigilators() <= 0) {
+            throw new CustomException(ErrorCode.EXAM_SLOT_FULL);
+        }
+    }
+
+    private void checkOverlapWithinNewSlots(ExamSlot currentSlot, Set<ExamSlot> allNewSlots) {
+        for (ExamSlot otherSlot : allNewSlots) {
+            if (currentSlot.getId().intValue() != otherSlot.getId().intValue() && isOverlapping(currentSlot, otherSlot)) {
+                throw new CustomException(ErrorCode.OVERLAP_SLOT_IN_LIST);
+            }
+        }
+    }
+
+    private void checkOverlapWithExistingRegistrations(Set<InvigilatorRegistration> existingRegistrations, Set<ExamSlot> newExamSlots) {
         for (InvigilatorRegistration registration : existingRegistrations) {
             ExamSlot existingSlot = registration.getExamSlot();
             for (ExamSlot newSlot : newExamSlots) {
                 if (existingSlot.getId().intValue() == newSlot.getId().intValue()) {
                     throw new CustomException(ErrorCode.EXAM_SLOT_ALREADY_REGISTERED);
                 } else if (isOverlapping(existingSlot, newSlot)) {
-                    return null;
+                    throw new CustomException(ErrorCode.OVERLAP_SLOT);
                 }
             }
         }
-        return examSlotDetails;
     }
 
     private boolean isOverlapping(ExamSlot slot1, ExamSlot slot2) {

@@ -30,6 +30,8 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
     List<ExamSlot> findExamSlotsBySemesterAndBeforeEndDate(
             @Param("semester") Semester semester,
             @Param("endDate") ZonedDateTime endDate);
+
+    List<ExamSlot> findByIdIn(List<Integer> examSlotIds);
 }
 
 

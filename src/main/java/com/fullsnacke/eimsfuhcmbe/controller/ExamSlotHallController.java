@@ -58,7 +58,7 @@ public class ExamSlotHallController {
         }
         ExamSlot examSlot = examSlotRepository.findExamSlotById(requestDTO.getExamSlotId());
         examSlot.setStatus(1);
-        examSlotService.updateExamSlotExamSlot(examSlot);
+        examSlotService.updateExamSlotExamSlot(examSlot, examSlot.getId());
         return examSlotHallResponseDTOList;
     }
 //    public List<ExamSlotHall> addExamSlotHalls(@RequestBody ExamSlotHallRequestDTO requestDTO) {

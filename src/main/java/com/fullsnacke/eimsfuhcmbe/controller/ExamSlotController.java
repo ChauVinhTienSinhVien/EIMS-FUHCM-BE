@@ -130,7 +130,7 @@ public class ExamSlotController {
     public ResponseEntity<ExamSlotResponseDTO> updateExamSlot(@PathVariable("id") int id,@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         try{
             ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
-            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlotExamSlot(examSlot);
+            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlotExamSlot(examSlot, id);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
 //            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
 //            examSlotResponseDTO.setSubjectExamId(subjectExam);

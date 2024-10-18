@@ -77,6 +77,7 @@ public enum ErrorCode{
     NO_INVIGILATOR_REGISTRATION("No invigilator registration found.", HttpStatus.NOT_FOUND),
     INVIGILATOR_NOT_FOUND("Invigilator not found.", HttpStatus.NOT_FOUND),
     EXCHANGE_INVIGILATORS_FAILED("Failed to exchange invigilators.", HttpStatus.INTERNAL_SERVER_ERROR),
+    ASSIGNMENT_NOT_FOUND("Assignment not found.", HttpStatus.NOT_FOUND),
 
     // HTTP Handling
     HTTP_MESSAGE_NOT_READABLE("Failed to read request.", HttpStatus.BAD_REQUEST),

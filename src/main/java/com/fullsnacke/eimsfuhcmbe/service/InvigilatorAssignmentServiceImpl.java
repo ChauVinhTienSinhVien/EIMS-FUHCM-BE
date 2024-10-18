@@ -3,7 +3,9 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotRoomMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserRegistrationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
@@ -182,7 +184,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
 
-    public List<UserResponseDTO> getUnassignedInvigilators(int examSlotId) {
+    public List<UserRegistrationResponseDTO> getUnassignedInvigilators(int examSlotId) {
         if(examSlotId <= 0) {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
         }
@@ -192,21 +194,25 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(unassignedList);
     }
 
-    private void exchangeInvigilators(int examSlotId, String oldInvigilatorFuId, String newInvigilatorFuId) {
-        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository
-                .findByExamSlotIdAndInvigilatorFuId(examSlotId, oldInvigilatorFuId)
+    @Transactional(rollbackFor = Exception.class)
+    public String exchangeInvigilators(UpdateInvigilatorAssignmentRequestDTO request) {
+        int assignmentId = request.getAssignmentId();
+        int newRegistrationId = request.getNewRegistrationId();
+        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> {
-                    log.error("Old invigilator not found: {}", oldInvigilatorFuId);
-                    return new CustomException(ErrorCode.OLD_INVIGILATOR_NOT_FOUND);
+                    log.error("Assignment not found: {}", assignmentId);
+                    return new CustomException(ErrorCode.ASSIGNMENT_NOT_FOUND);
                 });
-
-        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository
-                .findByExamSlotIdAndInvigilatorFuId(examSlotId, newInvigilatorFuId)
+        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository.findById(newRegistrationId)
                 .orElseThrow(() -> {
-                    log.error("New invigilator not found: {}", newInvigilatorFuId);
+                    log.error("New invigilator not found: {}", newRegistrationId);
                     return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
                 });
+        exchangeInvigilators(oldAssignment, newInvigilator);
+        return "Exchanged successfully";
+    }
 
+    private void exchangeInvigilators(InvigilatorAssignment oldAssignment, InvigilatorRegistration newInvigilator) {
         try {
             oldAssignment.setInvigilatorRegistration(newInvigilator);
             invigilatorAssignmentRepository.save(oldAssignment);
@@ -215,9 +221,28 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             throw new CustomException(ErrorCode.EXCHANGE_INVIGILATORS_FAILED);
         }
     }
-    @Transactional(rollbackFor = Exception.class)
-    public void exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request) {
 
-        exchangeInvigilators(requestEntity.getExamSlot().getId(), requestEntity.getCreatedBy().getFuId(), request.getNewInvigilatorFuId());
+    @Transactional(rollbackFor = Exception.class)
+    public String exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request) {
+
+        int examSlotId = requestEntity.getExamSlot().getId();
+        String oldInvigilatorFuId = requestEntity.getCreatedBy().getFuId();
+
+        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository
+                .findByExamSlotIdAndInvigilatorFuId(examSlotId, oldInvigilatorFuId)
+                .orElseThrow(() -> {
+                    log.error("Old invigilator not found: {}", oldInvigilatorFuId);
+                    return new CustomException(ErrorCode.OLD_INVIGILATOR_NOT_FOUND);
+                });
+
+        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository
+                .findByExamSlotIdAndInvigilatorFuId(examSlotId, request.getNewInvigilatorFuId())
+                .orElseThrow(() -> {
+                    log.error("New invigilator not found: {}", request.getNewInvigilatorFuId());
+                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
+                });
+
+        exchangeInvigilators(oldAssignment, newInvigilator);
+        return "Exchanged successfully";
     }
 }

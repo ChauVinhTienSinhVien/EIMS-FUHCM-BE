@@ -1,8 +1,8 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
-import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
-import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,14 +20,22 @@ public class InvigilatorAssignmentController {
 
 
     //SYSTEM
-    @GetMapping()
+    @GetMapping
+    @Operation(summary = "Assign invigilators to exam slots")
     public ResponseEntity<?> assignInvigilatorToRoom(@RequestParam List<Integer> examSlotId) {
         return ResponseEntity.ok(invigilatorAssignmentService.assignInvigilators(examSlotId));
     }
 
     //MANAGER
     @GetMapping("/unassigned/invigilators/examslotid={examSlotId}")
+    @Operation(summary = "Get unassigned invigilators for a given exam slot")
     public ResponseEntity<?> getUnassignedInvigilators(@PathVariable("examSlotId") int examSlotId) {
         return ResponseEntity.ok(invigilatorAssignmentService.getUnassignedInvigilators(examSlotId));
+    }
+
+    @PutMapping
+    @Operation(summary = "Exchange a unassigned invigilator with a assigned invigilator")
+    public ResponseEntity<?> exchangeInvigilators(@RequestBody UpdateInvigilatorAssignmentRequestDTO request) {
+        return ResponseEntity.ok(invigilatorAssignmentService.exchangeInvigilators(request));
     }
 }

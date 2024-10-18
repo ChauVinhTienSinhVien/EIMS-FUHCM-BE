@@ -257,7 +257,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository.findByExamSlot(examSlot);
 
         ListInvigilatorsByExamSlotResponseDTO response = invigilatorRegistrationMapper.toListInvigilatorsByExamSlotResponseDTO(examSlot);
-        response.setUserResponseDTOSet(invigilatorRegistrationMapper.mapInvigilatorRegistrations(registrations));
+        response.setUserRegistrationResponseDTOSet(invigilatorRegistrationMapper.mapInvigilatorRegistrations(registrations));
         return response;
     }
 

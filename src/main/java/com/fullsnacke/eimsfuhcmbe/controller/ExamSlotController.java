@@ -64,6 +64,12 @@ public class ExamSlotController {
         }
     }
 
+    @GetMapping("/using-rooms/{examSlotId}")
+    @Operation(summary = "Find rooms that are currently in use", description = "Returns a list of rooms that are currently in use.")
+    public List<List<String>> getAllUsingRooms(@PathVariable int examSlotId) {
+        return examSlotServiceImpl.getHallForExamSlot(examSlotId);
+    }
+
     @GetMapping("/by-semester/{semesterId}")
     @Operation(summary = "Retrieve all exam slots by semester ID", description = "Fetches a list of all exam slots from the system based on the semester ID. If no exam slots are found, it will return a 204 No Content response.")
     public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsBySemesterId(@PathVariable("semesterId") int semesterId) {

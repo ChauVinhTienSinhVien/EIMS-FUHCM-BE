@@ -55,10 +55,10 @@ public interface ExamSlotMapper {
             return null;
         }
         return switch (status) {
-            case NEEDS_ROOM_ASSIGNMENT -> 0;
-            case PENDING -> 1;
-            case APPROVED -> 2;
-            case REJECTED -> 3;
+            case NEEDS_ROOM_ASSIGNMENT -> 1;
+            case PENDING -> 2;
+            case APPROVED -> 3;
+            case REJECTED -> 4;
             default -> throw new IllegalArgumentException("Unknown ExamSlotStatus: " + status);
         };
     }
@@ -69,10 +69,10 @@ public interface ExamSlotMapper {
             return null;
         }
         return switch (statusValue) {
-            case 0 -> ExamSlotStatus.NEEDS_ROOM_ASSIGNMENT;
-            case 1 -> ExamSlotStatus.PENDING;
-            case 2 -> ExamSlotStatus.APPROVED;
-            case 3 -> ExamSlotStatus.REJECTED;
+            case 1 -> ExamSlotStatus.NEEDS_ROOM_ASSIGNMENT;
+            case 2 -> ExamSlotStatus.PENDING;
+            case 3 -> ExamSlotStatus.APPROVED;
+            case 4 -> ExamSlotStatus.REJECTED;
             default -> throw new IllegalArgumentException("Unknown status value: " + statusValue);
         };
     }

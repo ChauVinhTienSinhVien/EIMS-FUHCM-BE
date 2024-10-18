@@ -26,7 +26,7 @@ public class AuthenController {
     @Autowired
     private UserServiceImpl userServiceImpl;
 
-    @PostMapping("/login")
+    @PostMapping("/google/login")
     public ResponseEntity<AuthenticationResponseDTO> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
         AuthenticationResponseDTO authResponse = authenticationService.loginOAuthGoogle(requestBody);
         String authToken = authResponse.getToken();
@@ -40,7 +40,7 @@ public class AuthenController {
         return ResponseEntity.ok().body(authResponse);
     }
 
-    @PostMapping("google/login")
+    @PostMapping("/login")
     public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody AuthenticationRequestDTO requestBody, HttpServletResponse response) {
         AuthenticationResponseDTO authResponse = authenticationService.loginUserNamePassWord(requestBody);
         String authToken = authResponse.getToken();

@@ -15,7 +15,6 @@ import org.mapstruct.Named;
 public interface ExamSlotMapper {
 
     @Mapping(target = "subjectExam", source = "subjectExamId", qualifiedByName = "intToSubjectExam")
-    @Mapping(target = "updatedBy", source = "updatedBy", qualifiedByName = "intToUser")
     @Mapping(target = "status", source = "status", qualifiedByName = "statusToInt")
     ExamSlot toEntity(ExamSlotRequestDTO dto);
 

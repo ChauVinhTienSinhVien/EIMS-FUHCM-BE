@@ -48,7 +48,7 @@ public class ExamSlotRequestDTO {
 
     ExamSlotStatus status;
 
-    Integer updatedBy;
+//    Integer updatedBy;
 //
 //    Instant updatedAt;
 

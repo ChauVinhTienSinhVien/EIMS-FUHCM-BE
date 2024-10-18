@@ -192,26 +192,20 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(unassignedList);
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request) {
-
+    private void exchangeInvigilators(int examSlotId, String oldInvigilatorFuId, String newInvigilatorFuId) {
         InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository
-                .findByExamSlotIdAndInvigilatorFuId(requestEntity.getExamSlot().getId(), requestEntity.getCreatedBy().getFuId())
+                .findByExamSlotIdAndInvigilatorFuId(examSlotId, oldInvigilatorFuId)
                 .orElseThrow(() -> {
-                    log.error("Old invigilator not found: {}", requestEntity.getCreatedBy().getFuId());
+                    log.error("Old invigilator not found: {}", oldInvigilatorFuId);
                     return new CustomException(ErrorCode.OLD_INVIGILATOR_NOT_FOUND);
                 });
 
-        log.info("Old Assignment: {}", oldAssignment.getId());
-
         InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository
-                .findByExamSlotIdAndInvigilatorFuId(requestEntity.getExamSlot().getId(), request.getNewInvigilatorFuId())
+                .findByExamSlotIdAndInvigilatorFuId(examSlotId, newInvigilatorFuId)
                 .orElseThrow(() -> {
-                    log.error("New invigilator not found: {}", request.getNewInvigilatorFuId());
+                    log.error("New invigilator not found: {}", newInvigilatorFuId);
                     return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
                 });
-
-        log.info("New Invigilator Registration ID: {}", newInvigilator.getId());
 
         try {
             oldAssignment.setInvigilatorRegistration(newInvigilator);
@@ -220,5 +214,10 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             log.error("Error in updating invigilator assignment: {}", e.getMessage());
             throw new CustomException(ErrorCode.EXCHANGE_INVIGILATORS_FAILED);
         }
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public void exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request) {
+
+        exchangeInvigilators(requestEntity.getExamSlot().getId(), requestEntity.getCreatedBy().getFuId(), request.getNewInvigilatorFuId());
     }
 }

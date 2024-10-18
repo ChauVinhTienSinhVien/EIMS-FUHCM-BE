@@ -20,7 +20,7 @@ public class InvigilatorAssignmentController {
 
 
     //SYSTEM
-    @PutMapping()
+    @GetMapping()
     public ResponseEntity<?> assignInvigilatorToRoom(@RequestParam List<Integer> examSlotId) {
         return ResponseEntity.ok(invigilatorAssignmentService.assignInvigilators(examSlotId));
     }

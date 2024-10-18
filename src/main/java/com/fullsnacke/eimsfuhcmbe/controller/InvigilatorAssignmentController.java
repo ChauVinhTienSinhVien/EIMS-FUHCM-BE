@@ -33,6 +33,7 @@ public class InvigilatorAssignmentController {
         return ResponseEntity.ok(invigilatorAssignmentService.getUnassignedInvigilators(examSlotId));
     }
 
+    //STAFF
     @PutMapping
     @Operation(summary = "Exchange a unassigned invigilator with a assigned invigilator")
     public ResponseEntity<?> exchangeInvigilators(@RequestBody UpdateInvigilatorAssignmentRequestDTO request) {

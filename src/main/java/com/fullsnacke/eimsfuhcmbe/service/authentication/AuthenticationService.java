@@ -1,6 +1,8 @@
 package com.fullsnacke.eimsfuhcmbe.service.authentication;
 
-import com.fullsnacke.eimsfuhcmbe.dto.request.AuthenticationRequest;
+import com.fullsnacke.eimsfuhcmbe.dto.request.AuthenticationRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ChangePasswordRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.AuthenticationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.util.JWTUtils;
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
@@ -14,7 +16,8 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,20 +49,43 @@ public class AuthenticationService {
                 .build();
     }
 
-    public String loginOAuthGoogle(IdTokenRequestDto requestBody) {
+    public AuthenticationResponseDTO loginOAuthGoogle(IdTokenRequestDto requestBody) {
         User user = verifyIDToken(requestBody.getIdToken());
 
         if (user == null) {
             throw new IllegalArgumentException();
         }
 
-        User isIntheDB = userRepository.findByEmail(user.getEmail()).orElse(null);
+        return login(AuthenticationRequestDTO.builder()
+                .email(user.getEmail())
+                .build());
+    }
 
-        if (isIntheDB == null) {
-            throw new EntityNotFoundException(User.class, "email", user.getEmail());
+    public AuthenticationResponseDTO loginUserNamePassWord(AuthenticationRequestDTO requestBody) {
+        authenticationProvider.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        requestBody.getEmail(),
+                        requestBody.getPassword()
+                )
+        );
+        return login(requestBody);
+    }
+
+    private AuthenticationResponseDTO login(AuthenticationRequestDTO requestBody) {
+        User user = userRepository.findByEmail(requestBody.getEmail()).orElse(null);
+        if(user == null) {
+            throw new EntityNotFoundException(User.class, "email", requestBody.getEmail());
         }
 
-        return jwtUtils.createToken(isIntheDB, false);
+        String token =  jwtUtils.createToken(user, false);
+
+        return AuthenticationResponseDTO.builder()
+                .token(token)
+                .id(user.getId())
+                .email(user.getEmail())
+                .role(user.getRole().getName())
+                .isPasswordSet(user.isPasswordSet())
+                .build();
     }
 
     private User verifyIDToken(String idToken) {
@@ -84,23 +110,30 @@ public class AuthenticationService {
         }
     }
 
-    public String login(AuthenticationRequest requestBody) {
-        System.out.println(requestBody.getEmail());
+    public void changePassword(ChangePasswordRequestDTO requestBody) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
 
-        authenticationProvider.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        requestBody.getEmail(),
-                        requestBody.getPassword()
-                )
-        );
+        User user = userRepository.findByEmail(currentUserEmail).orElse(null);
 
-        User user = userRepository.findByEmail(requestBody.getEmail()).orElse(null);
+        if (user == null) {
+            throw new EntityNotFoundException(User.class, "email", requestBody.getEmail());
+        }
 
-        return jwtUtils.createToken(user, false);
+        boolean isPasswordMatch = passwordEncoder.matches(requestBody.getOldPassword(), user.getPassword());
+        if (!isPasswordMatch) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(requestBody.getNewPassword()));
+        userRepository.save(user);
     }
 
-    public void changePassword(AuthenticationRequest requestBody) {
-        User user = userRepository.findByEmail(requestBody.getEmail()).orElse(null);
+    public void addPassword(AuthenticationRequestDTO requestBody) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+
+        User user = userRepository.findByEmail(currentUserEmail).orElse(null);
 
         if (user == null) {
             throw new EntityNotFoundException(User.class, "email", requestBody.getEmail());

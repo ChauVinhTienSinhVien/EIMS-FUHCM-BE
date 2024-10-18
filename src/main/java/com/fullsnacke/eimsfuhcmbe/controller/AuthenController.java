@@ -1,24 +1,21 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
-import com.fullsnacke.eimsfuhcmbe.dto.request.AuthenticationRequest;
+import com.fullsnacke.eimsfuhcmbe.dto.request.AuthenticationRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ChangePasswordRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
+import com.fullsnacke.eimsfuhcmbe.dto.response.AuthenticationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.authentication.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Collection;
 
 @RestController
 @RequestMapping("/v1/oauth")
@@ -30,8 +27,9 @@ public class AuthenController {
     private UserServiceImpl userServiceImpl;
 
     @PostMapping("/login")
-    public ResponseEntity<?> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
-        String authToken = authenticationService.loginOAuthGoogle(requestBody);
+    public ResponseEntity<AuthenticationResponseDTO> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
+        AuthenticationResponseDTO authResponse = authenticationService.loginOAuthGoogle(requestBody);
+        String authToken = authResponse.getToken();
         final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", authToken)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
@@ -39,12 +37,14 @@ public class AuthenController {
                 .secure(false)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body(authResponse);
     }
 
     @PostMapping("google/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest requestBody, HttpServletResponse response) {
-        String authToken = authenticationService.login(requestBody);
+    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody AuthenticationRequestDTO requestBody, HttpServletResponse response) {
+        AuthenticationResponseDTO authResponse = authenticationService.loginUserNamePassWord(requestBody);
+        String authToken = authResponse.getToken();
+
         final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", authToken)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
@@ -52,11 +52,17 @@ public class AuthenController {
                 .secure(false)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/add-password")
+    public ResponseEntity<?> addPassword(@RequestBody AuthenticationRequestDTO requestBody){
+        authenticationService.addPassword(requestBody);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody AuthenticationRequest requestBody) {
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDTO requestBody) {
         authenticationService.changePassword(requestBody);
         return ResponseEntity.ok().build();
     }

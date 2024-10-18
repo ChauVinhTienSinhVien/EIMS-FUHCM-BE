@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -30,7 +31,8 @@ public class InvigilatorAttendance {
     @Column(name = "check_out")
     Instant checkOut;
 
-    @Column(name = "status", nullable = false, columnDefinition = "int default 1")
+    @Column(name = "status", nullable = false)
+    @ColumnDefault("1")
     Integer status;
 
     @Column(name = "updated_at")

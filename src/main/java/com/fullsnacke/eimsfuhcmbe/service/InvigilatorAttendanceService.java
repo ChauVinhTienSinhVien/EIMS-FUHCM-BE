@@ -7,9 +7,9 @@ import java.util.List;
 public interface InvigilatorAttendanceService {
     InvigilatorAttendance createAttendance(InvigilatorAttendance invigilatorAttendance);
     InvigilatorAttendance updateAttendance(InvigilatorAttendance invigilatorAttendance);
-    InvigilatorAttendance checkIn(Integer invigilatorAssignmentId);
-    InvigilatorAttendance checkOut(Integer invigilatorAssignmentId);
+    InvigilatorAttendance checkIn(InvigilatorAttendance invigilatorAttendance);
+    InvigilatorAttendance checkOut(InvigilatorAttendance invigilatorAttendance);
 
-    List<InvigilatorAttendance> checkInAll(List<Integer> invigilatorAssignmentIds);
-    List<InvigilatorAttendance> checkOutAll(List<Integer> invigilatorAssignmentIds);
+    List<InvigilatorAttendance> checkInAll(List<InvigilatorAttendance> invigilatorAttendanceList);
+    List<InvigilatorAttendance> checkOutAll(List<InvigilatorAttendance> invigilatorAttendanceList);
 }

@@ -13,6 +13,8 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
 
 
     List<ExamSlot> findExamSlotBySubjectExam_SubjectId_SemesterId(Semester semester);
+
+
 }
 
 

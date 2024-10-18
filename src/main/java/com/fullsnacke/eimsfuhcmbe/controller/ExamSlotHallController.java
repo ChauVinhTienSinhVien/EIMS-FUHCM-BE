@@ -66,10 +66,19 @@ public class ExamSlotHallController {
         examSlotService.updateExamSlotExamSlot(examSlot, examSlot.getId());
         return examSlotHallResponseDTOList;
     }
-//    public List<ExamSlotHall> addExamSlotHalls(@RequestBody ExamSlotHallRequestDTO requestDTO) {
-//
-//        return examSlotHallService.addExamSlotHalls(requestDTO);
-//    }
+
+    @PutMapping
+    @Operation(summary = "Update an exam slot hall", description = "Updates an exam slot hall in the system.")
+    public List<ExamSlotHallResponseDTO> updateExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {
+        List<ExamSlotHall> examSlotHallList = examSlotHallService.updateExamSlotHall(requestDTO);
+
+        List<ExamSlotHallResponseDTO> examSlotHallResponseDTOList = new ArrayList<>();
+        for (ExamSlotHall examSlotHall : examSlotHallList) {
+            ExamSlotHallResponseDTO examSlotHallResponseDTO = examSlotHallMapper.toDto(examSlotHall);
+            examSlotHallResponseDTOList.add(examSlotHallResponseDTO);
+        }
+        return examSlotHallResponseDTOList;
+    }
 
 
 }

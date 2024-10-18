@@ -52,7 +52,6 @@ public class UserController {
             return ResponseEntity.ok(userResponseDTOList);
         }
 
-
     }
 
     @PostMapping
@@ -123,11 +122,4 @@ public class UserController {
         }
     }
 
-    @GetMapping("/userInfo")
-    public ResponseEntity<UserResponseDTO> getUserInfo(@AuthenticationPrincipal
-    OAuth2User oAuth2User){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userServiceImpl.getMyInfo(oAuth2User));
-    }
 }

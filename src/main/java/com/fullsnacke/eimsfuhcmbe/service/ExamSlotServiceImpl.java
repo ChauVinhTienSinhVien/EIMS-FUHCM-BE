@@ -44,6 +44,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     public ExamSlot updateExamSlotExamSlot(ExamSlot examSlotInRequest, int id) {
 //        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
+
         User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
 
         if (examSlotInDB == null)
@@ -54,6 +55,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
+
         return examSlotRepository.save(examSlotInDB);
     }
 

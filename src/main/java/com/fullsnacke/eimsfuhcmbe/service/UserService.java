@@ -28,5 +28,4 @@ public interface UserService {
 
     public void deleteUser(String fuId);
 
-    public UserResponseDTO getMyInfo(OAuth2User oAuth2User);
 }

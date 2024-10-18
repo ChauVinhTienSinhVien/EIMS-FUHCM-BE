@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        User user =  userRepository.findByEmailAndIsDeleted(email, false);
+        User user =  userRepository.findUserByEmailAndIsDeleted(email, false);
         if(user == null){
             throw new EntityNotFoundException(User.class, "email", email);
         }
@@ -120,25 +120,6 @@ public class UserServiceImpl implements UserService {
         }
         userInDb.setIsDeleted(true);
         userRepository.save(userInDb);
-    }
-
-    @Override
-    public UserResponseDTO getMyInfo(OAuth2User oAuth2User) {
-        String email = oAuth2User.getAttribute("email");
-        System.out.println(email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND));
-
-        return new UserResponseDTO().builder()
-                .fuId(user.getFuId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
-                .department(user.getDepartment())
-                .gender(user.getGender())
-                .role(user.getRole().getId())
-                .build();
     }
 
 }

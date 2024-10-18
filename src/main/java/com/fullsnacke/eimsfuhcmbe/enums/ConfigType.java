@@ -10,7 +10,6 @@ public enum ConfigType {
     INVIGILATOR_ROOM("invigilator_room", ConfigUnit.ROOM.getValue());
 
 
-
     private final String value;
     private final String unit;
 

@@ -17,7 +17,8 @@ public class ExamSlotHallResponseDTO {
     int examSlotId;
     int hallInvigilatorId;
     String hallInvigilatorFuId;
-    String hallInvigilatorName;
+    String hallInvigilatorFirstName;
+    String hallInvigilatorLastName;
 //    // ExamSlotDTO examSlotDTO;
 //    List<String> roomNames;
 //    Instant startTime;

@@ -133,4 +133,15 @@ public class SubjectController {
         return ResponseEntity.ok(subjectResponseDTOList);
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a subject by id", description = "Delete a subject by id")
+    public ResponseEntity<?> deleteSubject(@PathVariable("id") int id) {
+        try {
+            subjectServiceImpl.deleteSubject(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

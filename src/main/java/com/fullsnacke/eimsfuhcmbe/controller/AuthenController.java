@@ -1,23 +1,23 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.UserMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.request.AuthenticationRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ChangePasswordRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.IdTokenRequestDto;
+import com.fullsnacke.eimsfuhcmbe.dto.response.AuthenticationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.authentication.AuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Collection;
 
 @RestController
 @RequestMapping("/v1/oauth")
@@ -27,10 +27,13 @@ public class AuthenController {
     AuthenticationService authenticationService;
     @Autowired
     private UserServiceImpl userServiceImpl;
+    @Autowired
+    private UserMapper userMapper;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
-        String authToken = authenticationService.loginOAuthGoogle(requestBody);
+    @PostMapping("/google/login")
+    public ResponseEntity<AuthenticationResponseDTO> LoginWithGoogleOauth2(@RequestBody IdTokenRequestDto requestBody, HttpServletResponse response) {
+        AuthenticationResponseDTO authResponse = authenticationService.loginOAuthGoogle(requestBody);
+        String authToken = authResponse.getToken();
         final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", authToken)
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
@@ -38,6 +41,33 @@ public class AuthenController {
                 .secure(false)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok().body(authResponse);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponseDTO> login(@RequestBody AuthenticationRequestDTO requestBody, HttpServletResponse response) {
+        AuthenticationResponseDTO authResponse = authenticationService.loginUserNamePassWord(requestBody);
+        String authToken = authResponse.getToken();
+
+        final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", authToken)
+                .httpOnly(true)
+                .maxAge(7 * 24 * 3600)
+                .path("/")
+                .secure(false)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ResponseEntity.ok(authResponse);
+    }
+
+    @PostMapping("/add-password")
+    public ResponseEntity<?> addPassword(@RequestBody AuthenticationRequestDTO requestBody){
+        authenticationService.addPassword(requestBody);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDTO requestBody) {
+        authenticationService.changePassword(requestBody);
         return ResponseEntity.ok().build();
     }
 
@@ -56,10 +86,10 @@ public class AuthenController {
     }
 
     @GetMapping("/user/info")
-    public ResponseEntity<?> getUserInfo(Principal principal) {
+    public ResponseEntity<UserResponseDTO> getUserInfo(Principal principal) {
         User user = userServiceImpl.getUserByEmail(principal.getName());
-        System.out.println(user.getFuId());
-        return ResponseEntity.ok().body(user);
+        UserResponseDTO userResponseDTO = userMapper.toDto(user);
+        return ResponseEntity.ok().body(userResponseDTO);
     }
 
 }

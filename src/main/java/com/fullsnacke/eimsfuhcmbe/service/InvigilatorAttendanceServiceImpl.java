@@ -2,10 +2,8 @@ package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
-import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorRegistration;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAttendanceRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,9 +66,9 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     }
 
     @Override
-    public InvigilatorAttendance checkIn(InvigilatorAttendance invigilatorAttendance) {
+    public InvigilatorAttendance checkIn(Integer id) {
 
-        InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(invigilatorAttendance.getId()).orElse(null);
+        InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(id).orElse(null);
 
         if(invigilatorAttendanceInDb != null){
             invigilatorAttendanceInDb.setCheckIn(Instant.now());
@@ -80,9 +78,9 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     }
 
     @Override
-    public InvigilatorAttendance checkOut(InvigilatorAttendance invigilatorAttendance) {
+    public InvigilatorAttendance checkOut(Integer id) {
 
-        InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(invigilatorAttendance.getId()).orElse(null);
+        InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(id).orElse(null);
 
         if(invigilatorAttendanceInDb != null){
             invigilatorAttendanceInDb.setCheckOut(Instant.now());
@@ -92,28 +90,36 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     }
 
     @Override
-    public List<InvigilatorAttendance> checkInAll(List<InvigilatorAttendance> invigilatorAttendanceList) {
-        List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
-        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendanceList) {
-            InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(invigilatorAttendance.getId()).orElse(null);
-            if(invigilatorAttendanceInDb != null){
-                invigilatorAttendanceInDb.setCheckIn(Instant.now());
-                invigilatorAttendances.add(invigilatorAttendanceInDb);
+    @Transactional
+    public List<InvigilatorAttendance> checkInAll(Integer examSlotId) {
+        List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
+        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
+            if(!isCheckIn(invigilatorAttendance)){
+                invigilatorAttendance.setCheckIn(Instant.now());
             }
         }
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
         return invigilatorAttendances;
     }
 
     @Override
-    public List<InvigilatorAttendance> checkOutAll(List<InvigilatorAttendance> invigilatorAttendanceList) {
-        List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
-        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendanceList) {
-            InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(invigilatorAttendance.getId()).orElse(null);
-            if(invigilatorAttendanceInDb != null){
-                invigilatorAttendanceInDb.setCheckOut(Instant.now());
-                invigilatorAttendances.add(invigilatorAttendanceInDb);
+    @Transactional
+    public List<InvigilatorAttendance> checkOutAll(Integer examSlotId) {
+        List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
+        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
+            if(!isCheckOut(invigilatorAttendance)){
+                invigilatorAttendance.setCheckOut(Instant.now());
             }
         }
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
         return invigilatorAttendances;
+    }
+
+    private boolean isCheckIn(InvigilatorAttendance invigilatorAttendance) {
+        return invigilatorAttendance.getCheckIn() != null;
+    }
+
+    private boolean isCheckOut(InvigilatorAttendance invigilatorAttendance) {
+        return invigilatorAttendance.getCheckOut() != null;
     }
 }

@@ -65,26 +65,45 @@ public class ExamSlotHallServiceImpl implements ExamSlotHallService {
     }
 
     @Override
-    public ExamSlotHall updateExamSlotHall(ExamSlotHall examSlotHall) {
+    public List<ExamSlotHall> updateExamSlotHall(ExamSlotHallRequestDTO examSlotHallRequestDTO) {
 
-        ExamSlotHall examSlotHall1 = examSlotHallRepository.findExamSlotHallById(examSlotHall.getId());
-        if (examSlotHall1 == null)
-            throw new EntityNotFoundException("Exam slot hall not found");
+       ExamSlot examSlot = examSlotRepository.findExamSlotById(examSlotHallRequestDTO.getExamSlotId());
+        if (examSlot == null)
+            throw new EntityNotFoundException("Exam slot not found with ID: " + examSlotHallRequestDTO.getExamSlotId());
 
-//        examSlotRoomRepository.deleteByExamSlotHallId(examSlotHall.getId());
+        List<ExamSlotHall> examSlotHallList = examSlotHallRepository.findByExamSlot(examSlot);
+        if (examSlotHallList == null)
+            throw new EntityNotFoundException("Exam slot hall not found with exam slot ID: " + examSlotHallRequestDTO.getExamSlotId());
+
+        // Delete all related ExamSlotRooms
+        for (ExamSlotHall hall : examSlotHallList) {
+            List<ExamSlotRoom> examSlotRoomList = examSlotRoomRepository.findByExamSlotHall(hall);
+            examSlotRoomRepository.deleteAll(examSlotRoomList);
+            examSlotHallRepository.delete(hall);
+        }
+
         // Add new ExamSlotRooms
-//        for (List<String> roomIds : requestDTO.getRoomIds()) {
-//            for (String roomId : roomIds) {
-//                Room room = roomRepository.findById(roomId)
-//                        .orElseThrow(() -> new RuntimeException("Room not found"));
-//                ExamSlotRoom examSlotRoom = new ExamSlotRoom();
-//                examSlotRoom.setExamSlot(examSlot);
-//                examSlotRoom.setRoom(room);
-//                examSlotRoom.setExamSlotHall(examSlotHall);
-//                examSlotRoomRepository.save(examSlotRoom);
-//            }
-//        }
-        return null;
+        List<ExamSlotHall> newExamSlotHallList = new ArrayList<>();
+        for (List<String> roomIds : examSlotHallRequestDTO.getRoomIds()) {
+            ExamSlotHall examSlotHall = new ExamSlotHall();
+            examSlotHall.setExamSlot(examSlot);
+            examSlotHallRepository.save(examSlotHall);
+
+            for (String roomId : roomIds) {
+                Room room = roomRepository.findRoomById(Integer.parseInt(roomId));
+                if (room == null)
+                    throw new EntityNotFoundException("Room not found");
+
+                ExamSlotRoom examSlotRoom = new ExamSlotRoom();
+                examSlotRoom.setRoom(room);
+                examSlotRoom.setExamSlotHall(examSlotHall);
+                examSlotRoomRepository.save(examSlotRoom);
+            }
+
+            newExamSlotHallList.add(examSlotHall);
+        }
+
+        return newExamSlotHallList;
     }
 
     @Override

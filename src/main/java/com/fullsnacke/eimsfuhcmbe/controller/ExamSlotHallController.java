@@ -57,8 +57,13 @@ public class ExamSlotHallController {
             examSlotHallResponseDTOList.add(examSlotHallResponseDTO);
         }
         ExamSlot examSlot = examSlotRepository.findExamSlotById(requestDTO.getExamSlotId());
-        examSlot.setStatus(1);
-        examSlotService.updateExamSlotExamSlot(examSlot);
+        examSlot.setStatus(2);
+        int requiredInvigilators = requestDTO.getRoomIds().size();
+        for (List<String> list : requestDTO.getRoomIds()) {
+            requiredInvigilators += list.size();
+        }
+        examSlot.setRequiredInvigilators(requiredInvigilators);
+        examSlotService.updateExamSlotExamSlot(examSlot, examSlot.getId());
         return examSlotHallResponseDTOList;
     }
 //    public List<ExamSlotHall> addExamSlotHalls(@RequestBody ExamSlotHallRequestDTO requestDTO) {

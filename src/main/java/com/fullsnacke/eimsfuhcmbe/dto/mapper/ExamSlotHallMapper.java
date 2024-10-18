@@ -17,10 +17,23 @@ public interface ExamSlotHallMapper {
     @Mapping(source = "examSlotId", target = "examSlot", qualifiedByName = "intToExamSlot")
     ExamSlotHall toEntity(ExamSlotHallRequestDTO requestDTO);
 
+
+//    // version 1
+//    @Mapping(source = "examSlot.id", target = "examSlotId")
+////    @Mapping(source = "hallInvigilator.inviligarotRegistation", target = "hallInvigilatorFuId")
+////    @Mapping(source = "hallInvigilator.inviligarotRegistationId", target = "hallInvigilatorName")
+//    ExamSlotHallResponseDTO toDto(ExamSlotHall examSlotHall);
+
+
+    // version 2
+    @Mapping(source = "id", target = "id")
     @Mapping(source = "examSlot.id", target = "examSlotId")
-//    @Mapping(source = "hallInvigilator.inviligarotRegistation", target = "hallInvigilatorFuId")
-//    @Mapping(source = "hallInvigilator.inviligarotRegistationId", target = "hallInvigilatorName")
+    @Mapping(source = "hallInvigilator.invigilatorRegistration.invigilator.id", target = "hallInvigilatorId")
+    @Mapping(source = "hallInvigilator.invigilatorRegistration.invigilator.fuId", target = "hallInvigilatorFuId")
+    @Mapping(source = "hallInvigilator.invigilatorRegistration.invigilator.firstName", target = "hallInvigilatorFirstName")
+    @Mapping(source = "hallInvigilator.invigilatorRegistration.invigilator.lastName", target = "hallInvigilatorLastName")
     ExamSlotHallResponseDTO toDto(ExamSlotHall examSlotHall);
+
 
 
     @Named("intToExamSlot")

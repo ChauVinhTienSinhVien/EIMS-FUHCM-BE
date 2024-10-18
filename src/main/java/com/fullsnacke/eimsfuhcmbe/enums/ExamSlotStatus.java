@@ -2,10 +2,10 @@ package com.fullsnacke.eimsfuhcmbe.enums;
 
 public enum ExamSlotStatus {
 
-    NEEDS_ROOM_ASSIGNMENT(0),
-    PENDING(1),
-    APPROVED(2),
-    REJECTED(3);
+    NEEDS_ROOM_ASSIGNMENT(1),
+    PENDING(2),
+    APPROVED(3),
+    REJECTED(4);
 
     private final int value;
 

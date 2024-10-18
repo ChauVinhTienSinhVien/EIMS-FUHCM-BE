@@ -32,7 +32,7 @@ public class ExamSlotRequestDTO {
 //
 //    Instant endAt;
 
-    Integer id;
+//    Integer id;
 
     Integer subjectExamId;
 
@@ -42,14 +42,14 @@ public class ExamSlotRequestDTO {
 
     Integer requiredInvigilators;
 
-    Instant createdAt;
-
-    Integer createdBy;
+//    Instant createdAt;
+//
+//    Integer createdBy;
 
     ExamSlotStatus status;
 
-    Integer updatedBy;
-
-    Instant updatedAt;
+//    Integer updatedBy;
+//
+//    Instant updatedAt;
 
 }

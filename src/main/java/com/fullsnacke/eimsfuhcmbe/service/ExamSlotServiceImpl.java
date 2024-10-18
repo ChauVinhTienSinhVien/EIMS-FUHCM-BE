@@ -1,18 +1,18 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
-import com.fullsnacke.eimsfuhcmbe.entity.Semester;
-import com.fullsnacke.eimsfuhcmbe.entity.Subject;
+import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subjectexam.SubjectExamNotFoundException;
-import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
-import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
+import com.fullsnacke.eimsfuhcmbe.repository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -23,6 +23,12 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
     @Autowired
     private SemesterRepository semesterRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ExamSlotHallRepository examSlotHallRepository;
+    @Autowired
+    private ExamSlotRoomRepository examSlotRoomRepository;
 
     @Override
     public List<ExamSlot> getAllExamSlot() {
@@ -35,12 +41,17 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     }
 
     @Override
-    public ExamSlot updateExamSlotExamSlot(ExamSlot examSlotInRequest) {
-        int id = examSlotInRequest.getId();
+    public ExamSlot updateExamSlotExamSlot(ExamSlot examSlotInRequest, int id) {
+//        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
 
+        User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
+
         if (examSlotInDB == null)
-            throw new ExamSlotNotFoundException("ExamSlot not found with ID: " + id);
+            throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
+
+        if (user.getRole().getId() == 1)
+            examSlotInDB.setUpdatedBy(user);
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
@@ -58,6 +69,29 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     public void deleteExamSlot(int id) {
         ExamSlot examSlot = findById(id);
             examSlotRepository.delete(examSlot);
+    }
+
+    @Override
+    public List<List<String>> getHallForExamSlot(int examSlotId) {
+        ExamSlot examSlot = examSlotRepository.findExamSlotById(examSlotId);
+        List<ExamSlotHall> examSlotHallList = examSlotHallRepository.findByExamSlot(examSlot);
+        if (examSlotHallList == null) {
+            return new ArrayList<>();
+        }
+
+        List<List<String>> result = new ArrayList<>();
+        for (ExamSlotHall hall : examSlotHallList) {
+            List<ExamSlotRoom> rooms = examSlotRoomRepository.findByExamSlotHall(hall);
+            if (rooms == null) {
+                return new ArrayList<>();
+            }
+            List<String> roomNames = new ArrayList<>();
+            for (ExamSlotRoom room : rooms) {
+                roomNames.add(room.getRoom().getRoomName());
+            }
+            result.add(roomNames);
+        }
+        return result;
     }
 
     @Override

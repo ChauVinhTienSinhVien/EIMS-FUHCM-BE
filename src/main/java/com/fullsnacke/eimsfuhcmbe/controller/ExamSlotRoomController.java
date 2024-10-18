@@ -5,6 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRoomRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotRoom;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotRoomService;
+import com.fullsnacke.eimsfuhcmbe.service.ExamSlotService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -58,6 +59,8 @@ public class ExamSlotRoomController {
     public List<String> getAllAvailableRooms(@RequestParam ZonedDateTime startAt, @RequestParam ZonedDateTime endAt) {
         return examSlotRoomService.getAllUnavailableRooms(startAt, endAt);
     }
+
+
 
     @PostMapping
     @Operation(summary = "Create a new exam slot room", description = "Creates a new exam slot room in the system.")

@@ -58,6 +58,11 @@ public class ExamSlotHallController {
         }
         ExamSlot examSlot = examSlotRepository.findExamSlotById(requestDTO.getExamSlotId());
         examSlot.setStatus(2);
+        int requiredInvigilators = requestDTO.getRoomIds().size();
+        for (List<String> list : requestDTO.getRoomIds()) {
+            requiredInvigilators += list.size();
+        }
+        examSlot.setRequiredInvigilators(requiredInvigilators);
         examSlotService.updateExamSlotExamSlot(examSlot, examSlot.getId());
         return examSlotHallResponseDTOList;
     }

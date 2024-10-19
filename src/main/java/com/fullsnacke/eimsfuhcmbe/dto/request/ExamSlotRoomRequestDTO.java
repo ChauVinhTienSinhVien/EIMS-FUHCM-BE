@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ExamSlotRomRequestDTO {
+public class ExamSlotRoomRequestDTO {
 
     Integer examSlotRoomId;
     Integer examHallId;

@@ -1,11 +1,13 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorRegistration;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.RequestStatusEnum;
@@ -14,26 +16,35 @@ import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
+import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorRegistrationRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.RequestRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.slf4j.Logger;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RequestServiceImpl implements RequestService {
+
+    Logger log = org.slf4j.LoggerFactory.getLogger(RequestServiceImpl.class);
+
     RequestRepository requestRepository;
     UserRepository userRepository;
     RequestMapper requestMapper;
     ExamSlotRepository examSlotRepository;
+    InvigilatorAssignmentService invigilatorAssignmentService;
+    InvigilatorRegistrationService invigilatorRegistrationService;
+    InvigilatorRegistrationRepository invigilatorRegistrationRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO createRequest(RequestRequestDTO request) {
@@ -49,6 +60,7 @@ public class RequestServiceImpl implements RequestService {
 //        }
         try {
             var currentUser = getCurrentUser();
+            log.info("Current User: {}", currentUser.getFuId());
             request.setInvigilator(currentUser);
             request.setRequestType(RequestTypeEnum.CANCEL.name());
 
@@ -60,7 +72,7 @@ public class RequestServiceImpl implements RequestService {
             responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
             return responseDTO;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error occurred while creating request", e);
             throw new CustomException(ErrorCode.REQUEST_CREATION_FAILED);
         }
     }
@@ -113,6 +125,62 @@ public class RequestServiceImpl implements RequestService {
                 .toList();
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public RequestResponseDTO updateRequestStatus(ExchangeInvigilatorsRequestDTO request) {
+        //find request by id
+        log.info("Request ID: {}", request.getRequestId());
+        Request entity = requestRepository.findById(request.getRequestId())
+                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
+
+        //convert status to enum
+        log.info("Status entity: {}", entity.getStatus());
+        RequestStatusEnum entityStatus = RequestStatusEnum.fromValue(entity.getStatus());
+        RequestStatusEnum status;
+        try {
+            status = RequestStatusEnum.valueOf(request.getStatus());
+            log.info("Status: {}", status);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
+        }
+
+        log.info("Status: {}", status);
+        if (entityStatus != RequestStatusEnum.PENDING) {
+            throw new CustomException(ErrorCode.REQUEST_ALREADY_PROCESSED);
+        }
+
+        //update status
+        if (status == RequestStatusEnum.APPROVED) {
+            //CREATE INVIGILATOR REGISTRATION
+            InvigilatorRegistration registration = invigilatorRegistrationRepository.findByExamSlotIdAndInvigilatorFuId(entity.getExamSlot().getId(), request.getNewInvigilatorFuId())
+                    .orElseGet(() -> {
+                        InvigilatorRegistrationRequestDTO registrationRequest = InvigilatorRegistrationRequestDTO.builder()
+                                .fuId(request.getNewInvigilatorFuId())
+                                .examSlotId(Set.of(entity.getExamSlot().getId()))
+                                .build();
+
+                        invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
+                        return null;
+                    });
+
+            invigilatorAssignmentService.exchangeInvigilators(entity, request);
+        }
+        //update request
+        entity.setStatus(status.getValue());
+//        entity.setUpdatedAt(Instant.now());
+        entity.setComment(request.getNote());
+
+        //save update request
+        requestRepository.save(entity);
+
+        //convert to response dto
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+        responseDTO.setStatus(status.name());
+        return responseDTO;
+    }
+
+
+    //-----------------------------PRIVATE METHOD--------------------------------
+
     private void setExamSlot(ExamSlot examSlot) {
         if (examSlot == null) {
             throw new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND);
@@ -135,20 +203,8 @@ public class RequestServiceImpl implements RequestService {
         }
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 
-    public RequestResponseDTO updateRequestStatus(int requestId, UpdateStatusRequestDTO status) {
-        Request entity = requestRepository.findById(requestId)
-                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
-
-        entity.setStatus(RequestStatusEnum.fromName(status.getStatus()).getValue());
-        entity.setUpdatedAt(java.time.Instant.now());
-        requestRepository.save(entity);
-
-        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
-        responseDTO.setStatus(RequestStatusEnum.fromValue(entity.getStatus()).name());
-        return responseDTO;
-    }
 
 }

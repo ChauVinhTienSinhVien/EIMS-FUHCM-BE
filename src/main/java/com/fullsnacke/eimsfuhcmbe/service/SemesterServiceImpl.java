@@ -6,6 +6,7 @@ import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
+import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.semester.SemesterNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
@@ -44,7 +45,7 @@ public class SemesterServiceImpl implements SemesterService {
         Semester lastestSemester =  semesterRepository.findFirstByOrderByStartAtDesc();
         Semester createdSemester = semesterRepository.save(semester);
         configServiceImpl.cloneLastedSemesterConfig(createdSemester, lastestSemester);
-        List<Subject> subjectList = subjectServiceImpl.cloneSubjectFromPreviousSemester(createdSemester, lastestSemester);
+        subjectServiceImpl.cloneSubjectFromPreviousSemester(createdSemester, lastestSemester);
         subjectExamServiceImpl.cloneSubjectExamFromPreviousSemester(createdSemester, lastestSemester);
         return createdSemester;
     }
@@ -54,7 +55,7 @@ public class SemesterServiceImpl implements SemesterService {
 
         Semester semesterInDB = semesterRepository.findById(id).orElse(null);
         if (semesterInDB == null)
-            throw new SemesterNotFoundException("Semester not found");
+            throw new EntityNotFoundException(Semester.class, "id", String.valueOf(id));
         semesterInDB.setName(semester.getName());
         semesterInDB.setEndAt(semester.getEndAt());
         semesterInDB.setStartAt(semester.getStartAt());

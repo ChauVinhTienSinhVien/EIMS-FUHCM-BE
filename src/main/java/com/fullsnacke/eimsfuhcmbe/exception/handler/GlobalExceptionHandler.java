@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -24,6 +26,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Date;
@@ -31,6 +35,7 @@ import java.util.List;
 
 @ControllerAdvice
 @Slf4j
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
@@ -89,7 +94,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     //NGAN
     @ExceptionHandler(value = CustomException.class)
-    ResponseEntity<ApiResponse> handlingCustomException(CustomException exception, HttpServletRequest request){
+    ResponseEntity<ApiResponse<?>> handlingCustomException(CustomException exception, HttpServletRequest request){
         ErrorCode errorCode = exception.getErrorCode();
         if(errorCode.getPath() == null){
             errorCode.setPath(request.getServletPath());
@@ -112,6 +117,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             errorCode.setPath(((ServletWebRequest) request).getRequest().getServletPath());
         }
 
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getStatusCode().value())
+                        .message(errorCode.getMessage())
+                        .path(errorCode.getPath())
+                        .build());
+    }
+
+    //NGAN
+    @ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ApiResponse> handlingMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException exception, HttpServletRequest request){
+        ErrorCode errorCode = ErrorCode.METHOD_ARGUMENT_TYPE_MISMATCH;
+        if(errorCode.getPath() == null){
+            errorCode.setPath(request.getRequestURI());
+        }
+        return ResponseEntity
+                .status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getStatusCode().value())
+                        .message(errorCode.getMessage())
+                        .path(errorCode.getPath())
+                        .build());
+    }
+
+    //NGAN
+    @ExceptionHandler(value = AsyncRequestNotUsableException.class)
+    ResponseEntity<ApiResponse> handlingAsyncRequestNotUsableException(AsyncRequestNotUsableException exception, HttpServletRequest request){
+        ErrorCode errorCode = ErrorCode.ASYNC_REQUEST_NOT_USABLE;
+        if(errorCode.getPath() == null){
+            errorCode.setPath(request.getRequestURI());
+        }
         return ResponseEntity
                 .status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()

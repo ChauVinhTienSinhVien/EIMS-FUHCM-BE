@@ -1,5 +1,12 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotRoomMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserRegistrationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
@@ -7,13 +14,13 @@ import com.fullsnacke.eimsfuhcmbe.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,90 +28,221 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentService {
 
+    Logger log = LoggerFactory.getLogger(InvigilatorAssignmentServiceImpl.class);
+
     SemesterRepository semesterRepository;
     InvigilatorRegistrationRepository invigilatorRegistrationRepository;
     InvigilatorAssignmentRepository invigilatorAssignmentRepository;
+    InvigilatorRegistrationMapper invigilatorRegistrationMapper;
     ExamSlotRepository examSlotRepository;
     ExamSlotRoomRepository examSlotRoomRepository;
+    ExamSlotRoomMapper examSlotRoomMapper;
     ExamSlotHallRepository examSlotHallRepository;
 
     @Transactional(rollbackFor = Exception.class)
-    public List<ExamSlotRoom> assignInvigilatorToRoom(int semesterId) {
-        Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
-        System.out.println("Semester: " + semester.getName());
+    public List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds) {
+        if(examSlotIds.isEmpty()) {
+            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
+        }
+//        List<ExamSlot> examSlots = examSlotRepository.findExamSlotsBySemesterWithDetails(semester);
+        List<ExamSlot> examSlots = examSlotRepository.findByIdIn(examSlotIds);
 
-        List<ExamSlot> examSlots = examSlotRepository.findExamSlotBySubjectExam_SubjectId_SemesterId(semester);
-        System.out.println("Exam Slots: " + examSlots.stream().map(ExamSlot::getId).collect(Collectors.toSet()));
+        Map<Integer, List<InvigilatorRegistration>> registrationMap = invigilatorRegistrationRepository
+                .findUnassignedRegistrationsByExamSlotInOrderByCreatedAtAsc(examSlots)
+                .stream()
+                .collect(Collectors.groupingBy(reg -> reg.getExamSlot().getId()));
+        log.info("Registration Map: {}", registrationMap);
+        registrationMap.forEach((examSlotId, registrations) -> {
+            log.info("ExamSlot ID: {}, Registrations Size: {}", examSlotId, registrations.size());
+        });
+
+        if(registrationMap.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_INVIGILATOR_REGISTRATION);
+        }
+
+        Map<Integer, List<ExamSlotHall>> hallMap = examSlotHallRepository
+                .findByExamSlotIn(examSlots)
+                .stream()
+                .collect(Collectors.groupingBy(hall -> hall.getExamSlot().getId()));
+
+        log.info("Hall Map: {}", hallMap);
+        hallMap.forEach((examSlotId, halls) -> {
+            log.info("ExamSlot ID: {}, Halls: {}", examSlotId, halls.size());
+        });
+
+        Map<Integer, List<ExamSlotRoom>> roomMap = examSlotRoomRepository
+                .findByExamSlotHall_ExamSlotIn(examSlots)
+                .stream()
+                .collect(Collectors.groupingBy(room -> room.getExamSlotHall().getExamSlot().getId()));
+
+        log.info("Room Map: {}", roomMap);
+        roomMap.forEach((examSlotId, rooms) -> {
+            log.info("ExamSlot ID: {}, Rooms: {}", examSlotId, rooms.size());
+        });
 
         for (ExamSlot examSlot : examSlots) {
-            Set<InvigilatorRegistration> invigilatorRegistrations = invigilatorRegistrationRepository
-                    .findByExamSlotOrderByCreatedAtAsc(examSlot);
-            System.out.println("Invigilator Registrations: " + invigilatorRegistrations.stream().map(InvigilatorRegistration::getInvigilator).map(User::getFuId).collect(Collectors.toSet()));
-            List<ExamSlotHall> examSlotHalls = examSlotHallRepository.findByExamSlot(examSlot);
-            System.out.println("Exam Slot Halls: " + examSlotHalls.stream().map(ExamSlotHall::getId).collect(Collectors.toSet()));
-            List<ExamSlotRoom> examSlotRooms = examSlotRoomRepository.findByExamSlotHall_ExamSlot(examSlot);
-            System.out.println("Exam Slot Rooms: " + examSlotRooms.stream().map(ExamSlotRoom::getRoom).map(Room::getRoomName).collect(Collectors.toSet()));
+            List<InvigilatorRegistration> registrations = registrationMap.getOrDefault(examSlot.getId(), new ArrayList<>());
+            List<ExamSlotHall> halls = hallMap.getOrDefault(examSlot.getId(), new ArrayList<>());
+            List<ExamSlotRoom> rooms = roomMap.getOrDefault(examSlot.getId(), new ArrayList<>());
 
-            assignInvigilatorsToRoom(invigilatorRegistrations, examSlotRooms);
-            assignInvigilatorsToHalls(invigilatorRegistrations, examSlotHalls);
+            log.info("Processing ExamSlot ID: {}", examSlot.getId());
+            log.info("Registrations: {}", registrations.size());
+            log.info("Halls: {}", halls.size());
+            log.info("Rooms: {}", rooms.size());
 
+            assignInvigilatorsToRoom(registrations, rooms);
+            assignInvigilatorsToHalls(registrations, halls);
         }
-        return examSlotRoomRepository.findByExamSlotHall_ExamSlotIn(examSlots);
+
+        Set<Integer> examSlotRoomIds = roomMap.values().stream()
+                .flatMap(List::stream)
+                .map(ExamSlotRoom::getId)
+                .collect(Collectors.toSet());
+        return examSlotRoomRepository.findByIdIn(examSlotRoomIds).stream()
+                .map(examSlotRoomMapper::toDto)
+                .toList();
     }
 
-    private void assignInvigilatorsToRoom(Set<InvigilatorRegistration> registrations, List<ExamSlotRoom> examSlotRooms) {
-        List<InvigilatorRegistration> availableInvigilators = new ArrayList<>(registrations);
-        List<ExamSlotRoom> availableRooms = new ArrayList<>(examSlotRooms);
+    @Transactional(rollbackFor = Exception.class)
+    protected void assignInvigilatorsToRoom(List<InvigilatorRegistration> registrations, List<ExamSlotRoom> examSlotRooms) {
+        List<ExamSlotRoom> availableRooms = examSlotRooms.stream()
+                .filter(room -> room.getRoomInvigilator() == null)
+                .toList();
+        log.info("Available Rooms: {}", availableRooms.size());
+        availableRooms.forEach(room ->
+                log.info("ExamSlotRoom ID: {}", room.getId())
+        );
 
-        for (int i = 0; i < availableRooms.size() && availableRooms.size() <= availableInvigilators.size(); i++) {
-            ExamSlotRoom room = examSlotRooms.get(i);
-            InvigilatorRegistration registration = availableInvigilators.get(i);
+        int assignmentCount = Math.min(registrations.size(), availableRooms.size());
+        log.info("Assignment Count: {}", assignmentCount);
+
+        List<InvigilatorAssignment> assignments = new ArrayList<>();
+        List<ExamSlotRoom> roomsToUpdate = new ArrayList<>();
+
+        for (int i = 0; i < assignmentCount; i++) {
+            ExamSlotRoom room = availableRooms.get(i);
+            InvigilatorRegistration registration = registrations.get(i);
 
             InvigilatorAssignment assignment = InvigilatorAssignment.builder()
                     .invigilatorRegistration(registration)
                     .isHallInvigilator(false)
                     .build();
-            invigilatorAssignmentRepository.save(assignment);
+            assignments.add(assignment);
+
             room.setRoomInvigilator(assignment);
-            examSlotRoomRepository.save(room);
-
-            System.out.println("Phòng: " + room.getRoom().getRoomName());
-            System.out.println("Phân công: " + registration.getInvigilator().getFuId());
+            roomsToUpdate.add(room);
+            log.info("Room: {}", room.getRoom().getRoomName());
+            log.info("Invigilator: {}", registration.getInvigilator().getFuId());
         }
-        registrations.removeAll(availableInvigilators.subList(0, Math.min(availableRooms.size(), availableInvigilators.size())));
-//        Iterator<InvigilatorRegistration> registrationIterator = registrations.iterator();
-//        for (ExamSlotRoom examSlotRoom : examSlotRooms) {
-//            System.out.println("Room: " + examSlotRoom.getRoom().getRoomName());
-//            if (registrationIterator.hasNext() && examSlotRoom.getRoomInvigilator() == null) {
-//                InvigilatorRegistration registration = registrationIterator.next();
-//                InvigilatorAssignment assignment = InvigilatorAssignment.builder()
-//                        .invigilatorRegistration(registration)
-//                        .isHallInvigilator(false)
-//                        .build();
-//                System.out.println("Assignment: " + assignment.getInvigilatorRegistration().getInvigilator().getFuId());
-//                invigilatorAssignmentRepository.save(assignment);
-//                examSlotRoom.setRoomInvigilator(assignment);
-//                registrations.remove(registration);
-//            }
-//        }
+
+        try {
+            invigilatorAssignmentRepository.saveAll(assignments);
+            examSlotRoomRepository.saveAll(roomsToUpdate);
+        } catch (Exception e) {
+            log.error("Error in assigning invigilator to room: {}", e.getMessage());
+            throw new CustomException(ErrorCode.FAILD_TO_CLASSIFY_INVIGILATOR);
+        }
+
+        registrations.subList(0, assignmentCount).clear();
     }
 
-    private void assignInvigilatorsToHalls(Set<InvigilatorRegistration> registrations, List<ExamSlotHall> examSlotHalls) {
-        Iterator<InvigilatorRegistration> registrationIterator = registrations.iterator();
-        for (ExamSlotHall examSlotHall : examSlotHalls) {
-            if (registrationIterator.hasNext() && examSlotHall.getHallInvigilator() == null) {
-                InvigilatorRegistration registration = registrationIterator.next();
-                InvigilatorAssignment assignment = InvigilatorAssignment.builder()
-                        .invigilatorRegistration(registration)
-                        .isHallInvigilator(true)
-                        .build();
-                invigilatorAssignmentRepository.save(assignment);
-                examSlotHall.setHallInvigilator(assignment);
-                examSlotHallRepository.save(examSlotHall);
-                registrations.remove(registration);
-            }
+    @Transactional(rollbackFor = Exception.class)
+    protected void assignInvigilatorsToHalls(List<InvigilatorRegistration> registrations, List<ExamSlotHall> examSlotHalls) {
+        List<ExamSlotHall> availableHalls = examSlotHalls.stream()
+                .filter(hall -> hall.getHallInvigilator() == null)
+                .toList();
+
+        int assignmentCount = Math.min(registrations.size(), availableHalls.size());
+        List<InvigilatorAssignment> assignments = new ArrayList<>();
+        List<ExamSlotHall> hallsToUpdate = new ArrayList<>();
+
+        for (int i = 0; i < assignmentCount; i++) {
+            ExamSlotHall hall = availableHalls.get(i);
+            InvigilatorRegistration registration = registrations.get(i);
+
+            InvigilatorAssignment assignment = InvigilatorAssignment.builder()
+                    .invigilatorRegistration(registration)
+                    .isHallInvigilator(true)
+                    .build();
+            assignments.add(assignment);
+
+            hall.setHallInvigilator(assignment);
+            hallsToUpdate.add(hall);
+            log.info("Hall ID: {}", hall.getId());
+            log.info("Invigilator: {}", registration.getInvigilator().getFuId());
+        }
+
+        try {
+            invigilatorAssignmentRepository.saveAll(assignments);
+            examSlotHallRepository.saveAll(hallsToUpdate);
+        } catch (Exception e) {
+            log.error("Error in assigning invigilator to hall: {}", e.getMessage());
+            throw new CustomException(ErrorCode.FAILD_TO_CLASSIFY_INVIGILATOR);
+        }
+
+        registrations.subList(0, assignmentCount).clear();
+    }
+
+
+    public List<UserRegistrationResponseDTO> getUnassignedInvigilators(int examSlotId) {
+        if(examSlotId <= 0) {
+            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
+        }
+
+        List<InvigilatorRegistration> unassignedList = invigilatorRegistrationRepository.findUnassignedRegistrationsByExamSlot_IdOrderByCreatedAtAsc(examSlotId);
+
+        return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(unassignedList);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public String exchangeInvigilators(UpdateInvigilatorAssignmentRequestDTO request) {
+        int assignmentId = request.getAssignmentId();
+        int newRegistrationId = request.getNewRegistrationId();
+        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> {
+                    log.error("Assignment not found: {}", assignmentId);
+                    return new CustomException(ErrorCode.ASSIGNMENT_NOT_FOUND);
+                });
+        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository.findById(newRegistrationId)
+                .orElseThrow(() -> {
+                    log.error("New invigilator not found: {}", newRegistrationId);
+                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
+                });
+        exchangeInvigilators(oldAssignment, newInvigilator);
+        return "Exchanged successfully";
+    }
+
+    private void exchangeInvigilators(InvigilatorAssignment oldAssignment, InvigilatorRegistration newInvigilator) {
+        try {
+            oldAssignment.setInvigilatorRegistration(newInvigilator);
+            invigilatorAssignmentRepository.save(oldAssignment);
+        } catch (Exception e) {
+            log.error("Error in updating invigilator assignment: {}", e.getMessage());
+            throw new CustomException(ErrorCode.EXCHANGE_INVIGILATORS_FAILED);
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public String exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request) {
+
+        int examSlotId = requestEntity.getExamSlot().getId();
+        String oldInvigilatorFuId = requestEntity.getCreatedBy().getFuId();
+
+        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository
+                .findByExamSlotIdAndInvigilatorFuId(examSlotId, oldInvigilatorFuId)
+                .orElseThrow(() -> {
+                    log.error("Old invigilator not found: {}", oldInvigilatorFuId);
+                    return new CustomException(ErrorCode.OLD_INVIGILATOR_NOT_FOUND);
+                });
+
+        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository
+                .findByExamSlotIdAndInvigilatorFuId(examSlotId, request.getNewInvigilatorFuId())
+                .orElseThrow(() -> {
+                    log.error("New invigilator not found: {}", request.getNewInvigilatorFuId());
+                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
+                });
+
+        exchangeInvigilators(oldAssignment, newInvigilator);
+        return "Exchanged successfully";
+    }
 }

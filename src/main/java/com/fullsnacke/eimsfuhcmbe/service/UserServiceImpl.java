@@ -34,15 +34,40 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User add(User user) {
-        Role role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found"));
+        User userInDb = userRepository.findUserByEmail(user.getEmail());
+
+        if (userInDb != null) {
+            if (userInDb.getIsDeleted()) {
+                userInDb.setIsDeleted(false);
+                return userRepository.save(userInDb);
+            } else {
+                throw new AuthenticationProcessException(ErrorCode.USER_ALREADY_EXISTS);
+            }
+        }
+
+        Role role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new EntityNotFoundException(Role.class, "id", user.getRole().getId().toString()));
         user.setRole(role);
+
         return userRepository.save(user);
     }
 
     @Override
     @Transactional
     public List<User> saveAll(List<User> users) {
-        return userRepository.saveAll(users);
+        List<User> result = new ArrayList<>();
+        for (User user : users) {
+            User existingUser = userRepository.findUserByEmail(user.getEmail());
+            if (existingUser != null) {
+                if (existingUser.getIsDeleted()) {
+                    existingUser.setIsDeleted(false);
+                    result.add(userRepository.save(existingUser));
+                }
+            } else {
+                user.setIsDeleted(false);
+                result.add(userRepository.save(user));
+            }
+        }
+        return result;
     }
 
     @Override
@@ -56,23 +81,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND));
+        User user =  userRepository.findUserByEmailAndIsDeleted(email, false);
+        if(user == null){
+            throw new EntityNotFoundException(User.class, "email", email);
+        }
+        return user;
     }
 
     @Override
     public List<User> getAllUsers() {
-        List<User> userList = userRepository.findAll();
-        List<User> nonDeletedUsers = new ArrayList<>();
-        for (User user : userList) {
-            if (user.getIsDeleted() == null || !user.getIsDeleted()) {
-                nonDeletedUsers.add(user);
-            }
-        }
-        if(userList.isEmpty()){
-            throw new EntityNotFoundException(User.class, "All", "All");
-        }
-        return nonDeletedUsers;
+        return userRepository.findAllByIsDeleted(false);
     }
 
     @Override
@@ -89,7 +107,7 @@ public class UserServiceImpl implements UserService {
         userInDb.setGender(userInRequest.getGender());
         userInDb.setDepartment(userInRequest.getDepartment());
         userInDb.setPhoneNumber(userInRequest.getPhoneNumber());
-        userInDb.setRole(roleRepository.findById(userInRequest.getRole().getId()).orElseThrow(() -> new UserNotFoundException("Role not found")));
+        userInDb.setRole(roleRepository.findById(userInRequest.getRole().getId()).orElseThrow(() -> new EntityNotFoundException(Role.class, "id", userInRequest.getRole().getId().toString())));
 
         return userRepository.save(userInDb);
     }
@@ -102,25 +120,6 @@ public class UserServiceImpl implements UserService {
         }
         userInDb.setIsDeleted(true);
         userRepository.save(userInDb);
-    }
-
-    @Override
-    public UserResponseDTO getMyInfo(OAuth2User oAuth2User) {
-        String email = oAuth2User.getAttribute("email");
-        System.out.println(email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND));
-
-        return new UserResponseDTO().builder()
-                .fuId(user.getFuId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
-                .department(user.getDepartment())
-                .gender(user.getGender())
-                .role(user.getRole().getId())
-                .build();
     }
 
 }

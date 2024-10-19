@@ -1,8 +1,10 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.entity.Config;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
+import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,9 @@ public class ConfigServiceImpl implements ConfigService{
     @Autowired
     private SemesterRepository semesterRepository;
 
+    @Autowired
+    ConfigurationHolder configurationHolder;
+
     @Override
     public Config addConfig(Config config) {
         Semester semester = semesterRepository.findById(config.getSemester().getId()).orElseThrow(() -> new RuntimeException("Semester not found"));
@@ -32,7 +37,9 @@ public class ConfigServiceImpl implements ConfigService{
             }
         }
         config.setSemester(semester);
-        return configRepository.save(config);
+        Config addedConfig = configRepository.save(config);
+        configurationHolder.reloadConfigurations();
+        return addedConfig;
     }
 
     @Override
@@ -44,16 +51,24 @@ public class ConfigServiceImpl implements ConfigService{
     public List<Config> getConfigBySemesterId(Integer semesterId) {
         List<Config> configList = configRepository.findBySemesterId(semesterId);
         if(configList.isEmpty()){
-            throw new RuntimeException("Config not found");
+            throw new EntityNotFoundException(Config.class, "Config not found");
         }
         return configList;
+    }
+
+    @Override
+    @Transactional
+    public List<Config> addAllConfigs(List<Config> configList) {
+        List<Config> addedConfigs = configRepository.saveAll(configList);
+        configurationHolder.reloadConfigurations();
+        return addedConfigs;
     }
 
     @Override
     public Config getConfigBySemesterIdAndConfigType(Integer semesterId, String configType) {
         Config config = configRepository.findBySemesterIdAndConfigType(semesterId, configType);
         if(config == null){
-            throw new RuntimeException("Config not found");
+            throw new EntityNotFoundException(Config.class, "Config not found");
         }
         return config;
     }
@@ -61,58 +76,47 @@ public class ConfigServiceImpl implements ConfigService{
     @Override
     public Config updateConfig(Config config) {
         Config configInDb = configRepository.findById(config.getId()).orElseThrow(() -> new RuntimeException("Config not found"));
-        Semester semester = semesterRepository.findById(config.getSemester().getId()).orElseThrow(() -> new RuntimeException("Semester not found"));
-        configInDb.setConfigType(config.getConfigType());
-        configInDb.setUnit(config.getUnit());
         configInDb.setValue(config.getValue());
-        configInDb.setSemester(semester);
-        return configRepository.save(configInDb);
+        Config updaConfig = configRepository.save(configInDb);
+        configurationHolder.reloadConfigurations();
+        return updaConfig;
     }
 
     @Override
     public void deleteConfig(Integer id) {
-        Config config = configRepository.findById(id).orElseThrow(() -> new RuntimeException("Config not found"));
+        Config config = configRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(Config.class, "Config not found"));
         configRepository.deleteById(config.getId());
     }
 
     @Override
     @Transactional
     public List<Config> addAllConfig(List<Config> configList) {
-        return configRepository.saveAll(configList);
+        List<Config> updatedConfigs =  configRepository.saveAll(configList);
+        configurationHolder.reloadConfigurations();
+        return updatedConfigs;
     }
 
     @Override
     @Transactional
     public List<Config> updateAllConfig(List<Config> configList) {
-        return configRepository.saveAll(configList);
+        List<Config> updatedConfigs =  configRepository.saveAll(configList);
+        configurationHolder.reloadConfigurations();
+        return updatedConfigs;
     }
 
+    @Transactional
     public void cloneLastedSemesterConfig(Semester semester, Semester lastestSemester){
-
-        Config hourlyRateConfig = new Config();
-        Config allowedSlotConfig = new Config();
-
-        List<Config> configList = configRepository.findBySemesterId(lastestSemester.getId());
-
-        for (Config config : configList) {
-            if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
-                hourlyRateConfig.setConfigType(config.getConfigType());
-                hourlyRateConfig.setUnit(config.getUnit());
-                hourlyRateConfig.setValue(config.getValue());
-            } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
-                allowedSlotConfig.setConfigType(config.getConfigType());
-                allowedSlotConfig.setUnit(config.getUnit());
-                allowedSlotConfig.setValue(config.getValue());
-            }
-        }
-
+        List<Config> oldConfigList = configRepository.findBySemesterId(lastestSemester.getId());
         List<Config> newConfigList = new ArrayList<>();
 
-        hourlyRateConfig.setSemester(semester);
-        allowedSlotConfig.setSemester(semester);
-
-        newConfigList.add(hourlyRateConfig);
-        newConfigList.add(allowedSlotConfig);
+        for (Config config : oldConfigList) {
+            Config newConfig = new Config();
+            newConfig.setConfigType(config.getConfigType());
+            newConfig.setUnit(config.getUnit());
+            newConfig.setValue(config.getValue());
+            newConfig.setSemester(semester);
+            newConfigList.add(newConfig);
+        }
 
         configRepository.saveAll(newConfigList);
     }

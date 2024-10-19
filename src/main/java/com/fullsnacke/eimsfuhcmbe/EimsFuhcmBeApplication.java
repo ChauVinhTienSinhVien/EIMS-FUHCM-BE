@@ -1,5 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -9,8 +11,6 @@ import java.time.ZoneId;
 public class EimsFuhcmBeApplication {
 
     public static void main(String[] args) {
-        ZoneId defaultZone = ZoneId.systemDefault();
-        System.out.println("System default timezone: " + defaultZone);
         SpringApplication.run(EimsFuhcmBeApplication.class, args);
     }
 

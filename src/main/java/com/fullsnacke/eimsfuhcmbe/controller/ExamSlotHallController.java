@@ -11,6 +11,7 @@ import com.fullsnacke.eimsfuhcmbe.service.ExamSlotService;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -56,14 +57,36 @@ public class ExamSlotHallController {
             examSlotHallResponseDTOList.add(examSlotHallResponseDTO);
         }
         ExamSlot examSlot = examSlotRepository.findExamSlotById(requestDTO.getExamSlotId());
-        examSlot.setStatus(1);
-        examSlotService.updateExamSlotExamSlot(examSlot);
+        examSlot.setStatus(2);
+        int requiredInvigilators = requestDTO.getRoomIds().size();
+        for (List<String> list : requestDTO.getRoomIds()) {
+            requiredInvigilators += list.size();
+        }
+        examSlot.setRequiredInvigilators(requiredInvigilators);
+        examSlotService.updateExamSlotExamSlot(examSlot, examSlot.getId());
         return examSlotHallResponseDTOList;
     }
-//    public List<ExamSlotHall> addExamSlotHalls(@RequestBody ExamSlotHallRequestDTO requestDTO) {
-//
-//        return examSlotHallService.addExamSlotHalls(requestDTO);
-//    }
+
+    @PutMapping
+    @Operation(summary = "Update an exam slot hall", description = "Updates an exam slot hall in the system.")
+    public List<ExamSlotHallResponseDTO> updateExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {
+        List<ExamSlotHall> examSlotHallList = examSlotHallService.updateExamSlotHall(requestDTO);
+
+        List<ExamSlotHallResponseDTO> examSlotHallResponseDTOList = new ArrayList<>();
+        for (ExamSlotHall examSlotHall : examSlotHallList) {
+            ExamSlotHallResponseDTO examSlotHallResponseDTO = examSlotHallMapper.toDto(examSlotHall);
+            examSlotHallResponseDTOList.add(examSlotHallResponseDTO);
+        }
+        ExamSlot examSlot = examSlotRepository.findExamSlotById(requestDTO.getExamSlotId());
+        examSlot.setStatus(2);
+        int requiredInvigilators = requestDTO.getRoomIds().size();
+        for (List<String> list : requestDTO.getRoomIds()) {
+            requiredInvigilators += list.size();
+        }
+        examSlot.setRequiredInvigilators(requiredInvigilators);
+        examSlotService.updateExamSlotExamSlot(examSlot, examSlot.getId());
+        return examSlotHallResponseDTOList;
+    }
 
 
 }

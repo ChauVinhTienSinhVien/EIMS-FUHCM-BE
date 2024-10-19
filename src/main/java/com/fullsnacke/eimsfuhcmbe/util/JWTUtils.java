@@ -15,10 +15,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JWTUtils {
@@ -64,15 +61,15 @@ public class JWTUtils {
                     .parseClaimsJws(token)
                     .getBody();
             //List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(claims.get("role", String.class));
-            User user = userRepository.findByEmailAndIsDeleted(claims.getSubject(), false);
+            User user = userRepository.findUserByEmailAndIsDeleted(claims.getSubject(), false);
             
             if(user == null) {
                 return null;
             }
 
-            List<GrantedAuthority> authorities = (List<GrantedAuthority>) user.getAuthorities();
+            List<GrantedAuthority> authorities = new ArrayList<>(user.getAuthorities());
 
-            return new UsernamePasswordAuthenticationToken(claims.getSubject(), token, authorities);
+            return new UsernamePasswordAuthenticationToken(user, token, authorities);
         } catch (JwtException | IllegalArgumentException ignored) {
             return null;
         }

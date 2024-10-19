@@ -1,16 +1,14 @@
-package com.fullsnacke.eimsfuhcmbe.dto.response;
-
+package com.fullsnacke.eimsfuhcmbe.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationResponse {
-    String token;
-    boolean authenticated;
+public class UpdateInvigilatorAssignmentRequestDTO {
+    int assignmentId;
+    int newRegistrationId;
 }

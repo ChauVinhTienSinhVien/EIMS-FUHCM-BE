@@ -5,11 +5,13 @@ import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationRequest {
-    String email;
-    String password;
+public class ExchangeInvigilatorsRequestDTO {
+    String newInvigilatorFuId;
+    int requestId;
+    String status; //REJECTED or APPROVED
+    String note;
 }

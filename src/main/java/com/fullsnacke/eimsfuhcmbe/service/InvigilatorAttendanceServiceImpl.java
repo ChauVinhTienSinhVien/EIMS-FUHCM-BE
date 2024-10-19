@@ -94,7 +94,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     public List<InvigilatorAttendance> checkInByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
-            if(!isCheckIn(invigilatorAttendance)){
+            if(isCheckIn(invigilatorAttendance)){
                 invigilatorAttendance.setCheckIn(Instant.now());
             }
         }
@@ -107,7 +107,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     public List<InvigilatorAttendance> checkOutByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
-            if(!isCheckOut(invigilatorAttendance)){
+            if(isCheckOut(invigilatorAttendance)){
                 invigilatorAttendance.setCheckOut(Instant.now());
             }
         }
@@ -116,6 +116,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     }
 
     @Override
+    @Transactional
     public List<InvigilatorAttendance> checkInAll(List<Integer> invigilatorAttendanceIds) {
         List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
 
@@ -127,7 +128,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         }
 
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
-            if(!isCheckIn(invigilatorAttendance)){
+            if(isCheckIn(invigilatorAttendance)){
                 invigilatorAttendance.setCheckIn(Instant.now());
             }
         }
@@ -137,6 +138,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     }
 
     @Override
+    @Transactional
     public List<InvigilatorAttendance> checkOutAll(List<Integer> invigilatorAttendanceIds) {
         List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
 
@@ -148,7 +150,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         }
 
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
-            if(!isCheckOut(invigilatorAttendance)){
+            if(isCheckOut(invigilatorAttendance)){
                 invigilatorAttendance.setCheckOut(Instant.now());
             }
         }
@@ -158,10 +160,10 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     }
 
     private boolean isCheckIn(InvigilatorAttendance invigilatorAttendance) {
-        return invigilatorAttendance.getCheckIn() != null;
+        return invigilatorAttendance.getCheckIn() == null;
     }
 
     private boolean isCheckOut(InvigilatorAttendance invigilatorAttendance) {
-        return invigilatorAttendance.getCheckOut() != null;
+        return invigilatorAttendance.getCheckOut() == null;
     }
 }

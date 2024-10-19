@@ -44,13 +44,6 @@ public class SemesterController {
             semesterResponseDTO.setName(semester.getName());
             semesterResponseDTO.setStartAt(semester.getStartAt());
             semesterResponseDTO.setEndAt(semester.getEndAt());
-
-            Config hourlyRateConfig = configServiceImpl.getConfigBySemesterIdAndConfigType(semester.getId(), ConfigType.HOURLY_RATE.getValue());
-            Config allowedSlotConfig = configServiceImpl.getConfigBySemesterIdAndConfigType(semester.getId(), ConfigType.ALLOWED_SLOT.getValue());
-
-            semesterResponseDTO.setHourlyConfig(hourlyRateConfig.getValue());
-            semesterResponseDTO.setAllowedSlotConfig(Integer.parseInt(allowedSlotConfig.getValue()));
-
             semesterResponseDTOS.add(semesterResponseDTO);
         }
 

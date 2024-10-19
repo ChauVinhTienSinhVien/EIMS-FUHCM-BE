@@ -19,7 +19,4 @@ public class SemesterRequestDTO {
 
     Date startAt;
     Date endAt;
-
-    String hourlyConfig;
-    String allowedSlotConfig;
 }

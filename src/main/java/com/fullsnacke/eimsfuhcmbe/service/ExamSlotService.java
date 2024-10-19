@@ -1,6 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.Room;
 
 import java.util.List;
 
@@ -11,5 +12,5 @@ public interface ExamSlotService {
     ExamSlot findById(int id);
     void deleteExamSlot(int id);
     List<ExamSlot> getExamSlotsBySemesterId(int semesterId);
-    List<List<String>> getHallForExamSlot(int examSlotId);
+    List<List<Room>> getHallForExamSlot(int examSlotId);
 }

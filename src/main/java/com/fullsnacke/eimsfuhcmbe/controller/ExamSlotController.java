@@ -4,6 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.Room;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
@@ -66,7 +67,7 @@ public class ExamSlotController {
 
     @GetMapping("/using-rooms/{examSlotId}")
     @Operation(summary = "Find rooms that are currently in use", description = "Returns a list of rooms that are currently in use.")
-    public List<List<String>> getAllUsingRooms(@PathVariable int examSlotId) {
+    public List<List<Room>> getAllUsingRooms(@PathVariable int examSlotId) {
         return examSlotServiceImpl.getHallForExamSlot(examSlotId);
     }
 

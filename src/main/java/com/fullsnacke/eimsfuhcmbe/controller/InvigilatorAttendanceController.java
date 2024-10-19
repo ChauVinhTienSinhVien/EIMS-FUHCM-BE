@@ -84,11 +84,37 @@ public class InvigilatorAttendanceController {
         return ResponseEntity.ok(invigilatorAttendanceResponseDTO);
     }
 
+
+    @PutMapping("checkin-all")
+    @Operation(summary = "Check in all invigilators", description = "Check in all invigilators for an exam slot")
+    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkInAll(@RequestBody List<Integer> invigilatorAttendanceIds) {
+
+        List<InvigilatorAttendance> invigilatorAttendanceList = invigilatorAttendanceService.checkInAll(invigilatorAttendanceIds);
+        List<InvigilatorAttendanceResponseDTO> invigilatorAttendanceResponseDTOList = invigilatorAttendanceList.stream()
+                .map(invigilatorAttendance -> invigilatorAttendanceMapper.toResponseDTO(invigilatorAttendance))
+                .toList();
+
+        return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
+    }
+
+    @PutMapping("checkout-all")
+    @Operation(summary = "Check out all invigilators", description = "Check out all invigilators for an exam slot")
+    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkOutAll(@RequestBody List<Integer> invigilatorAttendanceIds) {
+
+        List<InvigilatorAttendance> invigilatorAttendanceList = invigilatorAttendanceService.checkOutAll(invigilatorAttendanceIds);
+        List<InvigilatorAttendanceResponseDTO> invigilatorAttendanceResponseDTOList = invigilatorAttendanceList.stream()
+                .map(invigilatorAttendance -> invigilatorAttendanceMapper.toResponseDTO(invigilatorAttendance))
+                .toList();
+
+        return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
+    }
+
+
     @PutMapping("checkin-all/{examSlotId}")
     @Operation(summary = "Check in all invigilators", description = "Check in all invigilators for an exam slot")
-    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkInAll(@PathVariable("examSlotId") Integer examSlotId) {
+    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkInAllByExamSlot(@PathVariable("examSlotId") Integer examSlotId) {
 
-        List<InvigilatorAttendance> invigilatorAttendanceList = invigilatorAttendanceService.checkInAll(examSlotId);
+        List<InvigilatorAttendance> invigilatorAttendanceList = invigilatorAttendanceService.checkInByExamSlotId(examSlotId);
         List<InvigilatorAttendanceResponseDTO> invigilatorAttendanceResponseDTOList = invigilatorAttendanceList.stream()
                 .map(invigilatorAttendance -> invigilatorAttendanceMapper.toResponseDTO(invigilatorAttendance))
                 .toList();
@@ -98,9 +124,9 @@ public class InvigilatorAttendanceController {
 
     @PutMapping("checkout-all/{examSlotId}")
     @Operation(summary = "Check out all invigilators", description = "Check out all invigilators for an exam slot")
-    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkoutAll(@PathVariable("examSlotId") Integer examSlotId) {
+    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkoutAllByExamSlot(@PathVariable("examSlotId") Integer examSlotId) {
 
-        List<InvigilatorAttendance> invigilatorAttendanceList = invigilatorAttendanceService.checkOutAll(examSlotId);
+        List<InvigilatorAttendance> invigilatorAttendanceList = invigilatorAttendanceService.checkOutByExamSlotId(examSlotId);
         List<InvigilatorAttendanceResponseDTO> invigilatorAttendanceResponseDTOList = invigilatorAttendanceList.stream()
                 .map(invigilatorAttendance -> invigilatorAttendanceMapper.toResponseDTO(invigilatorAttendance))
                 .toList();

@@ -91,7 +91,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
     @Override
     @Transactional
-    public List<InvigilatorAttendance> checkInAll(Integer examSlotId) {
+    public List<InvigilatorAttendance> checkInByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
             if(!isCheckIn(invigilatorAttendance)){
@@ -104,13 +104,55 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
     @Override
     @Transactional
-    public List<InvigilatorAttendance> checkOutAll(Integer examSlotId) {
+    public List<InvigilatorAttendance> checkOutByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
             if(!isCheckOut(invigilatorAttendance)){
                 invigilatorAttendance.setCheckOut(Instant.now());
             }
         }
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return invigilatorAttendances;
+    }
+
+    @Override
+    public List<InvigilatorAttendance> checkInAll(List<Integer> invigilatorAttendanceIds) {
+        List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
+
+        for (Integer invigilatorAttendanceId : invigilatorAttendanceIds) {
+            InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceRepository.findById(invigilatorAttendanceId).orElse(null);
+            if(invigilatorAttendance != null){
+                invigilatorAttendances.add(invigilatorAttendance);
+            }
+        }
+
+        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
+            if(!isCheckIn(invigilatorAttendance)){
+                invigilatorAttendance.setCheckIn(Instant.now());
+            }
+        }
+
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return invigilatorAttendances;
+    }
+
+    @Override
+    public List<InvigilatorAttendance> checkOutAll(List<Integer> invigilatorAttendanceIds) {
+        List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
+
+        for (Integer invigilatorAttendanceId : invigilatorAttendanceIds) {
+            InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceRepository.findById(invigilatorAttendanceId).orElse(null);
+            if(invigilatorAttendance != null){
+                invigilatorAttendances.add(invigilatorAttendance);
+            }
+        }
+
+        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
+            if(!isCheckOut(invigilatorAttendance)){
+                invigilatorAttendance.setCheckOut(Instant.now());
+            }
+        }
+
         invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
         return invigilatorAttendances;
     }

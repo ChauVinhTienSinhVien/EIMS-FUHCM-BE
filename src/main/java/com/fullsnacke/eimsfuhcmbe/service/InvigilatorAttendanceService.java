@@ -10,6 +10,10 @@ public interface InvigilatorAttendanceService {
     InvigilatorAttendance checkIn(Integer id);
     InvigilatorAttendance checkOut(Integer id);
 
-    List<InvigilatorAttendance> checkInAll(Integer examSlotId);
-    List<InvigilatorAttendance> checkOutAll(Integer examSlotId);
+    List<InvigilatorAttendance> checkInByExamSlotId(Integer examSlotId);
+    List<InvigilatorAttendance> checkOutByExamSlotId(Integer examSlotId);
+
+    List<InvigilatorAttendance> checkInAll(List<Integer> invigilatorAttendanceIds);
+    List<InvigilatorAttendance> checkOutAll(List<Integer> invigilatorAttendanceIds);
 }
+

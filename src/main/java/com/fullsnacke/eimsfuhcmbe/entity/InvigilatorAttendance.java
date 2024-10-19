@@ -3,18 +3,23 @@ package com.fullsnacke.eimsfuhcmbe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
 @Entity
-@Table(name = "attendance")
 @Setter
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Attendance {
+@Table(name = "invigilator_attendances")
+@EntityListeners(AuditingEntityListener.class)
+public class InvigilatorAttendance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -27,21 +32,19 @@ public class Attendance {
     Instant checkOut;
 
     @Column(name = "status", nullable = false)
+    @ColumnDefault("1")
     Integer status;
 
     @Column(name = "updated_at")
+    @LastModifiedDate
     Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "updated_by", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "updated_by")
+    @LastModifiedBy
     User updatedBy;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "exam_slot_room_id", nullable = false)
-    ExamSlotRoom examSlotRoom;
-
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "invigilator_id", nullable = false)
-    User invigilator;
-
+    @JoinColumn(name = "invigilator_assignment_id", nullable = false)
+    InvigilatorAssignment invigilatorAssignment;
 }

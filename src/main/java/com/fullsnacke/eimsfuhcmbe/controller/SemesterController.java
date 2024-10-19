@@ -8,10 +8,12 @@ import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.semester.SemesterNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.service.ConfigServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.SemesterServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -31,6 +33,7 @@ public class SemesterController {
 
 
     @GetMapping
+    @Operation(summary = "Get all semesters", description = "Retrieve a list of all semesters")
     public ResponseEntity<List<SemesterResponseDTO>> getAllSemesters() {
         List<Semester> semesterList = semesterServiceImpl.getAllSemesters();
         List<SemesterResponseDTO> semesterResponseDTOS = new ArrayList<>();
@@ -46,7 +49,7 @@ public class SemesterController {
             Config allowedSlotConfig = configServiceImpl.getConfigBySemesterIdAndConfigType(semester.getId(), ConfigType.ALLOWED_SLOT.getValue());
 
             semesterResponseDTO.setHourlyConfig(hourlyRateConfig.getValue());
-            semesterResponseDTO.setAllowedSlotConfig(allowedSlotConfig.getValue());
+            semesterResponseDTO.setAllowedSlotConfig(Integer.parseInt(allowedSlotConfig.getValue()));
 
             semesterResponseDTOS.add(semesterResponseDTO);
         }
@@ -56,9 +59,12 @@ public class SemesterController {
         } else {
             return ResponseEntity.ok(semesterResponseDTOS);
         }
+
+
     }
 
     @PostMapping
+    @Operation(summary = "Add a semester", description = "Add a new semester")
     public ResponseEntity<SemesterResponseDTO> createSemester(@RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
         Semester semester = modelMapper.map(semesterRequestDTO, Semester.class);
         Semester createdSemester  = semesterServiceImpl.createSemester(semester);
@@ -68,6 +74,7 @@ public class SemesterController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update a semester", description = "Update a semester")
     public ResponseEntity<SemesterResponseDTO> updateSemester(@PathVariable("id") int id, @RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
         //Semester semesterUpdate = modelMapper.map(semesterRequestDTO, Semester.class);
         Semester semester  = semesterServiceImpl.findSemesterById(id);
@@ -82,43 +89,13 @@ public class SemesterController {
         semesterUpdate.setStartAt(semesterRequestDTO.getStartAt());
         semesterUpdate.setEndAt(semesterRequestDTO.getEndAt());
 
-        List<Config> configList = configServiceImpl.getConfigBySemesterId(semester.getId());
-
-        for (Config config : configList) {
-            if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
-                config.setValue(semesterRequestDTO.getHourlyConfig());
-            } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
-                config.setValue(semesterRequestDTO.getAllowedSlotConfig());
-            }
-        }
-
-        configServiceImpl.updateAllConfig(configList);
-
-        try {
-            Semester updatedSemester = semesterServiceImpl.updateSemester(semesterUpdate, id);
-            //SemesterResponseDTO semesterResponseDTO = modelMapper.map(updatedSemester, SemesterResponseDTO.class);
-
-            SemesterResponseDTO semesterResponseDTO = new SemesterResponseDTO();
-            semesterResponseDTO.setId(updatedSemester.getId());
-            semesterResponseDTO.setName(updatedSemester.getName());
-            semesterResponseDTO.setStartAt(updatedSemester.getStartAt());
-            semesterResponseDTO.setEndAt(updatedSemester.getEndAt());
-
-            for (Config config : configList) {
-                if (config.getConfigType().equals(ConfigType.HOURLY_RATE.getValue())) {
-                    semesterResponseDTO.setHourlyConfig(config.getValue());
-                } else if (config.getConfigType().equals(ConfigType.ALLOWED_SLOT.getValue())) {
-                    semesterResponseDTO.setAllowedSlotConfig(config.getValue());
-                }
-            }
-
-            return ResponseEntity.ok(semesterResponseDTO);
-        } catch (SemesterNotFoundException exception) {
-            return ResponseEntity.notFound().build();
-        }
+        Semester updatedSemester = semesterServiceImpl.updateSemester(semesterUpdate, id);
+        SemesterResponseDTO semesterResponseDTO = modelMapper.map(updatedSemester, SemesterResponseDTO.class);
+        return ResponseEntity.ok(semesterResponseDTO);
     }
 
     @GetMapping("/{name}")
+    @Operation(summary = "Get a semester by name", description = "Retrieve a semester by name")
     public ResponseEntity<SemesterResponseDTO> findSemesterByName(@PathVariable("name") String name){
         Semester semester = semesterServiceImpl.findSemesterByName(name);
         if(semester == null) {

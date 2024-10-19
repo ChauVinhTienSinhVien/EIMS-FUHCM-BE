@@ -3,6 +3,8 @@ package com.fullsnacke.eimsfuhcmbe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
@@ -15,23 +17,22 @@ import java.time.Instant;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "invigilator_assignments")
+@EntityListeners(AuditingEntityListener.class)
 public class InvigilatorAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "exam_slot_id", nullable = false)
-    ExamSlot examSlot;
+    @OneToOne
+    @JoinColumn(name = "invigilator_registration_id", nullable = false)
+    InvigilatorRegistration invigilatorRegistration;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "invigilator_id", nullable = false)
-    User invigilator;
-
-    @Column(name = "is_hall_invigilator", nullable = false)
+    @Column(name = "is_hall_invigilator")
     Boolean isHallInvigilator;
 
     @Column(name = "created_at", nullable = false)
+    @CreatedDate
     Instant createdAt;
+
 }

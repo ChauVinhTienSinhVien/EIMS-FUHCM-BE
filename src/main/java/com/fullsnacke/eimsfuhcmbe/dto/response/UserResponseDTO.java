@@ -5,8 +5,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fullsnacke.eimsfuhcmbe.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.time.Instant;
 
 @Setter
 @Getter
@@ -27,9 +30,16 @@ public class UserResponseDTO {
     @NotNull
     @Email
     String email;
+
     String phoneNumber;
+
     String department;
-    Boolean gender;
+
+    boolean gender;
+
+    boolean isPasswordSet;
+
+    Instant createdAt;
 
     int role;
 }

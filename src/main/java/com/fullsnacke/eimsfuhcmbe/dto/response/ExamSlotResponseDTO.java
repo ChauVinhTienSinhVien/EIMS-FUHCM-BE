@@ -3,11 +3,13 @@ package com.fullsnacke.eimsfuhcmbe.dto.response;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Setter
@@ -17,22 +19,32 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ExamSlotResponseDTO {
 
-    int id;
+    Integer id;
 
-    int subjectExamId;
+    SubjectExamDTO subjectExamDTO;
 
-    int status;
+//    Integer subjectExamId; // subjectExam.id
+//
+//    String examType; // subjectExam.examType
+//
+//    String subjectName; //subjectExam.duration
+//
+//    String subjectCode; //subjectExam.subjectId.code
 
-    int createdBy;
+    ZonedDateTime startAt;
 
-    int updatedBy;
+    ZonedDateTime endAt;
+
+    Integer requiredInvigilators;
 
     Instant createdAt;
 
+    Integer createdBy;
+
+    ExamSlotStatus status;
+
+    Integer updatedBy;
+
     Instant updatedAt;
-
-    Instant startAt;
-
-    Instant endAt;
 
 }

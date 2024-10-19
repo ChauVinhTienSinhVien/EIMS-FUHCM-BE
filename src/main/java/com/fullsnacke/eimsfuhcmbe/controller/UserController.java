@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.UserMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UserRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
@@ -15,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@PreAuthorize("hasRole('MANAGER')")
 @Tag(name = "User Controller", description = "API for User Controller")
 public class UserController {
 
@@ -31,12 +34,12 @@ public class UserController {
     private UserServiceImpl userServiceImpl;
 
     @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
     private UserMapper userMapper;
 
+
+
     @GetMapping
+    @PreAuthorize("hasAuthority('user:read')")
     @Operation(summary = "Get all users", description = "Retrieve a list of all users")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers(){
         List<User> userList = userServiceImpl.getAllUsers();
@@ -48,12 +51,15 @@ public class UserController {
             userResponseDTOList = userList.stream().map(user -> userMapper.toDto(user)).toList();
             return ResponseEntity.ok(userResponseDTOList);
         }
+
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('user:create')")
     @Operation(summary = "Add a user", description = "Add a new user")
     public ResponseEntity<UserResponseDTO> addUser(@RequestBody @Valid UserRequestDTO userRequestDTO){
         User user = userMapper.toEntity(userRequestDTO);
+        user.setIsDeleted(false);
         User addedUser = userServiceImpl.add(user);
         URI uri = URI.create("/users" + user.getFuId());
         UserResponseDTO userResponseDTO = userMapper.toDto(addedUser);
@@ -61,11 +67,15 @@ public class UserController {
     }
 
     @PostMapping("/bulk")
+    @PreAuthorize("hasAuthority('user:create')")
     @Operation(summary = "Add multiple users", description = "Add multiple users")
     public ResponseEntity<List<UserResponseDTO>> addUsers(@RequestBody List<UserRequestDTO> userRequestDTOList){
         List<User> userList = userRequestDTOList.stream()
                 .map(userRequestDTO -> userMapper.toEntity(userRequestDTO))
                 .toList();
+        for(User user: userList){
+            user.setIsDeleted(false);
+        }
         List<User> addedUsers = userServiceImpl.saveAll(userList);
         List<UserResponseDTO> userResponseDTOList = addedUsers.stream()
                 .map(user -> userMapper.toDto(user))
@@ -74,6 +84,7 @@ public class UserController {
     }
 
     @PutMapping("/{fuId}")
+    @PreAuthorize("hasAuthority('user:write')")
     @Operation(summary = "Update a user", description = "Update an existing user")
     public ResponseEntity<UserResponseDTO> updateUserByFuId(@RequestBody @Valid UserRequestDTO userRequestDTO){
         User user = userMapper.toEntity(userRequestDTO);
@@ -87,6 +98,7 @@ public class UserController {
     }
 
     @GetMapping("/{fuId}")
+    @PreAuthorize("hasAuthority('user:read')")
     @Operation(summary = "Get a user by fuId", description = "Retrieve a user by fuId")
     public ResponseEntity<UserResponseDTO> getUserByFuId(@PathVariable("fuId") String fuId){
         User user = userServiceImpl.getUserByFuId(fuId);
@@ -99,6 +111,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{fuId}")
+    @PreAuthorize("hasAuthority('user:delete')")
     @Operation(summary = "Delete a user by fuId", description = "Delete a user by fuId")
     public ResponseEntity<?> deleteUserByFuId(@PathVariable("fuId") String fuId){
         try{
@@ -109,11 +122,4 @@ public class UserController {
         }
     }
 
-    @GetMapping("/userInfo")
-    public ResponseEntity<UserResponseDTO> getUserInfo(@AuthenticationPrincipal
-    OAuth2User oAuth2User){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(userServiceImpl.getMyInfo(oAuth2User));
-    }
 }

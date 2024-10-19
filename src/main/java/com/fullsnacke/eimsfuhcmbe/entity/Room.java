@@ -21,6 +21,12 @@ public class Room {
     @Column(name = "room_name", nullable = false, length = 50, unique = true)
     String roomName;
 
+    @Column(name = "floor", nullable = false)
+    Integer floor;
+
     @Column(name = "capacity", nullable = false)
     Integer capacity;
+
+    @Column(name = "campus")
+    String campus;
 }

@@ -11,6 +11,8 @@ public interface ConfigService {
 
     List<Config> getConfigBySemesterId(Integer semesterId);
 
+    List<Config> addAllConfigs(List<Config> configList);
+
     Config getConfigBySemesterIdAndConfigType(Integer semesterId, String configType);
 
     Config updateConfig(Config config);

@@ -1,31 +1,19 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
-import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAssignmentRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.ListInvigilatorsByExamSlotResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemesterResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserRegistrationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotRoom;
+import com.fullsnacke.eimsfuhcmbe.entity.Request;
 
-import java.util.Set;
+import java.util.List;
 
 public interface InvigilatorAssignmentService {
-    InvigilatorAssignmentResponseDTO registerExamSlot(InvigilatorAssignmentRequestDTO request);
+    List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds);
+    List<UserRegistrationResponseDTO> getUnassignedInvigilators(int examSlotId);
+    String exchangeInvigilators(UpdateInvigilatorAssignmentRequestDTO request);
+    String exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request);
 
-    RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlots();
-
-    RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsByInvigilator(String fuId);
-
-    RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsInSemesterByInvigilator(int semesterId, String fuId);
-
-    RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlotsInSemester(int semesterId);
-
-    InvigilatorAssignmentResponseDTO updateRegisterExamSlot(InvigilatorAssignmentRequestDTO request);
-
-    boolean deleteAssignmentBySemester(RegisterdSlotWithSemesterAndInvigilatorRequestDTO request);
-
-    Set<RegisteredExamBySemesterResponseDTO> getRegisteredExamBySemester(int semesterId);
-
-    ListInvigilatorsByExamSlotResponseDTO listInvigilatorsByExamSlot(int examSlotId);
 }
-

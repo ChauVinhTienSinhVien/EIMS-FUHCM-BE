@@ -59,6 +59,24 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         return examSlotRepository.save(examSlotInDB);
     }
 
+    public ExamSlot managerUpdateExamSlot(ExamSlot examSlotInRequest, int id) {
+//        int id = examSlotInRequest.getId();
+        ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
+
+        User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
+
+        if (examSlotInDB == null)
+            throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
+
+        if (user.getRole().getId() == 1)
+            examSlotInDB.setUpdatedBy(user);
+
+        examSlotInDB.setStatus(examSlotInRequest.getStatus());
+        examSlotInDB.setUpdatedBy(examSlotInRequest.getUpdatedBy());
+
+        return examSlotRepository.save(examSlotInDB);
+    }
+
     @Override
     public ExamSlot findById(int id) {
         return examSlotRepository.findById(id)
@@ -98,6 +116,6 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     public List<ExamSlot> getExamSlotsBySemesterId(int semesterId) {
         Semester semester = semesterRepository.findById(semesterId).orElseThrow(() -> new RuntimeException("Semester not found"));
 
-        return examSlotRepository.findExamSlotBySubjectExam_SubjectId_SemesterId(semester);
+        return examSlotRepository.findExamSlotsBySemesterWithDetails(semester);
     }
 }

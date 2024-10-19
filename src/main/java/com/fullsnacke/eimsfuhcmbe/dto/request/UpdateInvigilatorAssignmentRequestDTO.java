@@ -7,11 +7,8 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ExchangeInvigilatorsRequestDTO {
-    String newInvigilatorFuId;
-    int requestId;
-    String status; //REJECTED or APPROVED
-    String note;
+public class UpdateInvigilatorAssignmentRequestDTO {
+    int assignmentId;
+    int newRegistrationId;
 }

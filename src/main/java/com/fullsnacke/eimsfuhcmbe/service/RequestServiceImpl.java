@@ -14,6 +14,7 @@ import com.fullsnacke.eimsfuhcmbe.enums.RequestStatusEnum;
 import com.fullsnacke.eimsfuhcmbe.enums.RequestTypeEnum;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorRegistrationRepository;
@@ -23,6 +24,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -56,7 +58,7 @@ public class RequestServiceImpl implements RequestService {
             throw new CustomException(ErrorCode.REASON_EMPTY);
         }
 //        else if(request.getRequestType() == null) {
-//            throw new CustomException(ErrorCode.REQUEST_TYPE_EMPTY);
+//            throw new CustomMessageException(ErrorCode.REQUEST_TYPE_EMPTY);
 //        }
         try {
             var currentUser = getCurrentUser();
@@ -182,11 +184,9 @@ public class RequestServiceImpl implements RequestService {
     //-----------------------------PRIVATE METHOD--------------------------------
 
     private void setExamSlot(ExamSlot examSlot) {
-        if (examSlot == null) {
-            throw new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND);
-        }
-        examSlot = examSlotRepository.findById(examSlot.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
+        int examSlotId = examSlot.getId();
+        examSlot = examSlotRepository.findById(examSlotId)
+                .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found."));
     }
 
     private User getCurrentUser() {

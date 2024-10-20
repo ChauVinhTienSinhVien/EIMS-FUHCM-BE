@@ -12,12 +12,14 @@ import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotRegisterStatusEnum;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import static com.fullsnacke.eimsfuhcmbe.enums.ConfigType.*;
 
 @Service
@@ -252,8 +255,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
     public ListInvigilatorsByExamSlotResponseDTO listInvigilatorsByExamSlot(int examSlotId) {
         ExamSlot examSlot = examSlotRepository.findById(examSlotId)
-                .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
-
+                .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found."));
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository.findByExamSlot(examSlot);
 
         ListInvigilatorsByExamSlotResponseDTO response = invigilatorRegistrationMapper.toListInvigilatorsByExamSlotResponseDTO(examSlot);
@@ -322,14 +324,15 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     }
 
     private ExamSlot findRepresentativeExamSlot(Set<Integer> examSlotIds) {
-        return examSlotRepository.findById(examSlotIds.iterator().next())
-                .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
+        int examSlotId = examSlotIds.iterator().next();
+        return examSlotRepository.findById(examSlotId)
+                .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found."));
     }
 
     private Set<InvigilatorRegistration> createRegistrations(User invigilator, Set<Integer> examSlotIds) {
         return examSlotIds.stream()
                 .map(examSlotId -> examSlotRepository.findById(examSlotId)
-                        .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND)))
+                        .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found.")))
                 .map(examSlot -> InvigilatorRegistration.builder()
                         .invigilator(invigilator)
                         .examSlot(examSlot)
@@ -400,14 +403,14 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
     private void validateRequiredInvigilators(ExamSlot slot) {
         if (slot.getRequiredInvigilators() <= 0) {
-            throw new CustomException(ErrorCode.EXAM_SLOT_FULL);
+            throw new CustomMessageException(HttpStatus.CONFLICT, "Exam slot ID " + slot.getId() + " is full.");
         }
     }
 
     private void checkOverlapWithinNewSlots(ExamSlot currentSlot, Set<ExamSlot> allNewSlots) {
         for (ExamSlot otherSlot : allNewSlots) {
             if (currentSlot.getId().intValue() != otherSlot.getId().intValue() && isOverlapping(currentSlot, otherSlot)) {
-                throw new CustomException(ErrorCode.OVERLAP_SLOT_IN_LIST);
+                throw new CustomMessageException(HttpStatus.CONFLICT, "Exam slot ID " + currentSlot.getId() + " overlaps with  " + otherSlot.getId() + " in the registration list.");
             }
         }
     }
@@ -417,9 +420,9 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
             ExamSlot existingSlot = registration.getExamSlot();
             for (ExamSlot newSlot : newExamSlots) {
                 if (existingSlot.getId().intValue() == newSlot.getId().intValue()) {
-                    throw new CustomException(ErrorCode.EXAM_SLOT_ALREADY_REGISTERED);
+                    throw new CustomMessageException(HttpStatus.CONFLICT, "Exam slot ID " + existingSlot.getId() + " already registered.");
                 } else if (isOverlapping(existingSlot, newSlot)) {
-                    throw new CustomException(ErrorCode.OVERLAP_SLOT);
+                    throw new CustomMessageException(HttpStatus.CONFLICT, "Exam slot ID " + existingSlot.getId() + " overlaps with another existing slot in the registration list.");
                 }
             }
         }

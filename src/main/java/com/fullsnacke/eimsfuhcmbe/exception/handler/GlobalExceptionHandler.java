@@ -6,6 +6,7 @@ import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.apierror.ApiError;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -155,6 +156,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         .code(errorCode.getStatusCode().value())
                         .message(errorCode.getMessage())
                         .path(errorCode.getPath())
+                        .build());
+    }
+
+    //NGAN
+    @ExceptionHandler(value = CustomMessageException.class)
+    ResponseEntity<ApiResponse> handlingCustomMessageException(CustomMessageException exception, HttpServletRequest request){
+        if (exception.getPath() == null){
+            exception.setPath(request.getRequestURI());
+        }
+
+        return ResponseEntity
+                .status(exception.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(exception.getStatusCode().value())
+                        .message(exception.getMessage())
+                        .path(exception.getPath())
                         .build());
     }
 

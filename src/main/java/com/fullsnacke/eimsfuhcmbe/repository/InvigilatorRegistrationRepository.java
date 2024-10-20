@@ -77,4 +77,5 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
             @Param("examSlotId") int examSlotId,
             @Param("fuId") String fuId
     );
+    int countByExamSlot(ExamSlot examSlot);
 }

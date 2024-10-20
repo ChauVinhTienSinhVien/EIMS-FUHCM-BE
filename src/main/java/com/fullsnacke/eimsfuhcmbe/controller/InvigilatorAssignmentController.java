@@ -39,4 +39,10 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<?> exchangeInvigilators(@RequestBody UpdateInvigilatorAssignmentRequestDTO request) {
         return ResponseEntity.ok(invigilatorAssignmentService.exchangeInvigilators(request));
     }
+
+    @GetMapping("/examslots/semesterid={semesterId}")
+    @Operation(summary = "Get all exam slots in a semester with status", description = "If invigilators was assigned to the exam slot then status will be ASSIGNED otherwise UNASSIGNED")
+    public ResponseEntity<?> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId) {
+        return ResponseEntity.ok(invigilatorAssignmentService.getAllExamSlotsInSemesterWithStatus(semesterId));
+    }
 }

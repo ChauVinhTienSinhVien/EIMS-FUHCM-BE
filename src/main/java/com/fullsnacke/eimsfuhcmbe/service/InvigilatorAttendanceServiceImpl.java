@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
@@ -45,6 +46,34 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
         invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
         return invigilatorAttendances;
+    }
+
+    @Transactional
+    public List<InvigilatorAttendance> addInvigilatorAttendancesByDay(Instant day) {
+        List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotStartAtInDay(day);
+
+        if(!invigilatorAttendances.isEmpty()){
+            return invigilatorAttendances;
+        }
+
+        List<InvigilatorAssignment> invigilatorAssignments = invigilatorAssignmentRepository.findByExamSlotStartAtInDay(day);
+
+        for (InvigilatorAssignment invigilatorRegistration : invigilatorAssignments) {
+            System.out.println(invigilatorRegistration.getId());
+            InvigilatorAttendance invigilatorAttendance = InvigilatorAttendance
+                    .builder()
+                    .invigilatorAssignment(invigilatorRegistration)
+                    .status(1)
+                    .build();
+            invigilatorAttendances.add(invigilatorAttendance);
+        }
+
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return invigilatorAttendances;
+    }
+
+    public List<ExamSlot> getExamSlotsByDay(Instant day) {
+        return invigilatorAttendanceRepository.findExamSlotByStartAtInDay(day);
     }
 
     public List<InvigilatorAttendance> getInvigilatorAttendancesByDay(Instant day) {

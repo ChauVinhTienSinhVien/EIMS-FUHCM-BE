@@ -28,6 +28,11 @@ public interface InvigilatorAttendanceMapper {
     @Mapping(target = "startAt", source = "invigilatorAssignment.invigilatorRegistration.examSlot.startAt", qualifiedByName = "zonedDateTimeToInstant")
     @Mapping(target = "endAt", source = "invigilatorAssignment.invigilatorRegistration.examSlot.endAt", qualifiedByName = "zonedDateTimeToInstant")
     @Mapping(target = "examSlotId", source = "invigilatorAssignment.invigilatorRegistration.examSlot.id")
+    @Mapping(target = "invigilatorId", source = "invigilatorAssignment.invigilatorRegistration.invigilator.id")
+    @Mapping(target = "invigilatorFirstName", source = "invigilatorAssignment.invigilatorRegistration.invigilator.firstName")
+    @Mapping(target = "invigilatorLastName", source = "invigilatorAssignment.invigilatorRegistration.invigilator.lastName")
+    @Mapping(target = "invigilatorEmail", source = "invigilatorAssignment.invigilatorRegistration.invigilator.email")
+    @Mapping(target = "invigilatorPhone", source = "invigilatorAssignment.invigilatorRegistration.invigilator.phoneNumber")
     InvigilatorAttendanceResponseDTO toResponseDTO(InvigilatorAttendance entity);
 
     @Named("intToStatus")

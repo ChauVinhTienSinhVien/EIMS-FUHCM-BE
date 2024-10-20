@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.repository;
 
+import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +24,11 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN FETCH ir.examSlot es " +
             "WHERE ir.examSlot.id = :examSlotId")
     List<InvigilatorAttendance> findByExamSlotId(@Param("examSlotId") Integer examSlotId);
+
+    @Query("SELECT es FROM InvigilatorAttendance ia " +
+            "JOIN ia.invigilatorAssignment iaa " +
+            "JOIN iaa.invigilatorRegistration ir " +
+            "JOIN ir.examSlot es " +
+            "WHERE FUNCTION('DATE', es.startAt) = FUNCTION('DATE', :day)")
+    List<ExamSlot> findExamSlotByStartAtInDay(@Param("day") Instant day);
 }

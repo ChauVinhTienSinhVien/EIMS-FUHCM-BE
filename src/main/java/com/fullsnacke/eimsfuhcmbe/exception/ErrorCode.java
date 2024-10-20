@@ -81,7 +81,12 @@ public enum ErrorCode{
     // Method Argument Type Mismatch
     METHOD_ARGUMENT_TYPE_MISMATCH("Method argument type mismatch", HttpStatus.BAD_REQUEST),
 
-    USER_ALREADY_EXISTS("User already exists", HttpStatus.CONFLICT),;
+    USER_ALREADY_EXISTS("User already exists", HttpStatus.CONFLICT),
+
+    //Excel File Generation
+    EXCEL_FILE_GENERATION_ERROR("Failed to generate Excel file.", HttpStatus.INTERNAL_SERVER_ERROR)
+
+    ;
 
     private String message;
     private HttpStatusCode statusCode;

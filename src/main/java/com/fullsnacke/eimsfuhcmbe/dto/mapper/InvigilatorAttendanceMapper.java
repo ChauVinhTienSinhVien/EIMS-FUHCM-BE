@@ -29,6 +29,7 @@ public interface InvigilatorAttendanceMapper {
     @Mapping(target = "endAt", source = "invigilatorAssignment.invigilatorRegistration.examSlot.endAt", qualifiedByName = "zonedDateTimeToInstant")
     @Mapping(target = "examSlotId", source = "invigilatorAssignment.invigilatorRegistration.examSlot.id")
     @Mapping(target = "invigilatorId", source = "invigilatorAssignment.invigilatorRegistration.invigilator.id")
+    @Mapping(target = "invigilatorFuId", source = "invigilatorAssignment.invigilatorRegistration.invigilator.fuId")
     @Mapping(target = "invigilatorFirstName", source = "invigilatorAssignment.invigilatorRegistration.invigilator.firstName")
     @Mapping(target = "invigilatorLastName", source = "invigilatorAssignment.invigilatorRegistration.invigilator.lastName")
     @Mapping(target = "invigilatorEmail", source = "invigilatorAssignment.invigilatorRegistration.invigilator.email")

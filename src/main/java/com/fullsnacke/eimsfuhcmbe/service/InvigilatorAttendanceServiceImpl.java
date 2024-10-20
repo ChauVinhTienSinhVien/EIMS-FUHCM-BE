@@ -195,4 +195,8 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     private boolean isCheckOut(InvigilatorAttendance invigilatorAttendance) {
         return invigilatorAttendance.getCheckOut() == null;
     }
+
+    public List<InvigilatorAttendance> getInvigilatorAttendancesByExamSlotId(Integer examSlotId) {
+        return invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
+    }
 }

@@ -108,6 +108,21 @@ public class InvigilatorAttendanceController {
         }
     }
 
+    @GetMapping("/exam-slot/{id}")
+    @Operation(summary = "Get all invigilator attendance by exam slot", description = "Retrieve a list of all invigilator attendance records by exam slot")
+    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorAttendanceByExamSlot(@PathVariable("id") Integer examSlotId) {
+        List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getInvigilatorAttendancesByExamSlotId(examSlotId);
+
+        if (attendanceList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<InvigilatorAttendanceResponseDTO> attendanceResponseDTOList = attendanceList.stream()
+                    .map(attendance -> invigilatorAttendanceMapper.toResponseDTO(attendance))
+                    .toList();
+            return ResponseEntity.ok(attendanceResponseDTOList);
+        }
+    }
+
     @PutMapping("checkin/{id}")
     @Operation(summary = "Check in invigilator", description = "Check in an invigilator")
     public ResponseEntity<InvigilatorAttendanceResponseDTO> checkIn(@PathVariable("id") Integer id) {

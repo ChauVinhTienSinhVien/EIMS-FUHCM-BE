@@ -70,7 +70,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
         InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(id).orElse(null);
 
-        if(invigilatorAttendanceInDb != null){
+        if(invigilatorAttendanceInDb != null && isCheckIn(invigilatorAttendanceInDb)){
             invigilatorAttendanceInDb.setCheckIn(Instant.now());
             invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
         }
@@ -82,7 +82,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
         InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(id).orElse(null);
 
-        if(invigilatorAttendanceInDb != null){
+        if(invigilatorAttendanceInDb != null && isCheckOut(invigilatorAttendanceInDb) && !isCheckIn(invigilatorAttendanceInDb)){
             invigilatorAttendanceInDb.setCheckOut(Instant.now());
             invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
         }
@@ -107,7 +107,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     public List<InvigilatorAttendance> checkOutByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
-            if(isCheckOut(invigilatorAttendance)){
+            if(isCheckOut(invigilatorAttendance)  && !isCheckIn(invigilatorAttendance)){
                 invigilatorAttendance.setCheckOut(Instant.now());
             }
         }
@@ -150,7 +150,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         }
 
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
-            if(isCheckOut(invigilatorAttendance)){
+            if(isCheckOut(invigilatorAttendance)  && !isCheckIn(invigilatorAttendance)){
                 invigilatorAttendance.setCheckOut(Instant.now());
             }
         }

@@ -86,6 +86,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     @Override
     public void deleteExamSlot(int id) {
         ExamSlot examSlot = findById(id);
+        System.out.println(examSlot.getId());
             examSlotRepository.delete(examSlot);
     }
 

@@ -42,7 +42,7 @@ public class ExamSlotController {
     private ExamSlotMapper examSlotMapper;
 
     @Autowired
-    private SubjectExamRepository examRepository;
+    private ExamSlotRepository examSlotRepository;
 
     @Autowired
     private SubjectExamRepository subjectExamRepository;
@@ -212,9 +212,9 @@ public class ExamSlotController {
     @GetMapping("/{id}")
     @Operation(summary = "Retrieve an exam slot by ID", description = "Fetches a specific exam slot based on its ID. Returns the exam slot data if found, otherwise returns a 404 Not Found.")
     public ResponseEntity<ExamSlotResponseDTO> getExamSlotById(@PathVariable("id") int id) {
-        ExamSlot examSlot = examSlotServiceImpl.findById(id);
+        ExamSlot examSlot = examSlotRepository.findExamSlotById(id);
         if (examSlot == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         } else {
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
 //            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());

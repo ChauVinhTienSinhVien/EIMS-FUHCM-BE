@@ -5,6 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotHallRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotHallResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotHall;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotHallServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotService;
@@ -63,7 +64,8 @@ public class ExamSlotHallController {
             requiredInvigilators += list.size();
         }
         examSlot.setRequiredInvigilators(requiredInvigilators);
-        examSlotService.updateExamSlotExamSlot(examSlot, examSlot.getId());
+        examSlot.setStatus(ExamSlotStatus.PENDING.getValue());
+        examSlotService.updateExamSlotStatus(examSlot, examSlot.getId());
         return examSlotHallResponseDTOList;
     }
 
@@ -84,7 +86,8 @@ public class ExamSlotHallController {
             requiredInvigilators += list.size();
         }
         examSlot.setRequiredInvigilators(requiredInvigilators);
-        examSlotService.updateExamSlotExamSlot(examSlot, examSlot.getId());
+        examSlot.setStatus(ExamSlotStatus.PENDING.getValue());
+        examSlotService.updateExamSlotStatus(examSlot, examSlot.getId());
         return examSlotHallResponseDTOList;
     }
 

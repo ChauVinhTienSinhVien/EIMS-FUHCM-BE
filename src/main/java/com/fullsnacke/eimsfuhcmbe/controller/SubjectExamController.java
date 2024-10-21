@@ -126,7 +126,7 @@ public class SubjectExamController {
         return ResponseEntity.ok(subjectExamResponseDTOList);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @Operation(summary = "Delete a subject exam", description = "Delete a subject exam")
     public ResponseEntity<?> deleteSubjectExam(@PathVariable("id") int id) {
         try {

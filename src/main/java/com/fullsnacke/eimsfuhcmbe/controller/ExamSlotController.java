@@ -25,8 +25,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/examslots")
@@ -42,7 +44,7 @@ public class ExamSlotController {
     private ExamSlotMapper examSlotMapper;
 
     @Autowired
-    private SubjectExamRepository examRepository;
+    private ExamSlotRepository examSlotRepository;
 
     @Autowired
     private SubjectExamRepository subjectExamRepository;
@@ -160,7 +162,7 @@ public class ExamSlotController {
             SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
             examSlot.setSubjectExam(subjectExam);
 
-            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlotExamSlot(examSlot, id);
+            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlot(examSlot, id);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
 //            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
 //            examSlotResponseDTO.setSubjectExamId(subjectExam);
@@ -212,14 +214,30 @@ public class ExamSlotController {
     @GetMapping("/{id}")
     @Operation(summary = "Retrieve an exam slot by ID", description = "Fetches a specific exam slot based on its ID. Returns the exam slot data if found, otherwise returns a 404 Not Found.")
     public ResponseEntity<ExamSlotResponseDTO> getExamSlotById(@PathVariable("id") int id) {
-        ExamSlot examSlot = examSlotServiceImpl.findById(id);
+        ExamSlot examSlot = examSlotRepository.findExamSlotById(id);
         if (examSlot == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         } else {
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
 //            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
 //            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
+        }
+    }
+
+    @GetMapping("/in-time-range")
+    @Operation(summary = "Retrieve exam slots within a time range", description = "Fetches a list of exam slots that fall within the specified start and end times.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsInTimeRange(
+            @RequestParam("startTime") ZonedDateTime startTime,
+            @RequestParam("endTime") ZonedDateTime endTime) {
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
         }
     }
 

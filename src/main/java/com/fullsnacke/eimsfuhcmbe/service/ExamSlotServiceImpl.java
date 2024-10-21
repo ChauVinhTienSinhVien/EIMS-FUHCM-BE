@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +43,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     }
 
     @Override
-    public ExamSlot updateExamSlotExamSlot(ExamSlot examSlotInRequest, int id) {
+    public ExamSlot updateExamSlot(ExamSlot examSlotInRequest, int id) {
 //        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
 
@@ -56,6 +58,14 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
 
+        return examSlotRepository.save(examSlotInDB);
+    }
+
+    public ExamSlot updateExamSlotStatus(ExamSlot examSlotInRequest, int id) {
+        ExamSlot examSlotInDB = examSlotRepository.findExamSlotById(id);
+        if (examSlotInDB == null)
+            throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
+        examSlotInDB.setStatus(examSlotInRequest.getStatus());
         return examSlotRepository.save(examSlotInDB);
     }
 
@@ -86,6 +96,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     @Override
     public void deleteExamSlot(int id) {
         ExamSlot examSlot = findById(id);
+        System.out.println(examSlot.getId());
             examSlotRepository.delete(examSlot);
     }
 
@@ -118,4 +129,10 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
         return examSlotRepository.findExamSlotsBySemesterWithDetails(semester);
     }
+
+    @Override
+    public List<ExamSlot> getExamSlotsInTimeRange(ZonedDateTime startTime, ZonedDateTime endTime) {
+        return examSlotRepository.findExamSlotsByTimeRange(startTime, endTime);
+    }
+
 }

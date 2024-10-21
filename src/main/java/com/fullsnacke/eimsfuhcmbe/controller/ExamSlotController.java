@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -227,8 +228,8 @@ public class ExamSlotController {
     @GetMapping("/in-time-range")
     @Operation(summary = "Retrieve exam slots within a time range", description = "Fetches a list of exam slots that fall within the specified start and end times.")
     public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsInTimeRange(
-            @RequestParam("startTime") Instant startTime,
-            @RequestParam("endTime") Instant endTime) {
+            @RequestParam("startTime") ZonedDateTime startTime,
+            @RequestParam("endTime") ZonedDateTime endTime) {
         List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
         if (examSlotList.isEmpty()) {
             return ResponseEntity.noContent().build();

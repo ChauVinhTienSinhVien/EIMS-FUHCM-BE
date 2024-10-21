@@ -27,6 +27,7 @@ import java.net.URI;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/examslots")
@@ -220,6 +221,22 @@ public class ExamSlotController {
 //            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
 //            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
+        }
+    }
+
+    @GetMapping("/in-time-range")
+    @Operation(summary = "Retrieve exam slots within a time range", description = "Fetches a list of exam slots that fall within the specified start and end times.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsInTimeRange(
+            @RequestParam("startTime") Instant startTime,
+            @RequestParam("endTime") Instant endTime) {
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
         }
     }
 

@@ -32,6 +32,10 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
             @Param("endDate") ZonedDateTime endDate);
 
     List<ExamSlot> findByIdIn(List<Integer> examSlotIds);
+
+    @Query("SELECT e FROM ExamSlot e WHERE e.startAt >= :startTime AND e.endAt <= :endTime")
+    List<ExamSlot> findExamSlotsByTimeRange(@Param("startTime") ZonedDateTime startTime, @Param("endTime") ZonedDateTime endTime);
+
 }
 
 

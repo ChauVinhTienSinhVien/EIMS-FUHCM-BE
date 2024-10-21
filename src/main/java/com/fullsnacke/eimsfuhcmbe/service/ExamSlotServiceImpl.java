@@ -43,7 +43,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     }
 
     @Override
-    public ExamSlot updateExamSlotExamSlot(ExamSlot examSlotInRequest, int id) {
+    public ExamSlot updateExamSlot(ExamSlot examSlotInRequest, int id) {
 //        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
 
@@ -58,6 +58,14 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
 
+        return examSlotRepository.save(examSlotInDB);
+    }
+
+    public ExamSlot updateExamSlotStatus(ExamSlot examSlotInRequest, int id) {
+        ExamSlot examSlotInDB = examSlotRepository.findExamSlotById(id);
+        if (examSlotInDB == null)
+            throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
+        examSlotInDB.setStatus(examSlotInRequest.getStatus());
         return examSlotRepository.save(examSlotInDB);
     }
 

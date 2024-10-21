@@ -162,7 +162,7 @@ public class ExamSlotController {
             SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
             examSlot.setSubjectExam(subjectExam);
 
-            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlotExamSlot(examSlot, id);
+            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlot(examSlot, id);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
 //            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
 //            examSlotResponseDTO.setSubjectExamId(subjectExam);

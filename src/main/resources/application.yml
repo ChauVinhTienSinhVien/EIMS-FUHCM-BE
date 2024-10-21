@@ -17,10 +17,6 @@ spring:
     url: ${MYSQL_URL}
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
-    # Uncomment for local connection
-    # url: jdbc:mysql://localhost:3306/invigilator_management_4
-    # username: root
-    # password: admin
   jpa:
     hibernate:
       ddl-auto: update
@@ -30,7 +26,6 @@ spring:
         jdbc:
           time_zone: UTC
         globally_quoted_identifiers: true
-        dialect: ${MYSQL_DIALECT:org.hibernate.dialect.MySQLDialect}
         format_sql: true
   mail:
     host: ${EMAIL_HOST}

@@ -44,16 +44,10 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
     @Override
     public ExamSlot updateExamSlot(ExamSlot examSlotInRequest, int id) {
-//        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
-
-        User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
 
         if (examSlotInDB == null)
             throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
-
-        if (user.getRole().getId() == 1)
-            examSlotInDB.setUpdatedBy(user);
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
@@ -70,7 +64,6 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     }
 
     public ExamSlot managerUpdateExamSlot(ExamSlot examSlotInRequest, int id) {
-//        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
 
         User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
@@ -121,6 +114,17 @@ public class ExamSlotServiceImpl implements ExamSlotService {
             result.add(roomNames);
         }
         return result;
+    }
+
+    @Override
+    public void removeExamSlotHall(int examSlotId) {
+        ExamSlot examSlot = examSlotRepository.findExamSlotById(examSlotId);
+        List<ExamSlotHall> examSlotHalls = examSlotHallRepository.findByExamSlot(examSlot);
+        for (ExamSlotHall hall : examSlotHalls) {
+            List<ExamSlotRoom> rooms = examSlotRoomRepository.findByExamSlotHall(hall);
+            examSlotRoomRepository.deleteAll(rooms);
+            examSlotHallRepository.delete(hall);
+        }
     }
 
     @Override

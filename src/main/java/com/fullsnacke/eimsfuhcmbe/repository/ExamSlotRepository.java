@@ -20,8 +20,17 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
             "JOIN FETCH e.subjectExam se " +
             "JOIN FETCH se.subjectId s " +
             "WHERE s.semesterId = :semester " +
+            "AND e.status = :status " +
             "ORDER BY e.startAt")
     List<ExamSlot> findExamSlotsBySemesterWithDetails(@Param("semester") Semester semester);
+
+    @Query("SELECT e FROM ExamSlot e " +
+            "JOIN FETCH e.subjectExam se " +
+            "JOIN FETCH se.subjectId s " +
+            "WHERE s.semesterId = :semester " +
+            "AND e.status = :status " +
+            "ORDER BY e.startAt")
+    List<ExamSlot> findExamSlotsBySemesterWithDetails(@Param("semester") Semester semester, int status);
 
     @Query("SELECT e FROM ExamSlot e " +
             "WHERE e.subjectExam.subjectId.semesterId = :semester " +

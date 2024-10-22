@@ -567,7 +567,7 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         XSSFSheet sheet = workbook.createSheet("Attendance and Total Hours");
 
         // Tạo tiêu đề chính và hàng tiêu đề
-        createMainTitle(sheet);
+        createMainTitle(sheet, semester);
         createHeaderRow(sheet);
 
         int totalInvigilators = attendanceMap.keySet().size();
@@ -620,10 +620,10 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         }
     }
 
-    private void createMainTitle(XSSFSheet sheet) {
+    private void createMainTitle(XSSFSheet sheet, Semester semester) {
         XSSFRow titleRow = sheet.createRow(0);
         XSSFCell titleCell = titleRow.createCell(0);
-        titleCell.setCellValue("ATTENDANCE AND TOTAL HOURS REPORT");
+        titleCell.setCellValue("ATTENDANCE AND TOTAL HOURS REPORT\nFPTUHCM - " + semester.getName().toUpperCase());
     }
 
     private void createHeaderRow(XSSFSheet sheet) {
@@ -708,12 +708,15 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         XSSFCellStyle titleStyle = workbook.createCellStyle();
         titleStyle.setFont(titleFont);
         titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        // Thiết lập ô để chứa xuống dòng
+        titleStyle.setWrapText(true);
 
         // Áp dụng style cho cell được chọn
         // Vì Title nằm ở hàng 0 và cột 0 nên setCellValue cho ô ở hàng 0 và cột 0
         sheet.getRow(0).getCell(0).setCellStyle(titleStyle);
         // Merge title cells
-        //
+        // Merge các ô từ hàng 0 đến hàng 0 và từ cột 0 đến cột 11
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, sheetWidth));
 
         // Format header row
@@ -721,6 +724,8 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         headerStyle.setFillForegroundColor(new XSSFColor(new Color(219, 229, 241), null));
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
         XSSFFont headerFont = workbook.createFont();
         headerFont.setBold(true);
         headerFont.setColor(IndexedColors.DARK_BLUE.getIndex());

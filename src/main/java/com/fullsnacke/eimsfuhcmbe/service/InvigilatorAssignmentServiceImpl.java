@@ -9,6 +9,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserRegistrationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotInvigilatorStatus;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
@@ -257,7 +258,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
 
         // Chuyển đổi allExamSlots từ List sang Set
-        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotsBySemesterWithDetails(semester));
+        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotsBySemesterWithDetails(semester, ExamSlotStatus.APPROVED.getValue()));
 
         // Tạo một Set để lưu trữ kết quả cuối cùng
         Set<ExamSlotDetail> examSlotDetails = new HashSet<>();
@@ -272,11 +273,9 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             } else {
                 status = ExamSlotInvigilatorStatus.UNASSIGNED.name();
             }
-            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetailInvigilator(examSlot);
+            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
             examSlotDetail.setStatus(status);
             examSlotDetails.add(examSlotDetail);
-            examSlotDetail.setRequiredInvigilators(examSlot.getRequiredInvigilators());
-            examSlotDetail.setNumberOfRegistered(assignedInvigilators);
         }
 
         return examSlotDetails;

@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Room;
@@ -25,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -232,6 +235,14 @@ public class ExamSlotController {
         } catch (ExamSlotNotFoundException exception) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/status")
+    @Operation(summary = "Retrieve exam slots status in a date range", description = "Fetches a list of exam slots based on the start and end date provided in the request parameters. Returns the exam slots data if found, otherwise returns a 404 Not Found.")
+    public ResponseEntity<List<ExamSlotDetail>> getExamSlotsStatusIn (@RequestParam() LocalDate startAt, @RequestParam LocalDate endAt) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(examSlotServiceImpl.getExamSlotsStatusIn(startAt, endAt));
     }
 
 }

@@ -148,7 +148,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         for (InvigilatorRegistration registration : registrations) {
             Semester semester = registration.getExamSlot().getSubjectExam().getSubjectId().getSemesterId();
 
-            ExamSlotDetail detail = invigilatorRegistrationMapper.toExamSlotDetail(registration.getExamSlot());
+            ExamSlotDetail detail = invigilatorRegistrationMapper.toExamSlotDetailInvigilator(registration.getExamSlot());
 
             groupedRegistrations
                     .computeIfAbsent(semester.getId(), k -> new HashMap<>())
@@ -247,7 +247,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
             }
             registeredExamBySemester
                     .getExamSlotDetails()
-                    .add(invigilatorRegistrationMapper.toExamSlotDetail(registration.getExamSlot()));
+                    .add(invigilatorRegistrationMapper.toExamSlotDetailInvigilator(registration.getExamSlot()));
         }
 
         return new HashSet<>(registeredExamBySemesterMap.values());
@@ -290,7 +290,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
             } else {
                 status = ExamSlotRegisterStatusEnum.FULL.name();
             }
-            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
+            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetailInvigilator(examSlot);
             examSlotDetail.setStatus(status);
             examSlotDetails.add(examSlotDetail);
             examSlotDetail.setNumberOfRegistered((int) count);
@@ -396,7 +396,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         for (ExamSlot newSlot : newExamSlots) {
             validateRequiredInvigilators(newSlot);
             checkOverlapWithinNewSlots(newSlot, newExamSlots);
-            examSlotDetails.add(invigilatorRegistrationMapper.toExamSlotDetail(newSlot));
+            examSlotDetails.add(invigilatorRegistrationMapper.toExamSlotDetailInvigilator(newSlot));
         }
     }
 

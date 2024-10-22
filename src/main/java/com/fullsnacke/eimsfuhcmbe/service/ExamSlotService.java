@@ -1,8 +1,10 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Room;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ExamSlotService {
@@ -13,4 +15,5 @@ public interface ExamSlotService {
     void deleteExamSlot(int id);
     List<ExamSlot> getExamSlotsBySemesterId(int semesterId);
     List<List<Room>> getHallForExamSlot(int examSlotId);
+    List<ExamSlotDetail> getExamSlotsStatusIn (LocalDate startAt, LocalDate endAt);
 }

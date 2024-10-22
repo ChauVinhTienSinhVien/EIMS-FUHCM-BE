@@ -272,7 +272,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             } else {
                 status = ExamSlotInvigilatorStatus.UNASSIGNED.name();
             }
-            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
+            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetailInvigilator(examSlot);
             examSlotDetail.setStatus(status);
             examSlotDetails.add(examSlotDetail);
             examSlotDetail.setRequiredInvigilators(examSlot.getRequiredInvigilators());

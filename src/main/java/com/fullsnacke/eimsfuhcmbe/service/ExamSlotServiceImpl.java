@@ -1,20 +1,28 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subjectexam.SubjectExamNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 
+@Slf4j
 @Service
 public class ExamSlotServiceImpl implements ExamSlotService {
 
@@ -29,6 +37,8 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     private ExamSlotHallRepository examSlotHallRepository;
     @Autowired
     private ExamSlotRoomRepository examSlotRoomRepository;
+    @Autowired
+    private InvigilatorRegistrationRepository invigilatorRegistrationRepository;
 
     @Override
     public List<ExamSlot> getAllExamSlot() {
@@ -117,5 +127,37 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         Semester semester = semesterRepository.findById(semesterId).orElseThrow(() -> new RuntimeException("Semester not found"));
 
         return examSlotRepository.findExamSlotsBySemesterWithDetails(semester);
+    }
+
+    public List<ExamSlotDetail> getExamSlotsStatusIn (LocalDate startAt, LocalDate endAt) {
+
+        List<ExamSlot> examSlots = examSlotRepository.findExamSlotsByStartAtBetween(toZonedDateTime(startAt), toZonedDateTime(endAt));
+        if (examSlots == null) {
+            log.info("No exam slots found in the given date range");
+            return new ArrayList<>();
+        }
+        System.out.println("Exam slots: " + examSlots.size());
+        List<ExamSlotDetail> examSlotDetails = new ArrayList<>();
+        for (ExamSlot examSlot : examSlots) {
+            ExamSlotDetail examSlotDetail = ExamSlotDetail.builder()
+                    .examSlotId(examSlot.getId())
+                    .subjectCode(examSlot.getSubjectExam().getSubjectId().getCode())
+                    .examType(examSlot.getSubjectExam().getExamType())
+                    .startAt(examSlot.getStartAt())
+                    .endAt(examSlot.getEndAt())
+                    .numberOfRegistered(invigilatorRegistrationRepository.countByExamSlot(examSlot))
+                    .requiredInvigilators(examSlot.getRequiredInvigilators())
+                    .build();
+            examSlotDetails.add(examSlotDetail);
+        }
+        return examSlotDetails;
+    }
+    private ZonedDateTime toZonedDateTime(LocalDate date) {
+        // Tạo LocalTime để xác định thời gian trong ngày
+        LocalTime localTime = LocalTime.of(0, 00); // 0 giờ s0 phút
+
+        // Xác định múi giờ (ZoneId)
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        return ZonedDateTime.of(date, localTime, zoneId);
     }
 }

@@ -17,10 +17,11 @@ import java.time.ZonedDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ExamSlotDetail{
     int examSlotId;
+    String subjectCode;
+    String examType;
     ZonedDateTime startAt;
     ZonedDateTime endAt;
     String status;
-    String examType;
     Integer requiredInvigilators;
     int numberOfRegistered;
 }

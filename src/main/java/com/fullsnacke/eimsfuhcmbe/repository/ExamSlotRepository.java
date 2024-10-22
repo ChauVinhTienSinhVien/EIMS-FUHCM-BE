@@ -38,8 +38,9 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
             "JOIN FETCH se.subjectId s " +
             "WHERE e.startAt >= :startDate " +
             "AND e.startAt <= :endDate " +
+            "AND e.status = :status " +
             "ORDER BY e.startAt")
-    List<ExamSlot> findExamSlotsByStartAtBetween(ZonedDateTime startDate, ZonedDateTime endDate);
+    List<ExamSlot> findExamSlotsByStartAtBetween(ZonedDateTime startDate, ZonedDateTime endDate, int status);
 }
 
 

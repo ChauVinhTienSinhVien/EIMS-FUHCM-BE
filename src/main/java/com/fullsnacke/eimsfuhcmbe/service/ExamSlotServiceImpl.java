@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subject.SubjectNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.subjectexam.SubjectExamNotFoundException;
@@ -131,7 +132,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
     public List<ExamSlotDetail> getExamSlotsStatusIn (LocalDate startAt, LocalDate endAt) {
 
-        List<ExamSlot> examSlots = examSlotRepository.findExamSlotsByStartAtBetween(toZonedDateTime(startAt), toZonedDateTime(endAt));
+        List<ExamSlot> examSlots = examSlotRepository.findExamSlotsByStartAtBetween(toZonedDateTime(startAt), toZonedDateTime(endAt), ExamSlotStatus.APPROVED.getValue());
         if (examSlots == null) {
             log.info("No exam slots found in the given date range");
             return new ArrayList<>();
@@ -147,6 +148,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
                     .endAt(examSlot.getEndAt())
                     .numberOfRegistered(invigilatorRegistrationRepository.countByExamSlot(examSlot))
                     .requiredInvigilators(examSlot.getRequiredInvigilators())
+                    .status(ExamSlotStatus.APPROVED.name())
                     .build();
             examSlotDetails.add(examSlotDetail);
         }

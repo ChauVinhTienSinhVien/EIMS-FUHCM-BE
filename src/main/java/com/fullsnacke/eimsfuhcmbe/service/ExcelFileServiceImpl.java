@@ -522,7 +522,6 @@ import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAttendanceRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
-import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -544,6 +543,7 @@ public class ExcelFileServiceImpl implements ExcelFileService {
 
     public static final String TOTAL_HOURS = "Total Hours";
     public static final int TOTAL_HOURS_COLUMN = 8;
+    private int sheetWidth;
     private final SemesterRepository semesterRepository;
     private final InvigilatorAttendanceRepository invigilatorAttendanceRepository;
     private final ConfigurationHolder configurationHolder;
@@ -628,7 +628,8 @@ public class ExcelFileServiceImpl implements ExcelFileService {
 
     private void createHeaderRow(XSSFSheet sheet) {
         XSSFRow headerRow = sheet.createRow(8);
-        String[] columns = {"FUID", "First name", "Last name", "Department", "Date", "Start time", "End time", "Hours", "Total Hours", "Hourly Rate", "Total Remuneration"};
+        String[] columns = {"FUID", "First name", "Last name", "Department", "Date", "Start time", "End time", "Hours", "Total Hours", "Hourly Rate", "Total Remuneration"};int headerLength = columns.length;
+        sheetWidth = columns.length;
         for (int i = 0; i < columns.length; i++) {
             headerRow.createCell(i).setCellValue(columns[i]);
         }
@@ -657,40 +658,63 @@ public class ExcelFileServiceImpl implements ExcelFileService {
     private void fillSummaryRow(XSSFRow row, double totalHours, double hourRate) {
         row.createCell(0).setCellValue("Total:");
         row.createCell(7).setCellValue(totalHours);
-        row.createCell(8).setCellValue(totalHours);
+        row.createCell(8).setCellFormula("H" + (row.getRowNum() + 1));
         row.createCell(9).setCellValue(hourRate);
-        row.createCell(10).setCellValue(totalHours * hourRate);
+        row.createCell(10).setCellFormula("PRODUCT(I" + (row.getRowNum() + 1) + ",J" + (row.getRowNum() + 1) + ")");
     }
 
     private void createSummaryTable(XSSFSheet sheet, int totalInvigilators, double totalRemuneration) {
         XSSFRow titleRow = sheet.createRow(1);
-        titleRow.createCell(0).setCellValue("Summary");
+        titleRow.createCell(0).setCellValue("Invigilator Summary");
 
-        XSSFRow totalInvigilatorsRow = sheet.createRow(2);
+        XSSFRow headerRow = sheet.createRow(2);
+        headerRow.createCell(0).setCellValue("Metric");
+        headerRow.createCell(1).setCellValue("Value");
+        headerRow.createCell(2).setCellValue("Unit");
+
+        XSSFRow totalInvigilatorsRow = sheet.createRow(3);
         totalInvigilatorsRow.createCell(0).setCellValue("Total Invigilators");
         totalInvigilatorsRow.createCell(1).setCellValue(totalInvigilators);
+        totalInvigilatorsRow.createCell(2).setCellValue("people");
 
-        XSSFRow totalRemunerationRow = sheet.createRow(3);
+        XSSFRow totalRemunerationRow = sheet.createRow(4);
         totalRemunerationRow.createCell(0).setCellValue("Total Remuneration");
         totalRemunerationRow.createCell(1).setCellValue(totalRemuneration);
+        totalRemunerationRow.createCell(2).setCellValue("VND");
 
         XSSFRow averageRow = sheet.createRow(4);
         averageRow.createCell(0).setCellValue("Average Remuneration");
         averageRow.createCell(1).setCellValue(totalRemuneration / totalInvigilators);
+        averageRow.createCell(2).setCellValue("VND");
     }
+
+    /*****************************************************
+    *  Complete input data                               *
+    *  Start formatting the sheet to make it look nice   *
+    *****************************************************/
+
 
     private void formatWorkbook(XSSFWorkbook workbook) {
         XSSFSheet sheet = workbook.getSheetAt(0);
 
-        // Format main title
-        XSSFCellStyle titleStyle = workbook.createCellStyle();
-        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        // Format font
         XSSFFont titleFont = workbook.createFont();
         titleFont.setBold(true);
-        titleFont.setFontHeightInPoints((short) 16);
+        titleFont.setFontHeightInPoints((short) 20);
+        titleFont.setColor(IndexedColors.RED1.getIndex());
+        titleFont.setFontName("Tahoma");
+
+        // Format style
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
         titleStyle.setFont(titleFont);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+
+        // Áp dụng style cho cell được chọn
+        // Vì Title nằm ở hàng 0 và cột 0 nên setCellValue cho ô ở hàng 0 và cột 0
         sheet.getRow(0).getCell(0).setCellStyle(titleStyle);
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, 10));
+        // Merge title cells
+        //
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, sheetWidth));
 
         // Format header row
         XSSFCellStyle headerStyle = workbook.createCellStyle();

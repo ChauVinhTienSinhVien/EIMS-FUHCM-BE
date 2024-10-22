@@ -280,9 +280,8 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         Set<ExamSlotDetail> examSlotDetails = new HashSet<>();
         for (ExamSlot examSlot : allExamSlots) {
             String status;
-            long count = registeredSlots.stream()
-                    .filter(registration -> registration.getExamSlot().equals(examSlot))
-                    .count();
+
+            int count = invigilatorRegistrationRepository.countByExamSlot(examSlot);
 
             if (registeredSlots.stream().anyMatch(registration -> registration.getExamSlot().equals(examSlot))) {
                 status = ExamSlotRegisterStatusEnum.REGISTERED.name();

@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -18,8 +19,8 @@ public class EmailController {
     EmailService emailService;
 
     @GetMapping("/send/attendance&totalhours")
-    public ResponseEntity<?> sendAttendanceAndTotalHoursReport() {
-        emailService.sendAttendanceAndHoursMailMessage("shinkiriloveforever@gmail.com", 34);
+    public ResponseEntity<?> sendAttendanceAndTotalHoursReport(@RequestParam int semesterId) {
+        emailService.sendAttendanceAndHoursMailMessage("shinkiriloveforever@gmail.com", semesterId);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Sent Attendance and Total Hours Report Successfully!!!");

@@ -139,7 +139,7 @@ public class RequestServiceImpl implements RequestService {
         RequestStatusEnum entityStatus = RequestStatusEnum.fromValue(entity.getStatus());
         RequestStatusEnum status;
         try {
-            status = RequestStatusEnum.valueOf(request.getStatus());
+            status = RequestStatusEnum.valueOf(request.getStatus().toUpperCase());
             log.info("Status: {}", status);
         } catch (Exception e) {
             throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);

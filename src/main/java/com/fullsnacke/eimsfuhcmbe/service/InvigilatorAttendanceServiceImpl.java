@@ -373,4 +373,8 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         }
         return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndSemesterId(currentUser.get().getId(), semesterId);
     }
+
+    public List<User> getInvigilatorBySemesterId(Integer semesterId) {
+        return invigilatorAttendanceRepository.findInvigilatorBySemesterId(semesterId);
+    }
 }

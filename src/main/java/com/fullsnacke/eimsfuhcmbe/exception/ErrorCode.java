@@ -88,7 +88,10 @@ public enum ErrorCode{
     // Method Argument Type Mismatch
     METHOD_ARGUMENT_TYPE_MISMATCH("Method argument type mismatch", HttpStatus.BAD_REQUEST),
 
-    USER_ALREADY_EXISTS("User already exists", HttpStatus.CONFLICT),;
+    USER_ALREADY_EXISTS("User already exists", HttpStatus.CONFLICT),
+
+    CHECKIN_TIME_IS_NOT_VALID("Check in time is not valid", HttpStatus.BAD_REQUEST),
+    CHECKOUT_TIME_IS_NOT_VALID("Check out time is not valid", HttpStatus.BAD_REQUEST),;
 
     private String message;
     private HttpStatusCode statusCode;

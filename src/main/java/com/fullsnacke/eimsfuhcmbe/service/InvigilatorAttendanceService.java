@@ -5,8 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
 import java.util.List;
 
 public interface InvigilatorAttendanceService {
-    InvigilatorAttendance createAttendance(InvigilatorAttendance invigilatorAttendance);
-    InvigilatorAttendance updateAttendance(InvigilatorAttendance invigilatorAttendance);
+
     InvigilatorAttendance checkIn(Integer id);
     InvigilatorAttendance checkOut(Integer id);
 

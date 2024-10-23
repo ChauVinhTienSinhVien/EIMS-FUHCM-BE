@@ -1,15 +1,17 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
-import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
-import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
-import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
-import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.enums.InvigilatorAttendanceStatus;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
+import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAttendanceRepository;
+import com.fullsnacke.eimsfuhcmbe.util.DateTimeUtil;
+import com.fullsnacke.eimsfuhcmbe.util.DateValidationUtil;
 import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +29,9 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
     @Autowired
     private InvigilatorAttendanceRepository invigilatorAttendanceRepository;
+
+    @Autowired
+    ExamSlotRepository examSlotRepository;
 
     @Transactional
     public List<InvigilatorAttendance> addInvigilatorAttendancesByDay() {
@@ -111,23 +116,20 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
 
     @Override
-    public InvigilatorAttendance createAttendance(InvigilatorAttendance invigilatorAttendance) {
-        return null;
-    }
-
-    @Override
-    public InvigilatorAttendance updateAttendance(InvigilatorAttendance invigilatorAttendance) {
-        return null;
-    }
-
-    @Override
     public InvigilatorAttendance checkIn(Integer id) {
 
         InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(id).orElse(null);
 
         if(invigilatorAttendanceInDb != null && isCheckIn(invigilatorAttendanceInDb)){
-            invigilatorAttendanceInDb.setCheckIn(Instant.now());
-            invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
+            Instant now = Instant.now();
+            Instant startAt = invigilatorAttendanceInDb.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().toInstant();
+
+            if(DateValidationUtil.isAfterTimeLimit(startAt)){
+                invigilatorAttendanceInDb.setCheckIn(now);
+                invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
+            }else{
+                throw new CustomException(ErrorCode.CHECKIN_TIME_IS_NOT_VALID);
+            }
         }
         return invigilatorAttendanceInDb;
     }
@@ -137,9 +139,15 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
         InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(id).orElse(null);
 
-        if(invigilatorAttendanceInDb != null && isCheckOut(invigilatorAttendanceInDb) && !isCheckIn(invigilatorAttendanceInDb)){
-            invigilatorAttendanceInDb.setCheckOut(Instant.now());
-            invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
+        if(invigilatorAttendanceInDb != null && isCheckOut(invigilatorAttendanceInDb) && !isCheckIn(invigilatorAttendanceInDb)) {
+            Instant now = Instant.now();
+            Instant endAt = invigilatorAttendanceInDb.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().toInstant();
+            if (DateValidationUtil.isAfterTimeLimit(endAt)) {
+                invigilatorAttendanceInDb.setCheckOut(now);
+                invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
+            } else {
+                throw new CustomException(ErrorCode.CHECKOUT_TIME_IS_NOT_VALID);
+            }
         }
         return invigilatorAttendanceInDb;
     }
@@ -147,6 +155,14 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     @Override
     @Transactional
     public List<InvigilatorAttendance> checkInByExamSlotId(Integer examSlotId) {
+        ExamSlot checkInExamSlot = examSlotRepository.findById(examSlotId).orElse(null);
+        System.out.println(Instant.now());
+        if(checkInExamSlot == null){
+            throw new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND);
+        }
+        if(!DateValidationUtil.isAfterTimeLimit(checkInExamSlot.getStartAt().toInstant())){
+            throw new CustomException(ErrorCode.CHECKIN_TIME_IS_NOT_VALID);
+        }
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
             if(isCheckIn(invigilatorAttendance)){
@@ -160,6 +176,13 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     @Override
     @Transactional
     public List<InvigilatorAttendance> checkOutByExamSlotId(Integer examSlotId) {
+        ExamSlot checkInExamSlot = examSlotRepository.findById(examSlotId).orElse(null);
+        if(checkInExamSlot == null){
+            throw new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND);
+        }
+        if(!DateValidationUtil.isAfterTimeLimit(checkInExamSlot.getEndAt().toInstant())){
+            throw new CustomException(ErrorCode.CHECKOUT_TIME_IS_NOT_VALID);
+        }
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
             if(isCheckOut(invigilatorAttendance)  && !isCheckIn(invigilatorAttendance)){
@@ -177,8 +200,12 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
         for (Integer invigilatorAttendanceId : invigilatorAttendanceIds) {
             InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceRepository.findById(invigilatorAttendanceId).orElse(null);
-            if(invigilatorAttendance != null){
+            Instant startAt = invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().toInstant();
+            if(DateValidationUtil.isAfterTimeLimit(startAt)){
+                invigilatorAttendance.setCheckOut(Instant.now());
                 invigilatorAttendances.add(invigilatorAttendance);
+            }else {
+                throw new CustomException(ErrorCode.CHECKIN_TIME_IS_NOT_VALID);
             }
         }
 
@@ -200,7 +227,13 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         for (Integer invigilatorAttendanceId : invigilatorAttendanceIds) {
             InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceRepository.findById(invigilatorAttendanceId).orElse(null);
             if(invigilatorAttendance != null){
-                invigilatorAttendances.add(invigilatorAttendance);
+                Instant endAt = invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().toInstant();
+                if(DateValidationUtil.isAfterTimeLimit(endAt)){
+                    invigilatorAttendance.setCheckOut(Instant.now());
+                    invigilatorAttendances.add(invigilatorAttendance);
+                }else {
+                    throw new CustomException(ErrorCode.CHECKOUT_TIME_IS_NOT_VALID);
+                }
             }
         }
 
@@ -226,6 +259,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         return invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
     }
 
+    @Transactional
     public List<InvigilatorAttendance> managerApproveByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
@@ -237,6 +271,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         return invigilatorAttendances;
     }
 
+    @Transactional
     public List<InvigilatorAttendance> managerRejectByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
@@ -276,6 +311,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         return invigilatorAttendances;
     }
 
+    @Transactional
     public List<InvigilatorAttendance> managerRejectAll(List<Integer> invigilatorAttendanceIds) {
         List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
 

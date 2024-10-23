@@ -195,11 +195,11 @@ public class InvigilatorAttendanceController {
     }
 
     @GetMapping("/manager/exam-slots-by-day")
-    @Operation(summary = "Manager get all of attendance checked examSlot", description = "Retrieve a list of all attendance checked examSlot")
-    public ResponseEntity<List<ExamSlotResponseDTO>> getCheckedAttendanceExamSlotsByDay(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
+    @Operation(summary = "Manager get all of attendance examSlot", description = "Retrieve a list of all attendance examSlot")
+    public ResponseEntity<List<ExamSlotResponseDTO>> managerGetAttendanceExamSlotsByDay(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
         LocalDate localDate = day.toInstant().atZone(ZoneOffset.systemDefault()).toLocalDate();
         Instant dayInstant = localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
-        List<ExamSlot> examSlotList = invigilatorAttendanceService.getCheckedAttendanceExamSlotsByDay(dayInstant);
+        List<ExamSlot> examSlotList = invigilatorAttendanceService.getExamSlotsByDay(dayInstant);
         List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
                 .map(examSlot -> examSlotMapper.toDto(examSlot))
                 .toList();

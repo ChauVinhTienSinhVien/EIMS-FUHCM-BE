@@ -1,6 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
@@ -32,6 +33,22 @@ public class InvigilatorAssignmentController {
     public ResponseEntity<?> getUnassignedInvigilators(@PathVariable("examSlotId") int examSlotId) {
         return ResponseEntity.ok(invigilatorAssignmentService.getUnassignedInvigilators(examSlotId));
     }
+
+    //STAFF/MANAGER
+    @GetMapping("/assigned/invigilators/examslotid={examSlotId}")
+    @Operation(summary = "Get assigned invigilators for a given exam slot")
+    public ResponseEntity<?> getAssignedInvigilators(@PathVariable("examSlotId") int examSlotId) {
+        return ResponseEntity.ok(invigilatorAssignmentService.getAssignedInvigilators(examSlotId));
+    }
+
+    //INVIGILATOR
+    @GetMapping("/myinfo/scheduled")
+    @Operation(summary = "Get all exam slots that an invigilator is assigned to")
+    public ResponseEntity<?> getScheduledExamSlots(@RequestParam int semesterId) {
+        return ResponseEntity.ok(invigilatorAssignmentService.getAllExamSlotsAssignedInSemester(semesterId));
+    }
+
+
 
     //STAFF
     @PutMapping

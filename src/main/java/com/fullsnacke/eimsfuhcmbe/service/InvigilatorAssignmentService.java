@@ -15,9 +15,11 @@ import java.util.Set;
 public interface InvigilatorAssignmentService {
     List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds);
     List<UserRegistrationResponseDTO> getUnassignedInvigilators(int examSlotId);
+    List<UserRegistrationResponseDTO> getAssignedInvigilators(int examSlotId);
     String exchangeInvigilators(UpdateInvigilatorAssignmentRequestDTO request);
     String exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request);
     Set<ExamSlotDetail> getAllExamSlotsInSemesterWithStatus(int semesterId);
+    List<ExamSlotDetail> getAllExamSlotsAssignedInSemester (int semesterId);
 
 
 }

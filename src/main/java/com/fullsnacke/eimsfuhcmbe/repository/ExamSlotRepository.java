@@ -24,6 +24,19 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
             "ORDER BY e.startAt")
     List<ExamSlot> findExamSlotsBySemesterWithDetails(@Param("semester") Semester semester);
 
+    @Query("SELECT DISTINCT ir.examSlot FROM InvigilatorRegistration ir " +
+            "JOIN ir.invigilator i " +
+            "JOIN ir.examSlot es " +
+            "JOIN es.subjectExam se " +
+            "JOIN se.subjectId sub " +
+            "JOIN sub.semesterId s " +
+            "WHERE es.id IN (SELECT DISTINCT esh.examSlot.id FROM ExamSlotHall esh WHERE esh.hallInvigilator IS NOT NULL) " +
+            "AND s.id = :semesterId " +
+            "AND i.fuId = :fuId")
+    List<ExamSlot> findAssignedExamSlotsBySemesterIdAndFuId(
+            @Param("semesterId") Integer semesterId,
+            @Param("fuId") String fuId);
+
     @Query("SELECT e FROM ExamSlot e " +
             "JOIN FETCH e.subjectExam se " +
             "JOIN FETCH se.subjectId s " +

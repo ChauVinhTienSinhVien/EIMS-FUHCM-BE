@@ -70,6 +70,12 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
     List<InvigilatorRegistration> findUnassignedRegistrationsByExamSlot_IdOrderByCreatedAtAsc(@Param("examSlotId") int examSlotId);
 
     @Query("SELECT ir FROM InvigilatorRegistration ir " +
+            "WHERE ir.examSlot.id = :examSlotId " +
+            "AND ir.id IN (SELECT ia.invigilatorRegistration.id FROM InvigilatorAssignment ia) " +
+            "ORDER BY ir.createdAt ASC")
+    List<InvigilatorRegistration> findAssignedRegistrationsByExamSlot_IdOrderByCreatedAtAsc(@Param("examSlotId") int examSlotId);
+
+    @Query("SELECT ir FROM InvigilatorRegistration ir " +
             "JOIN FETCH ir.examSlot es " +
             "JOIN FETCH ir.invigilator i " +
             "WHERE es.id = :examSlotId AND i.fuId = :fuId")

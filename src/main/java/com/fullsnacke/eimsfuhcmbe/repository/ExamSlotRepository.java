@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
 
@@ -35,6 +34,14 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
 
     @Query("SELECT e FROM ExamSlot e WHERE e.startAt >= :startTime AND e.endAt <= :endTime")
     List<ExamSlot> findExamSlotsByTimeRange(@Param("startTime") ZonedDateTime startTime, @Param("endTime") ZonedDateTime endTime);
+
+    @Query("SELECT e FROM ExamSlot e WHERE e.subjectExam.id = :subjectId AND " +
+            "((e.startAt <= :endAt AND e.endAt >= :startAt))")
+    List<ExamSlot> findBySubjectAndTime(@Param("subjectId") int subjectId,
+                                        @Param("startAt") ZonedDateTime startAt,
+                                        @Param("endAt") ZonedDateTime endAt);
+
+    List<ExamSlot> findExamSlotByStatus(int status);
 
 }
 

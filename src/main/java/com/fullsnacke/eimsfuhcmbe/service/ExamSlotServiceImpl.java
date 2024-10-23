@@ -39,21 +39,24 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
     @Override
     public ExamSlot createExamSlot(ExamSlot examSlot) {
+
+        if (isDuplicateExamSlot(examSlot)) {
+            throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
+        }
+
         return examSlotRepository.save(examSlot);
     }
 
     @Override
     public ExamSlot updateExamSlot(ExamSlot examSlotInRequest, int id) {
-//        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
-
-        User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
 
         if (examSlotInDB == null)
             throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
 
-        if (user.getRole().getId() == 1)
-            examSlotInDB.setUpdatedBy(user);
+        if (isDuplicateExamSlot(examSlotInRequest)) {
+            throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
+        }
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
@@ -70,7 +73,6 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     }
 
     public ExamSlot managerUpdateExamSlot(ExamSlot examSlotInRequest, int id) {
-//        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
 
         User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
@@ -124,6 +126,17 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     }
 
     @Override
+    public void removeExamSlotHall(int examSlotId) {
+        ExamSlot examSlot = examSlotRepository.findExamSlotById(examSlotId);
+        List<ExamSlotHall> examSlotHalls = examSlotHallRepository.findByExamSlot(examSlot);
+        for (ExamSlotHall hall : examSlotHalls) {
+            List<ExamSlotRoom> rooms = examSlotRoomRepository.findByExamSlotHall(hall);
+            examSlotRoomRepository.deleteAll(rooms);
+            examSlotHallRepository.delete(hall);
+        }
+    }
+
+    @Override
     public List<ExamSlot> getExamSlotsBySemesterId(int semesterId) {
         Semester semester = semesterRepository.findById(semesterId).orElseThrow(() -> new RuntimeException("Semester not found"));
 
@@ -133,6 +146,17 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     @Override
     public List<ExamSlot> getExamSlotsInTimeRange(ZonedDateTime startTime, ZonedDateTime endTime) {
         return examSlotRepository.findExamSlotsByTimeRange(startTime, endTime);
+    }
+
+    @Override
+    public List<ExamSlot> getExamSlotsByStatus(int status) {
+        return examSlotRepository.findExamSlotByStatus(status);
+    }
+
+    private boolean isDuplicateExamSlot(ExamSlot examSlot) {
+        List<ExamSlot> existingExamSlots = examSlotRepository.findBySubjectAndTime(
+                examSlot.getSubjectExam().getId(), examSlot.getStartAt(), examSlot.getEndAt());
+        return !existingExamSlots.isEmpty();
     }
 
 }

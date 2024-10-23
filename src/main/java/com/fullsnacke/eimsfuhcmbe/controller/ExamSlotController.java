@@ -59,8 +59,6 @@ public class ExamSlotController {
             List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
             for (ExamSlot e:examSlotList) {
                 ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
-//                SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-//                examSlotResponseDTO.setSubjectExamId(subjectExam.getId());
                 examSlotResponseDTOList.add(examSlotResponseDTO);
             }
             return ResponseEntity.ok(examSlotResponseDTOList);
@@ -86,8 +84,6 @@ public class ExamSlotController {
             for (ExamSlot e:examSlotList) {
                 System.out.println(e.getStartAt());
                 ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
-//                SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-//                examSlotResponseDTO.setSubjectExamId(subjectExam);
                 examSlotResponseDTOList.add(examSlotResponseDTO);
             }
             return ResponseEntity.ok(examSlotResponseDTOList);
@@ -98,7 +94,6 @@ public class ExamSlotController {
     @Operation(summary = "Create a new exam slot", description = "Creates a new exam slot based on the provided data in the request body. The created exam slot is returned with a 201 Created response.")
     public ResponseEntity<ExamSlotResponseDTO> createExamSlot(@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
-
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -115,8 +110,6 @@ public class ExamSlotController {
         URI uri = URI.create("/examslots/" + createdExamSlot.getId());
         System.out.println(createdExamSlot.getCreatedAt());
         ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(createdExamSlot);
-//        SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-//        examSlotResponseDTO.setSubjectExamId(subjectExam);
         return ResponseEntity.created(uri).body(examSlotResponseDTO);
     }
 
@@ -127,8 +120,6 @@ public class ExamSlotController {
         for (ExamSlotRequestDTO e:examSlotRequestDTOList) {
             ExamSlot examSlot = examSlotServiceImpl.createExamSlot(examSlotMapper.toEntity(e));
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
-//            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId());
-//            examSlotResponseDTO.setSubjectExamId(subjectExam);
             examSlotResponseDTOList.add(examSlotResponseDTO);
         }
         return ResponseEntity.ok(examSlotResponseDTOList);
@@ -147,7 +138,6 @@ public class ExamSlotController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
-
             ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -164,8 +154,6 @@ public class ExamSlotController {
 
             ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlot(examSlot, id);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
-//            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-//            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
         } catch (ExamSlotNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -185,7 +173,6 @@ public class ExamSlotController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
-
             ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -196,20 +183,23 @@ public class ExamSlotController {
             examSlot.setCreatedAt(existingExamSlot.getCreatedAt());
             examSlot.setCreatedBy(existingExamSlot.getCreatedBy());
             examSlot.setUpdatedBy(currentUser);
-            examSlot.setUpdatedAt(existingExamSlot.getUpdatedAt());
+            examSlot.setUpdatedAt(Instant.now());
+            examSlot.setStatus(examSlotRequestDTO.getStatus().getValue());
             SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
             examSlot.setSubjectExam(subjectExam);
 
             ExamSlot updateExamSlot =  examSlotServiceImpl.managerUpdateExamSlot(examSlot, id);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
 
+            if (updateExamSlot.getStatus() == ExamSlotStatus.REJECTED.getValue()) {
+                examSlotServiceImpl.removeExamSlotHall(updateExamSlot.getId());
+            }
+
             return ResponseEntity.ok(examSlotResponseDTO);
         } catch (ExamSlotNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
-
-
 
     @GetMapping("/{id}")
     @Operation(summary = "Retrieve an exam slot by ID", description = "Fetches a specific exam slot based on its ID. Returns the exam slot data if found, otherwise returns a 404 Not Found.")
@@ -219,8 +209,6 @@ public class ExamSlotController {
             return ResponseEntity.noContent().build();
         } else {
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
-//            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-//            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
         }
     }
@@ -250,6 +238,43 @@ public class ExamSlotController {
         } catch (ExamSlotNotFoundException exception) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/to-day")
+    @Operation(summary = "Retrieve exam slots for today", description = "Fetches a list of exam slots that are scheduled for today.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsForToday() {
+        ZonedDateTime startTime = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime endTime = ZonedDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        List<ExamSlot> examSlotListInTime = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
+        List<ExamSlot> examSlotList = new ArrayList<>();
+        for (ExamSlot e:examSlotListInTime) {
+            if (e.getStatus() == ExamSlotStatus.APPROVED.getValue()) {
+                examSlotList.add(e);
+            }
+        }
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
+        }
+    }
+
+    @GetMapping("/by-status/{status}")
+    @Operation(summary = "Retrieve exam slots by status", description = "Fetches a list of exam slots based on the status provided in the request. If no exam slots are found, it will return a 204 No Content response.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsByStatus(@PathVariable("status") String status) {
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsByStatus(ExamSlotStatus.valueOf(status).getValue());
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
+        }
+
     }
 
 }

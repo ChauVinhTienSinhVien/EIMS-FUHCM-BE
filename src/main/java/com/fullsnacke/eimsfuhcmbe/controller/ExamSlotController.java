@@ -256,4 +256,19 @@ public class ExamSlotController {
         }
     }
 
+    @GetMapping("/by-status/{status}")
+    @Operation(summary = "Retrieve exam slots by status", description = "Fetches a list of exam slots based on the status provided in the request. If no exam slots are found, it will return a 204 No Content response.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsByStatus(@PathVariable("status") String status) {
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsByStatus(ExamSlotStatus.valueOf(status).getValue());
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
+        }
+
+    }
+
 }

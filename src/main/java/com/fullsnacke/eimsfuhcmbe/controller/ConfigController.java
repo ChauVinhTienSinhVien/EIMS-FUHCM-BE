@@ -164,4 +164,20 @@ public class ConfigController {
             return ResponseEntity.ok(configResponseDtoList);
         }
     }
+
+    @GetMapping("/latest-semester")
+    @Operation(summary = "Get all configs of latest-semester", description = "Retrieve a list of all configuarations of the latest-semester")
+    public ResponseEntity<List<ConfigResponseDto>> getConfigOfLatestSemester(){
+        List<Config> configList = configServiceImpl.getConfigOfLatestSemester();
+
+        List<ConfigResponseDto> configResponseDtoList = configList.stream()
+                .map(config -> configMapper.toDto(config))
+                .toList();
+
+        if(configResponseDtoList.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }else{
+            return ResponseEntity.ok(configResponseDtoList);
+        }
+    }
 }

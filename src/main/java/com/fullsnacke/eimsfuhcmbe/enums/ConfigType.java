@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.enums;
 public enum ConfigType {
     HOURLY_RATE("hourly_rate", ConfigUnit.VND.getValue()),
     ALLOWED_SLOT("allowed_slot", ConfigUnit.SLOT.getValue()),
+
     TIME_BEFORE_EXAM("time_before_exam", ConfigUnit.MINUTE.getValue()),
     TIME_BEFORE_OPEN_REGISTRATION("time_before_open_registration", ConfigUnit.DAY.getValue()),
     TIME_BEFORE_CLOSE_REGISTRATION("time_before_close_registration", ConfigUnit.DAY.getValue()),

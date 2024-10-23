@@ -31,4 +31,17 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN ir.examSlot es " +
             "WHERE FUNCTION('DATE', es.startAt) = FUNCTION('DATE', :day)")
     List<ExamSlot> findExamSlotByStartAtInDay(@Param("day") Instant day);
+
+    @Query("SELECT ia FROM InvigilatorAttendance ia " +
+            "JOIN FETCH ia.invigilatorAssignment iaa " +
+            "JOIN FETCH iaa.invigilatorRegistration ir " +
+            "WHERE ir.invigilator.id = :invigilatorId")
+    List<InvigilatorAttendance> findInvigilatorAttendanceByInvigilatorId(Integer invigilatorId);
+
+    @Query("SELECT ia FROM InvigilatorAttendance ia " +
+            "JOIN FETCH ia.invigilatorAssignment iaa " +
+            "JOIN FETCH iaa.invigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "WHERE ir.invigilator.id = :id AND FUNCTION('DATE', es.startAt) = FUNCTION('DATE', :day)")
+    List<InvigilatorAttendance> findInvigilatorAttendanceByInvigilatorIdAndDay(@Param("id") Integer id, @Param("day") Instant day);
 }

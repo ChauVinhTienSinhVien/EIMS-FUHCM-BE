@@ -3,8 +3,13 @@ package com.fullsnacke.eimsfuhcmbe.service;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.enums.InvigilatorAttendanceStatus;
+import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
+import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAttendanceRepository;
+import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceService {
@@ -198,5 +204,78 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
     public List<InvigilatorAttendance> getInvigilatorAttendancesByExamSlotId(Integer examSlotId) {
         return invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
+    }
+
+    public List<InvigilatorAttendance> managerApproveByExamSlotId(Integer examSlotId) {
+        List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
+        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
+            if(invigilatorAttendance.getStatus() == InvigilatorAttendanceStatus.PENDING.getValue()){
+                invigilatorAttendance.setStatus(InvigilatorAttendanceStatus.APPROVED.getValue());
+            }
+        }
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return invigilatorAttendances;
+    }
+
+    public List<InvigilatorAttendance> managerRejectByExamSlotId(Integer examSlotId) {
+        List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
+        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
+            if(invigilatorAttendance.getStatus() == InvigilatorAttendanceStatus.PENDING.getValue()){
+                invigilatorAttendance.setStatus(InvigilatorAttendanceStatus.REJECTED.getValue());
+            }
+        }
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return  invigilatorAttendances;
+    }
+
+    public List<InvigilatorAttendance> getCurrentUserInvigilatorAttendance() {
+        Optional<User> currentUser = SecurityUntil.getLoggedInUser();
+        if(currentUser.isEmpty()){
+            throw new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND);
+        }
+        System.out.println("currentUser.get().getId() = " + currentUser.get().getId());
+        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorId(currentUser.get().getId())) {
+            System.out.println("invigilatorAttendance = " + invigilatorAttendance);
+        }
+        return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorId(currentUser.get().getId());
+    }
+
+
+    public List<InvigilatorAttendance> managerApproveAll(List<Integer> invigilatorAttendanceIds) {
+        List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
+
+        for (Integer invigilatorAttendanceId : invigilatorAttendanceIds) {
+            InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceRepository.findById(invigilatorAttendanceId).orElse(null);
+            if(invigilatorAttendance != null && invigilatorAttendance.getStatus() == InvigilatorAttendanceStatus.PENDING.getValue()){
+                invigilatorAttendance.setStatus(InvigilatorAttendanceStatus.APPROVED.getValue());
+                invigilatorAttendances.add(invigilatorAttendance);
+            }
+        }
+
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return invigilatorAttendances;
+    }
+
+    public List<InvigilatorAttendance> managerRejectAll(List<Integer> invigilatorAttendanceIds) {
+        List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
+
+        for (Integer invigilatorAttendanceId : invigilatorAttendanceIds) {
+            InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceRepository.findById(invigilatorAttendanceId).orElse(null);
+            if(invigilatorAttendance != null && invigilatorAttendance.getStatus() == InvigilatorAttendanceStatus.PENDING.getValue()){
+                invigilatorAttendance.setStatus(InvigilatorAttendanceStatus.REJECTED.getValue());
+                invigilatorAttendances.add(invigilatorAttendance);
+            }
+        }
+
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return invigilatorAttendances;
+    }
+
+    public List<InvigilatorAttendance> getCurrentUserInvigilatorAttendanceByDay(Instant day) {
+        Optional<User> currentUser = SecurityUntil.getLoggedInUser();
+        if(currentUser.isEmpty()){
+            throw new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND);
+        }
+        return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndDay(currentUser.get().getId(), day);
     }
 }

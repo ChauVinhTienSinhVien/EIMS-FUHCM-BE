@@ -122,95 +122,19 @@ public class ConfigController {
 
     @GetMapping
     @Operation(summary = "Get all configs", description = "Retrieve a list of all configuarations")
-    public ResponseEntity<List<ConfigResponseDto>> getAllConfigs(){
+    public ResponseEntity<List<ConfigResponseDto>> getAllConfigs() {
         List<Config> configList = configServiceImpl.getAllConfig();
         List<ConfigResponseDto> configResponseDtoList = new ArrayList<>();
-        for (Config config: configList) {
+        for (Config config : configList) {
             ConfigResponseDto configResponseDto = configMapper.toDto(config);
             configResponseDtoList.add(configResponseDto);
         }
 
-        if(configResponseDtoList.isEmpty()){
+        if (configResponseDtoList.isEmpty()) {
             return ResponseEntity.noContent().build();
-        }else{
+        } else {
             return ResponseEntity.ok(configResponseDtoList);
         }
-    }
-
-    @PostMapping("/hourly-rate")
-    @Operation(summary = "Add a  hourly-rate config", description = "Add a new  hourly-rate configuration")
-    public ResponseEntity<ConfigResponseDto> addHourlyRateConfig(@RequestBody ConfigRequestDto configRequestDto){
-        Config config = configMapper.toEntity(configRequestDto);
-
-        config.setConfigType(ConfigType.HOURLY_RATE.getValue());
-        config.setUnit(ConfigUnit.VND.getValue());
-
-        Config addedConfig = configServiceImpl.addConfig(config);
-        URI uri = URI.create("/configs/" + addedConfig.getId());
-
-        ConfigResponseDto configResponseDto = configMapper.toDto(addedConfig);
-
-        return ResponseEntity.created(uri).body(configResponseDto);
-    }
-
-    @PostMapping("/allowed-slot")
-    @Operation(summary = "Add a config allowed-slot", description = "Add a new allowed-slot configuration")
-    public ResponseEntity<ConfigResponseDto> addAllowedSlotConfig(@RequestBody ConfigRequestDto configRequestDto){
-        Config config = configMapper.toEntity(configRequestDto);
-
-        config.setConfigType(ConfigType.ALLOWED_SLOT.getValue());
-        config.setUnit(ConfigUnit.SLOT.getValue());
-
-        Config addedConfig = configServiceImpl.addConfig(config);
-        URI uri = URI.create("/configs/" + addedConfig.getId());
-
-        ConfigResponseDto configResponseDto = configMapper.toDto(addedConfig);
-        return ResponseEntity.created(uri).body(configResponseDto);
-    }
-
-    @PostMapping("/time-before-exam")
-    @Operation(summary = "Add a config time-before-exam", description = "Add a new time-before-exam configuration")
-    public ResponseEntity<ConfigResponseDto> addTimeBeforeExamConfig(@RequestBody ConfigRequestDto configRequestDto){
-        Config config = configMapper.toEntity(configRequestDto);
-
-        config.setConfigType(ConfigType.TIME_BEFORE_EXAM.getValue());
-        config.setUnit(ConfigUnit.MINUTE.getValue());
-
-        Config addedConfig = configServiceImpl.addConfig(config);
-        URI uri = URI.create("/configs/" + addedConfig.getId());
-
-        ConfigResponseDto configResponseDto = configMapper.toDto(addedConfig);
-        return ResponseEntity.created(uri).body(configResponseDto);
-    }
-
-    @PostMapping("/invigilator-room")
-    @Operation(summary = "Add a config invigilator-room", description = "Add a new invigilator-room configuration")
-    public ResponseEntity<ConfigResponseDto> addInvigilatorRoomConfig(@RequestBody ConfigRequestDto configRequestDto){
-        Config config = configMapper.toEntity(configRequestDto);
-
-        config.setConfigType(ConfigType.INVIGILATOR_ROOM.getValue());
-        config.setUnit(ConfigUnit.ROOM.getValue());
-
-        Config addedConfig = configServiceImpl.addConfig(config);
-        URI uri = URI.create("/configs/" + addedConfig.getId());
-
-        ConfigResponseDto configResponseDto = configMapper.toDto(addedConfig);
-        return ResponseEntity.created(uri).body(configResponseDto);
-    }
-
-    @PostMapping("/bulk")
-    @Operation(summary = "Add multiple configs", description = "Add multiple configurations")
-    public ResponseEntity<List<ConfigResponseDto>> addConfigs(@RequestBody List<ConfigRequestDto> configRequestDtoList){
-        List<Config> configList = configRequestDtoList.stream()
-                .map(configRequestDto -> configMapper.toEntity(configRequestDto))
-                .toList();
-
-        List<Config> addedConfigs = configServiceImpl.addAllConfigs(configList);
-        List<ConfigResponseDto> configResponseDtoList = addedConfigs.stream()
-                .map(config -> configMapper.toDto(config))
-                .toList();
-
-        return ResponseEntity.ok(configResponseDtoList);
     }
 
     @PutMapping("{id}")

@@ -1,6 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.service.EmailService;
+import com.fullsnacke.eimsfuhcmbe.service.ExcelFileServiceImpl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class EmailController {
     EmailService emailService;
+    ExcelFileServiceImpl excelFileService;
 
     @GetMapping("/send/attendance&totalhours")
     public ResponseEntity<?> sendAttendanceAndTotalHoursReport(@RequestParam int semesterId) {
@@ -32,5 +34,13 @@ public class EmailController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body("Sent Simple Mail Successfully!!!");
+    }
+
+    @GetMapping("/send/attendance&totalhours/invigilator")
+    public ResponseEntity<?> sendAttendanceAndTotalHoursReportToInvigilator(@RequestParam int semesterId, @RequestParam String fuId) {
+        excelFileService.generateAttendanceAndTotalHoursExcelFileForSemester(semesterId, fuId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Sent Attendance and Total Hours Report to Invigilator Successfully!!!");
     }
 }

@@ -32,6 +32,13 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "WHERE FUNCTION('DATE', es.startAt) = FUNCTION('DATE', :day)")
     List<ExamSlot> findExamSlotByStartAtInDay(@Param("day") Instant day);
 
+    @Query("SELECT es FROM InvigilatorAttendance ia " +
+            "JOIN ia.invigilatorAssignment iaa " +
+            "JOIN iaa.invigilatorRegistration ir " +
+            "JOIN ir.examSlot es " +
+            "WHERE es.subjectExam.subjectId.semesterId.id = :semesterId AND ia.status = 2")
+    List<ExamSlot> findExamSlotBySemesterId(Integer semesterId);
+
     @Query("SELECT ia FROM InvigilatorAttendance ia " +
             "JOIN FETCH ia.invigilatorAssignment iaa " +
             "JOIN FETCH iaa.invigilatorRegistration ir " +
@@ -57,5 +64,12 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN FETCH iaa.invigilatorRegistration ir " +
             "JOIN FETCH ir.examSlot es " +
             "WHERE ir.invigilator.id = :invigilatorId AND es.subjectExam.subjectId.semesterId.id = :semesterId AND ia.checkIn IS NOT NULL AND ia.checkOut IS NOT NULL")
+    List<InvigilatorAttendance> findInvigilatorAttendanceByInvigilatorIdAndSemesterIdAndApprove(Integer invigilatorId, Integer semesterId);
+
+    @Query("SELECT ia FROM InvigilatorAttendance ia " +
+            "JOIN FETCH ia.invigilatorAssignment iaa " +
+            "JOIN FETCH iaa.invigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "WHERE ir.invigilator.id = :invigilatorId AND es.subjectExam.subjectId.semesterId.id = :semesterId")
     List<InvigilatorAttendance> findInvigilatorAttendanceByInvigilatorIdAndSemesterId(Integer invigilatorId, Integer semesterId);
 }

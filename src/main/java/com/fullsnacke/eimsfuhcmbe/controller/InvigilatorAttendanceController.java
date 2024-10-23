@@ -206,6 +206,16 @@ public class InvigilatorAttendanceController {
         return ResponseEntity.ok(examSlotResponseDTOList);
     }
 
+    @GetMapping("/manager/exam-slot-by-semester/{semesterId}")
+    @Operation(summary = "Manager get all exam slots by semesterId", description = "Retrieve a list of all exam slots by semesterId")
+    public ResponseEntity<List<ExamSlotResponseDTO>> managerGetExamSlotsBySemesterId(@PathVariable Integer semesterId) {
+        List<ExamSlot> examSlotList = invigilatorAttendanceService.getExamSlotsBySemester(semesterId);
+        List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                .map(examSlot -> examSlotMapper.toDto(examSlot))
+                .toList();
+        return ResponseEntity.ok(examSlotResponseDTOList);
+    }
+
     @GetMapping("/manager/exam-slot/{id}")
     @Operation(summary = "Manager get all invigilator attendance by exam slot", description = "Retrieve a list of all invigilator attendance records by exam slot")
     public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorCheckedAttendanceByExamSlot(@PathVariable("id") Integer examSlotId) {
@@ -269,11 +279,13 @@ public class InvigilatorAttendanceController {
         return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
     }
 
-    @GetMapping("/invigilator/{semesterId}")
+    @GetMapping("/invigilator/report/{semesterId}")
     @Operation(summary = "Get all checked invigilator attendance by semesterId", description = "Retrieve a list of all checked invigilator attendance records of the current invigilator by SemesterId")
-    public ResponseEntity<InvigilatorAttendanceListResponseDTO> getInvigilatorAttendance(@PathVariable Integer semesterId) {
-        List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getCurrentUserInvigilatorAttendanceBySemesterId(semesterId);
+    public ResponseEntity<InvigilatorAttendanceListResponseDTO> getApprovedInvigilatorAttendanceBSemesterId(@PathVariable Integer semesterId) {
+        List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getCurrentUserInvigilatorAttendanceBySemesterIdAndApproved(semesterId);
         double hourlyRate = Double.parseDouble(configurationHolder.getConfig(ConfigType.HOURLY_RATE.getValue()));
+        System.out.println("hourlyRate: " + hourlyRate);
+
         if (attendanceList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
@@ -289,6 +301,23 @@ public class InvigilatorAttendanceController {
             return ResponseEntity.ok(invigilatorAttendanceListResponseDTO);
         }
     }
+
+    @GetMapping("/invigilator/{semesterId}")
+    @Operation(summary = "Get invigilator attendance by semesterId", description = "Retrieve a list of invigilator attendances by semesterId")
+    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorAttendanceBySemesterId( @PathVariable Integer semesterId) {
+
+        List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getCurrentUserInvigilatorAttendanceBySemesterId(semesterId);
+
+        if (attendanceList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<InvigilatorAttendanceResponseDTO> attendanceResponseDTOList = attendanceList.stream()
+                    .map(attendance -> invigilatorAttendanceMapper.toResponseDTO(attendance))
+                    .toList();
+            return ResponseEntity.ok(attendanceResponseDTOList);
+        }
+    }
+
 
     @GetMapping("/invigilator/today")
     @Operation(summary = "Get today invigilator attendance", description = "Retrieve a list of all today's invigilator attendance records of the current invigilator")

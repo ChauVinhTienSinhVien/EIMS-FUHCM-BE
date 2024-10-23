@@ -90,8 +90,8 @@ public enum ErrorCode{
 
     USER_ALREADY_EXISTS("User already exists", HttpStatus.CONFLICT),
 
-    CHECKIN_TIME_IS_NOT_VALID("You can only check in after an exam slot started.", HttpStatus.BAD_REQUEST),
-    CHECKOUT_TIME_IS_NOT_VALID("You can only check out after an exam slot ends.", HttpStatus.BAD_REQUEST),;
+    CHECKIN_TIME_IS_NOT_VALID("Check in time is not valid", HttpStatus.BAD_REQUEST),
+    CHECKOUT_TIME_IS_NOT_VALID("Check out time is not valid", HttpStatus.BAD_REQUEST),;
 
     private String message;
     private HttpStatusCode statusCode;

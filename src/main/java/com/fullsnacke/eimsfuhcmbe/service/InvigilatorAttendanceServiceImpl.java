@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.enums.InvigilatorAttendanceStatus;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
@@ -8,15 +9,14 @@ import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAttendanceRepository;
-import com.fullsnacke.eimsfuhcmbe.util.DateTimeUtil;
 import com.fullsnacke.eimsfuhcmbe.util.DateValidationUtil;
 import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +32,9 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
     @Autowired
     ExamSlotRepository examSlotRepository;
+
+    @Autowired
+    ConfigurationHolder configurationHolder;
 
     @Transactional
     public List<InvigilatorAttendance> addInvigilatorAttendancesByDay() {
@@ -85,6 +88,10 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
     public List<ExamSlot> getExamSlotsByDay(Instant day) {
         return invigilatorAttendanceRepository.findExamSlotByStartAtInDay(day);
+    }
+
+    public List<ExamSlot> getExamSlotsBySemester(Integer semesterId) {
+        return invigilatorAttendanceRepository.findExamSlotBySemesterId(semesterId);
     }
 
     public List<ExamSlot> getCheckedAttendanceExamSlotsByDay(Instant day) {
@@ -200,12 +207,18 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
         for (Integer invigilatorAttendanceId : invigilatorAttendanceIds) {
             InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceRepository.findById(invigilatorAttendanceId).orElse(null);
-            Instant startAt = invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().toInstant();
-            if(DateValidationUtil.isAfterTimeLimit(startAt)){
-                invigilatorAttendance.setCheckOut(Instant.now());
-                invigilatorAttendances.add(invigilatorAttendance);
-            }else {
-                throw new CustomException(ErrorCode.CHECKIN_TIME_IS_NOT_VALID);
+            if(invigilatorAttendance != null){
+                Instant startAt = invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().toInstant();
+                Instant endAt = invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().toInstant();
+
+                startAt = startAt.minus(configurationHolder.getCheckInTimeBeforeExamSlot(), ChronoUnit.MINUTES);
+
+                if(DateValidationUtil.isWithinTimeRange(startAt, endAt)){
+                    invigilatorAttendance.setCheckOut(Instant.now());
+                    invigilatorAttendances.add(invigilatorAttendance);
+                }else {
+                    throw new CustomException(ErrorCode.CHECKIN_TIME_IS_NOT_VALID);
+                }
             }
         }
 
@@ -228,7 +241,7 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
             InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceRepository.findById(invigilatorAttendanceId).orElse(null);
             if(invigilatorAttendance != null){
                 Instant endAt = invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().toInstant();
-                if(DateValidationUtil.isAfterTimeLimit(endAt)){
+                if(DateValidationUtil.isWithinTimeRange(endAt, endAt.plus(configurationHolder.getCheckOutTimeAfterExamSlot(), ChronoUnit.MINUTES))){
                     invigilatorAttendance.setCheckOut(Instant.now());
                     invigilatorAttendances.add(invigilatorAttendance);
                 }else {
@@ -327,12 +340,26 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         return invigilatorAttendances;
     }
 
+    public List<InvigilatorAttendance> getInvigilatorAttendancesByInvigilatorIdAndSemesterId(Integer invigilatorId, Integer semesterId) {
+        return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndSemesterIdAndApprove(invigilatorId, semesterId);
+    }
+
+
+
     public List<InvigilatorAttendance> getCurrentUserInvigilatorAttendanceByDay(Instant day) {
         Optional<User> currentUser = SecurityUntil.getLoggedInUser();
         if(currentUser.isEmpty()){
             throw new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND);
         }
         return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndDay(currentUser.get().getId(), day);
+    }
+
+    public List<InvigilatorAttendance> getCurrentUserInvigilatorAttendanceBySemesterIdAndApproved(Integer semesterId) {
+        Optional<User> currentUser = SecurityUntil.getLoggedInUser();
+        if(currentUser.isEmpty()){
+            throw new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND);
+        }
+        return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndSemesterIdAndApprove(currentUser.get().getId(), semesterId);
     }
 
     public List<InvigilatorAttendance> getCurrentUserInvigilatorAttendanceBySemesterId(Integer semesterId) {

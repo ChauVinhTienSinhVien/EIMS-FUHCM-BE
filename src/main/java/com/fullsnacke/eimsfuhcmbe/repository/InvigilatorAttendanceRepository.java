@@ -25,6 +25,27 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "WHERE ir.examSlot.id = :examSlotId")
     List<InvigilatorAttendance> findByExamSlotId(@Param("examSlotId") Integer examSlotId);
 
+    @Query("SELECT ia FROM InvigilatorAttendance ia " +
+            "JOIN FETCH ia.invigilatorAssignment iaa " +
+            "JOIN FETCH iaa.invigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "JOIN FETCH es.subjectExam se " +
+            "JOIN FETCH se.subjectId s " +
+            "WHERE s.semesterId.id = :semesterId " +
+            "AND ia.checkIn IS NOT NULL " +
+            "AND ia.checkOut IS NOT NULL")
+    List<InvigilatorAttendance> findCompletedAttendancesBySemesterId(@Param("semesterId") Integer semesterId);
+
+    @Query("SELECT ia FROM InvigilatorAttendance ia " +
+            "JOIN FETCH ia.invigilatorAssignment iaa " +
+            "JOIN FETCH iaa.invigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "JOIN FETCH es.subjectExam se " +
+            "JOIN FETCH se.subjectId s " +
+            "WHERE s.semesterId.id = :semesterId " +
+            "AND ir.invigilator.fuId = :fuId ")
+    List<InvigilatorAttendance> findAttendancesBySemesterIdAndFuId(@Param("semesterId") Integer semesterId, @Param("fuId") String fuId);
+
     @Query("SELECT es FROM InvigilatorAttendance ia " +
             "JOIN ia.invigilatorAssignment iaa " +
             "JOIN iaa.invigilatorRegistration ir " +

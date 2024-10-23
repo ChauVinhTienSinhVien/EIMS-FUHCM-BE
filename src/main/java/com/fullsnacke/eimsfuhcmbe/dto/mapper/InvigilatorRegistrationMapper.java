@@ -34,8 +34,19 @@ public interface InvigilatorRegistrationMapper {
     @Mapping(target = "examSlotId", source = "id")
     @Mapping(target = "startAt", source = "startAt")
     @Mapping(target = "endAt", source = "endAt")
-    @Mapping(target = "status", ignore = true)
     @Mapping(target = "requiredInvigilators", source = "requiredInvigilators")
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "numberOfRegistered", ignore = true)
+    @Mapping(target = "examType", ignore = true)
+    ExamSlotDetail toExamSlotDetailInvigilator(ExamSlot examSlot);
+
+    @Mapping(target = "examSlotId", source = "id")
+    @Mapping(target = "subjectCode", source = "subjectExam.subjectId.code")
+    @Mapping(target = "examType", source = "subjectExam.examType")
+    @Mapping(target = "startAt", source = "startAt")
+    @Mapping(target = "endAt", source = "endAt")
+    @Mapping(target = "requiredInvigilators", source = "requiredInvigilators")
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "numberOfRegistered", ignore = true)
     ExamSlotDetail toExamSlotDetail(ExamSlot examSlot);
 
@@ -66,7 +77,7 @@ public interface InvigilatorRegistrationMapper {
 
     default Set<ExamSlotDetail> mapExamSlotDetails(Set<ExamSlot> examSlots) {
         return examSlots.stream()
-                .map(this::toExamSlotDetail)
+                .map(this::toExamSlotDetailInvigilator)
                 .collect(Collectors.toSet());
     }
 

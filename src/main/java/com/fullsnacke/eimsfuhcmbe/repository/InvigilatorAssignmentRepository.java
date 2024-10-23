@@ -40,4 +40,12 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
             "WHERE FUNCTION('DATE', es.startAt) = FUNCTION('DATE', :day)")
     List<InvigilatorAssignment> findByExamSlotStartAtInDay(@Param("day") Instant day);
 
+//    @Query("SELECT ia FROM InvigilatorAssignment ia " +
+//            "JOIN FETCH ia.invigilatorRegistration ir " +
+//            "JOIN FETCH ir.examSlot es " +
+//            "JOIN FETCH es.subjectExam se " +
+//            "JOIN FETCH se.subjectId sub " +
+//            "WHERE ir.invigilator = :invigilator AND sub.semesterId = :semester")
+//    List<InvigilatorAssignment> findByInvigilatorAndSemester (@Param("invigilator") User invigilator, @Param("semester") Semester semester);
+
 }

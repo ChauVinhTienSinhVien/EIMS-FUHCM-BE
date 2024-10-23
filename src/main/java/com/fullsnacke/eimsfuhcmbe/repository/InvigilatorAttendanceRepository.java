@@ -36,7 +36,7 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN ia.invigilatorAssignment iaa " +
             "JOIN iaa.invigilatorRegistration ir " +
             "JOIN ir.examSlot es " +
-            "WHERE es.subjectExam.subjectId.semesterId.id = :semesterId AND ia.status = 2")
+            "WHERE es.subjectExam.subjectId.semesterId.id = :semesterId")
     List<ExamSlot> findExamSlotBySemesterId(Integer semesterId);
 
     @Query("SELECT ia FROM InvigilatorAttendance ia " +

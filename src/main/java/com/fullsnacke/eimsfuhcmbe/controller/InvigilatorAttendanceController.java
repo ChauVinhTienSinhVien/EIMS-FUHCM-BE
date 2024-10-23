@@ -279,6 +279,12 @@ public class InvigilatorAttendanceController {
         return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
     }
 
+    @GetMapping("manager/report/{semesterId}")
+    @Operation(summary = "Get all checked invigilator attendance by semesterId", description = "Retrieve a list of all checked invigilator attendance records by SemesterId")
+    public ResponseEntity<InvigilatorAttendanceListResponseDTO> getApprovedInvigilatorAttendanceBySemesterId(@PathVariable Integer semesterId) {
+
+    }
+
     @GetMapping("/invigilator/report/{semesterId}")
     @Operation(summary = "Get all checked invigilator attendance by semesterId", description = "Retrieve a list of all checked invigilator attendance records of the current invigilator by SemesterId")
     public ResponseEntity<InvigilatorAttendanceListResponseDTO> getApprovedInvigilatorAttendanceBSemesterId(@PathVariable Integer semesterId) {

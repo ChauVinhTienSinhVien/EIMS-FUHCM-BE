@@ -82,6 +82,26 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         return invigilatorAttendanceRepository.findExamSlotByStartAtInDay(day);
     }
 
+    public List<ExamSlot> getCheckedAttendanceExamSlotsByDay(Instant day) {
+        List<ExamSlot> examSlotList = invigilatorAttendanceRepository.findExamSlotByStartAtInDay(day);
+        List<ExamSlot> checkAttendanceExamSlots = new ArrayList<>();
+
+        for (ExamSlot examSlot : examSlotList) {
+            List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlot.getId());
+            boolean isAllChecked = true;
+            for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
+                if(invigilatorAttendance.getCheckIn() == null || invigilatorAttendance.getCheckOut() == null){
+                    isAllChecked = false;
+                    break;
+                }
+            }
+            if(isAllChecked){
+                checkAttendanceExamSlots.add(examSlot);
+            }
+        }
+        return checkAttendanceExamSlots;
+    }
+
     public List<InvigilatorAttendance> getInvigilatorAttendancesByDay(Instant day) {
         return invigilatorAttendanceRepository.findByExamSlotStartAtInDay(day);
     }
@@ -277,5 +297,13 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
             throw new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND);
         }
         return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndDay(currentUser.get().getId(), day);
+    }
+
+    public List<InvigilatorAttendance> getCurrentUserInvigilatorAttendanceBySemesterId(Integer semesterId) {
+        Optional<User> currentUser = SecurityUntil.getLoggedInUser();
+        if(currentUser.isEmpty()){
+            throw new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND);
+        }
+        return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndSemesterId(currentUser.get().getId(), semesterId);
     }
 }

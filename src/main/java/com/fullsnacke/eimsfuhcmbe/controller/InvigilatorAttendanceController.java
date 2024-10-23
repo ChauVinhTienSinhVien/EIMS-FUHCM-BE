@@ -1,12 +1,15 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 
+import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAttendanceMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAttendanceListResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAttendanceResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
+import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAttendanceServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,10 @@ public class InvigilatorAttendanceController {
 
     @Autowired
     private InvigilatorAttendanceServiceImpl invigilatorAttendanceService;
+
+    @Autowired
+    private ConfigurationHolder configurationHolder;
+
 
     @PostMapping("/staff/add-by-day")
     @Operation(summary = "Add all invigilator attendance by day", description = "Add all invigilator attendance records by day")
@@ -187,6 +194,33 @@ public class InvigilatorAttendanceController {
         return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
     }
 
+    @GetMapping("/manager/exam-slots-by-day")
+    @Operation(summary = "Manager get all of attendance checked examSlot", description = "Retrieve a list of all attendance checked examSlot")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getCheckedAttendanceExamSlotsByDay(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
+        LocalDate localDate = day.toInstant().atZone(ZoneOffset.systemDefault()).toLocalDate();
+        Instant dayInstant = localDate.atStartOfDay(ZoneOffset.UTC).toInstant();
+        List<ExamSlot> examSlotList = invigilatorAttendanceService.getCheckedAttendanceExamSlotsByDay(dayInstant);
+        List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                .map(examSlot -> examSlotMapper.toDto(examSlot))
+                .toList();
+        return ResponseEntity.ok(examSlotResponseDTOList);
+    }
+
+    @GetMapping("/manager/exam-slot/{id}")
+    @Operation(summary = "Manager get all invigilator attendance by exam slot", description = "Retrieve a list of all invigilator attendance records by exam slot")
+    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorCheckedAttendanceByExamSlot(@PathVariable("id") Integer examSlotId) {
+        List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getInvigilatorAttendancesByExamSlotId(examSlotId);
+
+        if (attendanceList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<InvigilatorAttendanceResponseDTO> attendanceResponseDTOList = attendanceList.stream()
+                    .map(attendance -> invigilatorAttendanceMapper.toResponseDTO(attendance))
+                    .toList();
+            return ResponseEntity.ok(attendanceResponseDTOList);
+        }
+    }
+
     @PutMapping("manager/approve/{examSlotId}")
     @Operation(summary = "Manager approve invigilator attendance", description = "Manager approve invigilator attendance for an exam slot")
     public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> managerApprove(@PathVariable("examSlotId") Integer examSlotId) {
@@ -235,18 +269,24 @@ public class InvigilatorAttendanceController {
         return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
     }
 
-    @GetMapping("/invigilator")
-    @Operation(summary = "Get all invigilator attendance", description = "Retrieve a list of all invigilator attendance records of the current invigilator")
-    public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorAttendance() {
-        List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getCurrentUserInvigilatorAttendance();
-
+    @GetMapping("/invigilator/{semesterId}")
+    @Operation(summary = "Get all checked invigilator attendance by semesterId", description = "Retrieve a list of all checked invigilator attendance records of the current invigilator by SemesterId")
+    public ResponseEntity<InvigilatorAttendanceListResponseDTO> getInvigilatorAttendance(@PathVariable Integer semesterId) {
+        List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getCurrentUserInvigilatorAttendanceBySemesterId(semesterId);
+        double hourlyRate = Double.parseDouble(configurationHolder.getConfig(ConfigType.HOURLY_RATE.getValue()));
         if (attendanceList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
             List<InvigilatorAttendanceResponseDTO> attendanceResponseDTOList = attendanceList.stream()
                     .map(attendance -> invigilatorAttendanceMapper.toResponseDTO(attendance))
                     .toList();
-            return ResponseEntity.ok(attendanceResponseDTOList);
+            InvigilatorAttendanceListResponseDTO invigilatorAttendanceListResponseDTO = InvigilatorAttendanceListResponseDTO.builder()
+                    .invigilatorAttendanceList(attendanceResponseDTOList)
+                    .hourlyRate(hourlyRate)
+                    .build();
+            invigilatorAttendanceListResponseDTO.setTotalHours();
+            invigilatorAttendanceListResponseDTO.setPreCalculatedInvigilatorFree();
+            return ResponseEntity.ok(invigilatorAttendanceListResponseDTO);
         }
     }
 

@@ -1,7 +1,10 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
-import com.fullsnacke.eimsfuhcmbe.entity.*;
+import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
+import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAttendanceRepository;
@@ -15,16 +18,19 @@ import org.springframework.stereotype.Service;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ExcelFileServiceImpl implements ExcelFileService {
 
+    private final Color HEADER_COLOR = new Color(219, 229, 241);
+    private final Color SUMMARY_ROW_COLOR = new Color(189, 215, 238);
+    private final Color DARK_BLUE = new Color(28, 69, 135);
     //Summary Table
     private final int METRIC_COLUMN_INDEX = 0;
     private final int VALUE_COLUMN_INDEX = 1;
@@ -32,21 +38,35 @@ public class ExcelFileServiceImpl implements ExcelFileService {
     private final String SUMMARY_TABLE_TITLE = "Invigilator Summary";
 
     //Main Table
-    //index of columns
-    private int FU_ID_COLUMN_INDEX = 0;
-    private int FIRST_NAME_COLUMN_INDEX = 1;
-    private int LAST_NAME_COLUMN_INDEX = 2;
-    private int DEPARTMENT_COLUMN_INDEX = 3;
-    private int DATE_COLUMN_INDEX = 4;
-    private int START_TIME_COLUMN_INDEX = 5;
-    private int END_TIME_COLUMN_INDEX = 6;
-    private int HOURS_COLUMN_INDEX = 7;
-    private int TOTAL_HOURS_COLUMN_INDEX = 8;
-    private int HOURLY_RATE_COLUMN_INDEX = 9;
-    private int TOTAL_REMUNERATION_COLUMN_INDEX = 10;
+    //index of column
+    private int NO_COLUMN_INDEX = 0;
+    private char NO_CHAR = 'A';
+    private int FU_ID_COLUMN_INDEX = 1;
+    private char FU_ID_CHAR = 'B';
+    private int FIRST_NAME_COLUMN_INDEX = 2;
+    private char FIRST_NAME_CHAR = 'C';
+    private int LAST_NAME_COLUMN_INDEX = 3;
+    private char LAST_NAME_CHAR = 'D';
+    private int DEPARTMENT_COLUMN_INDEX = 4;
+    private char DEPARTMENT_CHAR = 'E';
+    private int DATE_COLUMN_INDEX = 5;
+    private char DATE_CHAR = 'F';
+    private int START_TIME_COLUMN_INDEX = 6;
+    private char START_TIME_CHAR = 'G';
+    private int END_TIME_COLUMN_INDEX = 7;
+    private char END_TIME_CHAR = 'H';
+    private int HOURS_COLUMN_INDEX = 8;
+    private char HOURS_CHAR = 'I';
+    private int TOTAL_HOURS_COLUMN_INDEX = 9;
+    private char TOTAL_HOURS_CHAR = 'J';
+    private int HOURLY_RATE_COLUMN_INDEX = 10;
+    private char HOURLY_RATE_CHAR = 'K';
+    private int TOTAL_REMUNERATION_COLUMN_INDEX = 11;
+    private char TOTAL_REMUNERATION_CHAR = 'L';
 
     //field name
-    private final String FU_ID = "FUID";
+    private final String NO_FIELD = "No.";
+    private final String FU_ID = "Fu ID";
     private final String FIRST_NAME = "First name";
     private final String LAST_NAME = "Last name";
     private final String DEPARTMENT = "Department";
@@ -57,7 +77,6 @@ public class ExcelFileServiceImpl implements ExcelFileService {
     private final String TOTAL_HOURS = "Total Hours";
     private final String HOURLY_RATE = "Hourly Rate";
     private final String TOTAL_REMUNERATION = "Total Remuneration";
-
 
     //Common Configurations
     private final int FONT_SIZE = 10;
@@ -102,14 +121,14 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         createMainTitle(sheet, semester);
         createHeaderRow(sheet);
 
-        double totalRemuneration = 0;
 
         // Bắt đầu từ hàng 9 để dành chỗ cho bảng tổng hợp
         int rowNum = mainTableStartAt + 1;
 
+        int number = 0;
+
         // Lặp qua từng invigilator và các attendance của họ
         for (Map.Entry<String, List<InvigilatorAttendance>> entry : attendanceMap.entrySet()) {
-            // Lấy thông tin của invigilator
             // Vì tất cả các attendance trong entry này đều thuộc về cùng một invigilator nên lấy thông tin từ bất kỳ attendance nào cũng được
             User invigilator = entry.getValue().get(0).getInvigilatorAssignment().getInvigilatorRegistration().getInvigilator();
 
@@ -118,29 +137,23 @@ public class ExcelFileServiceImpl implements ExcelFileService {
             int startRow = rowNum;
 
             double totalHours = 0;
-
+            ++number;
             // Lặp qua từng attendance của invigilator
             for (InvigilatorAttendance attendance : entry.getValue()) {
                 ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
                 XSSFRow row = sheet.createRow(rowNum++);
-                fillInvigilatorData(row, invigilator, examSlot, startRow == rowNum - 1);
-
-//                totalHours += hours;
-                // Tạo ô cho số giờ làm việc
-                // Vì hours nằm ở cột 7 nên setCellValue cho ô ở cột 7
-//                row.createCell(HOURS_COLUMN_INDEX).setCellFormula("SUM(H" + startRow + ":H" + (rowNum - 1) + ")");
+                fillInvigilatorData(row, number, invigilator, examSlot, startRow == rowNum - 1);
             }
             mergeInvigilatorCells(sheet, startRow, rowNum - 1);
-            mergeInvigilatorCells(sheet, startRow, rowNum - 1);
-            // Tạo hàng tổng kết cho mỗi invigilator
-            double hourlyRate = configurationHolder.getHourlyRate();
-            fillSummaryRow(sheet, rowNum++, startRow, hourlyRate);
-            totalRemuneration += totalHours * hourlyRate;
+
+            fillSummaryRow(sheet, rowNum++, startRow, configurationHolder.getHourlyRate());
+
+            sheet.addMergedRegion(new CellRangeAddress(startRow, rowNum - 1, NO_COLUMN_INDEX, NO_COLUMN_INDEX));
             sheet.createRow(rowNum++);
         }
         totalInvigilatorsFormula += ")";
         totalRemunerationFormula += ")";
-        createSummaryTable(sheet, totalInvigilatorsFormula, totalRemunerationFormula);
+        createSummaryTable(sheet);
 
         formatWorkbook(workbook);
 
@@ -152,6 +165,7 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         }
     }
 
+
     private void createMainTitle(XSSFSheet sheet, Semester semester) {
         XSSFRow titleRow = sheet.createRow(MAIN_TITLE_ROW);
         XSSFCell titleCell = titleRow.createCell(0);
@@ -160,68 +174,52 @@ public class ExcelFileServiceImpl implements ExcelFileService {
 
     private void createHeaderRow(XSSFSheet sheet) {
         XSSFRow headerRow = sheet.createRow(8);
-        String[] columns = {FU_ID, FIRST_NAME, LAST_NAME, DEPARTMENT, DATE, START_TIME, END_TIME, HOURS, TOTAL_HOURS, HOURLY_RATE, TOTAL_REMUNERATION};
-        int headerLength = columns.length;
+        String[] columns = {NO_FIELD, FU_ID, FIRST_NAME, LAST_NAME, DEPARTMENT, DATE, START_TIME, END_TIME, HOURS, TOTAL_HOURS, HOURLY_RATE, TOTAL_REMUNERATION};
         sheetWidth = columns.length;
         for (int i = 0; i < columns.length; i++) {
             headerRow.createCell(i).setCellValue(columns[i]);
         }
     }
 
-    private void fillInvigilatorData(XSSFRow row, User invigilator, ExamSlot examSlot, boolean isFirstRow) {
-        XSSFWorkbook workbook = row.getSheet().getWorkbook();
-        XSSFCellStyle style = getDefaultStyle(workbook);
-        style.cloneStyleFrom(borderStyle(workbook));
-        if (isFirstRow) {
-            totalInvigilatorsFormula += "A" + (row.getRowNum() + 1) + ",";
-            createAMainTableRow(row, FU_ID_COLUMN_INDEX, invigilator.getFuId());
-            createAMainTableRow(row, FIRST_NAME_COLUMN_INDEX, invigilator.getFirstName());
-            createAMainTableRow(row, LAST_NAME_COLUMN_INDEX, invigilator.getLastName());
-            createAMainTableRow(row, DEPARTMENT_COLUMN_INDEX, invigilator.getDepartment());
-        }
-        createAMainTableRow(row, DATE_COLUMN_INDEX, examSlot.getStartAt().toLocalDate());
-        XSSFCellStyle timeCellStyle = workbook.createCellStyle();
-        timeCellStyle.cloneStyleFrom(style);
-        timeCellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("dd/MM/yyyy"));
-        row.getCell(DATE_COLUMN_INDEX).setCellStyle(timeCellStyle);
-
-        createAMainTableRow(row, START_TIME_COLUMN_INDEX, formatTime(examSlot.getStartAt()));
-        createAMainTableRow(row, END_TIME_COLUMN_INDEX, formatTime(examSlot.getEndAt()));
-        createAMainTableRowFormula(row, HOURS_COLUMN_INDEX, "HOUR(G" + (row.getRowNum() + 1) + "-F" + (row.getRowNum() + 1) + ") + MINUTE(G" + (row.getRowNum() + 1) + "-F" + (row.getRowNum() + 1) + ")/60");
-        createAMainTableRow(row, TOTAL_HOURS_COLUMN_INDEX, "");
-        createAMainTableRow(row, HOURLY_RATE_COLUMN_INDEX, "");
-        createAMainTableRow(row, TOTAL_REMUNERATION_COLUMN_INDEX, "");
-
-    }
-
-    private void createAMainTableRowFormula(XSSFRow row, int cellNum, String value) {
-        XSSFCell cell = row.createCell(cellNum);
-        cell.setCellFormula(value);
-    }
-
-    private void createAMainTableRow(XSSFRow row, int cellNum, String value) {
-        XSSFCell cell = row.createCell(cellNum);
-        cell.setCellValue(value);
+    private void fillInvigilatorData(XSSFRow row, int order, User invigilator, ExamSlot examSlot, boolean isFirstRow) {
         XSSFWorkbook workbook = row.getSheet().getWorkbook();
         XSSFCellStyle style = workbook.createCellStyle();
-        style.cloneStyleFrom(borderStyle(row.getSheet().getWorkbook()));
-        cell.setCellStyle(style);
-    }
+        borderStyle(style, workbook);
+        getDefaultStyle(style, workbook);
 
-    private void createAMainTableRow(XSSFRow row, int cellNum, double value) {
-        XSSFCell cell = row.createCell(cellNum);
-        cell.setCellValue(value);
-        XSSFCellStyle style = getDefaultStyle(row.getSheet().getWorkbook());
-        style.cloneStyleFrom(borderStyle(row.getSheet().getWorkbook()));
-        cell.setCellStyle(style);
-    }
+        if (isFirstRow) {
+            totalInvigilatorsFormula += "A" + (row.getRowNum() + 1) + ",";
+            row.createCell(NO_COLUMN_INDEX).setCellValue(order);
+            XSSFCellStyle noStyle = formatHeader(workbook).copy();
+            getCenterAlignXYStyle(noStyle, workbook);
+            setFormatForCellWithBorder(row.getCell(NO_COLUMN_INDEX), workbook, noStyle);
+            row.getCell(NO_COLUMN_INDEX).setCellStyle(noStyle);
+            row.createCell(FU_ID_COLUMN_INDEX).setCellValue(invigilator.getFuId());
+            row.createCell(FIRST_NAME_COLUMN_INDEX).setCellValue(invigilator.getFirstName());
+            row.createCell(LAST_NAME_COLUMN_INDEX).setCellValue(invigilator.getLastName());
+            row.createCell(DEPARTMENT_COLUMN_INDEX).setCellValue(invigilator.getDepartment());
+        } else {
+            row.createCell(NO_COLUMN_INDEX).setCellValue("");
+            row.createCell(FU_ID_COLUMN_INDEX).setCellValue("");
+            row.createCell(FIRST_NAME_COLUMN_INDEX).setCellValue("");
+            row.createCell(LAST_NAME_COLUMN_INDEX).setCellValue("");
+            row.createCell(DEPARTMENT_COLUMN_INDEX).setCellValue("");
+        }
+        row.createCell(DATE_COLUMN_INDEX).setCellValue(examSlot.getStartAt().toLocalDate());
+        row.createCell(START_TIME_COLUMN_INDEX).setCellValue(formatTime(examSlot.getStartAt()));
+        row.createCell(END_TIME_COLUMN_INDEX).setCellValue(formatTime(examSlot.getEndAt()));
+        row.createCell(HOURS_COLUMN_INDEX).setCellFormula("HOUR(" + END_TIME_CHAR + (row.getRowNum() + 1) + "-" + START_TIME_CHAR + (row.getRowNum() + 1) + ") + MINUTE(" + END_TIME_CHAR + (row.getRowNum() + 1) + "-" + START_TIME_CHAR + (row.getRowNum() + 1) + ")/60");
+        row.createCell(TOTAL_HOURS_COLUMN_INDEX).setCellValue("");
+        row.createCell(HOURLY_RATE_COLUMN_INDEX).setCellValue("");
+        row.createCell(TOTAL_REMUNERATION_COLUMN_INDEX).setCellValue("");
 
-    private void createAMainTableRow(XSSFRow row, int cellNum, LocalDate value) {
-        XSSFCell cell = row.createCell(cellNum);
-        cell.setCellValue(value);
-        XSSFCellStyle style = getDefaultStyle(row.getSheet().getWorkbook());
-        style.cloneStyleFrom(borderStyle(row.getSheet().getWorkbook()));
-        cell.setCellStyle(style);
+        for (int i = FU_ID_COLUMN_INDEX; i <= TOTAL_REMUNERATION_COLUMN_INDEX; i++) {
+            setFormatForCellWithBorder(row.getCell(i), workbook, style);
+        }
+
+        XSSFCellStyle timeCellStyle = row.getCell(DATE_COLUMN_INDEX).getCellStyle().copy();
+        timeCellStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("dd/MM/yyyy"));
+        row.getCell(DATE_COLUMN_INDEX).setCellStyle(timeCellStyle);
     }
 
 
@@ -231,7 +229,7 @@ public class ExcelFileServiceImpl implements ExcelFileService {
                 CellRangeAddress range = new CellRangeAddress(startRow, endRow, i, i);
                 if (!isRangeAlreadyMerged(sheet, range)) {
                     sheet.addMergedRegion(range);
-                    XSSFCellStyle style = sheet.getRow(startRow).getCell(i).getCellStyle();
+                    XSSFCellStyle style = sheet.getRow(startRow).getCell(i).getCellStyle().copy();
                     style.setVerticalAlignment(VerticalAlignment.CENTER);
                     sheet.getRow(startRow).getCell(i).setCellStyle(style);
                 }
@@ -261,26 +259,37 @@ public class ExcelFileServiceImpl implements ExcelFileService {
 
     private void fillSummaryRow(XSSFSheet sheet, int rowNum, int startRow, double hourRate) {
         XSSFRow row = sheet.createRow(rowNum);
-        XSSFWorkbook workbook = row.getSheet().getWorkbook();
-
-        createAMainTableRow(row, FU_ID_COLUMN_INDEX, "Total:");
-        createAMainTableRowFormula(row, HOURS_COLUMN_INDEX, "SUM(H" + (startRow + 1) + ":H" + row.getRowNum() + ")");
-        createAMainTableRowFormula(row, TOTAL_HOURS_COLUMN_INDEX, "H" + (row.getRowNum() + 1));
-        createAMainTableRow(row, HOURLY_RATE_COLUMN_INDEX, hourRate);
-        createAMainTableRowFormula(row, TOTAL_REMUNERATION_COLUMN_INDEX, "PRODUCT(I" + (row.getRowNum() + 1) + ",J" + (row.getRowNum() + 1) + ")");
-        totalRemunerationFormula += "K" + (row.getRowNum() + 1) + ",";
-
-        XSSFCellStyle style = getDefaultStyle(row.getSheet().getWorkbook());
-        style.cloneStyleFrom(borderStyle(row.getSheet().getWorkbook()));
-        System.out.println("Style: " + style.getFont().getFontName());
-        style.setFillForegroundColor(new XSSFColor(new Color(194, 239, 236), null));
+        XSSFWorkbook workbook = sheet.getWorkbook();
+        XSSFCellStyle style = workbook.createCellStyle();
+        getDefaultStyle(style, workbook);
+        borderStyle(style, workbook);
+        style.setFillForegroundColor(new XSSFColor(SUMMARY_ROW_COLOR, null));
         style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        row.setRowStyle(style);
+        style.getFont().setBold(true);
+        style.getFont().setColor(new XSSFColor(DARK_BLUE, null));
+
+        row.createCell(FU_ID_COLUMN_INDEX).setCellValue("Total:");
+        row.createCell(HOURS_COLUMN_INDEX).setCellFormula("SUM(" + HOURS_CHAR + (startRow + 1) + ":" + HOURS_CHAR + row.getRowNum() + ")");
+        row.createCell(TOTAL_HOURS_COLUMN_INDEX).setCellFormula("" + HOURS_CHAR + (row.getRowNum() + 1));
+        row.createCell(HOURLY_RATE_COLUMN_INDEX).setCellValue(hourRate);
+        row.createCell(TOTAL_REMUNERATION_COLUMN_INDEX).setCellFormula("PRODUCT(" + TOTAL_HOURS_CHAR + (row.getRowNum() + 1) + "," + HOURLY_RATE_CHAR + (row.getRowNum() + 1) + ")");
+        totalRemunerationFormula += TOTAL_REMUNERATION_CHAR + "" + (row.getRowNum() + 1) + ",";
 
         sheet.addMergedRegion(new CellRangeAddress(rowNum, rowNum, FU_ID_COLUMN_INDEX, END_TIME_COLUMN_INDEX));
+
+        setFormatForCellWithBorder(row.getCell(FU_ID_COLUMN_INDEX), workbook, style);
+
+        for (int i = HOURS_COLUMN_INDEX; i <= TOTAL_REMUNERATION_COLUMN_INDEX; i++) {
+            XSSFCell cell = row.getCell(i);
+            setFormatForCellWithBorder(cell, workbook, style);
+        }
     }
 
-    private void createSummaryTable(XSSFSheet sheet, String totalInvigilatorsFormula, String totalRemunerationFormula) {
+    private void setFormatForCellWithBorder(XSSFCell cell, XSSFWorkbook workbook, XSSFCellStyle style) {
+        cell.setCellStyle(style);
+    }
+
+    private void createSummaryTable(XSSFSheet sheet) {
 
         int rowNum = SUMARY_TABLE_START_ROW;
 
@@ -302,8 +311,10 @@ public class ExcelFileServiceImpl implements ExcelFileService {
     private void addNewRowToSummaryTableFormula(XSSFSheet sheet, int rowNum, String metric, String formula, String unit) {
         XSSFRow row = sheet.createRow(rowNum);
 
-        XSSFCellStyle style = row.getSheet().getWorkbook().createCellStyle();
-        style.cloneStyleFrom(borderStyle(row.getSheet().getWorkbook()));
+        XSSFWorkbook workbook = row.getSheet().getWorkbook();
+        XSSFCellStyle style = workbook.createCellStyle();
+        borderStyle(style, workbook);
+        getDefaultStyle(style, workbook);
 
         row.createCell(METRIC_COLUMN_INDEX).setCellValue(metric);
         row.getCell(METRIC_COLUMN_INDEX).setCellStyle(style);
@@ -322,30 +333,11 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         row.createCell(UNIT_COLUMN_INDEX).setCellValue(unit);
     }
 
-    private void addNewRowToSummaryTable(XSSFSheet sheet, int rowNum, String metric, int value, String unit) {
-        XSSFRow row = sheet.createRow(rowNum);
-        row.createCell(METRIC_COLUMN_INDEX).setCellValue(metric);
-        row.createCell(VALUE_COLUMN_INDEX).setCellValue(value);
-        row.createCell(UNIT_COLUMN_INDEX).setCellValue(unit);
-        XSSFCellStyle style = row.getSheet().getWorkbook().createCellStyle();
-        style.cloneStyleFrom(borderStyle(row.getSheet().getWorkbook()));
-    }
-
-    /*****************************************************
-     *  Complete input data                               *
-     *  Start formatting the sheet to make it look nice   *
-     *****************************************************/
-
-
     private void formatWorkbook(XSSFWorkbook workbook) {
         XSSFSheet sheet = workbook.getSheetAt(0);
 
         XSSFCellStyle titleStyle = formatTitle(workbook);
-        // Áp dụng style cho cell được chọn
-        // Vì Title nằm ở hàng 0 và cột 0 nên setCellValue cho ô ở hàng 0 và cột 0
         sheet.getRow(0).getCell(0).setCellStyle(titleStyle);
-        // Merge title cells
-        // Merge các ô từ hàng 0 đến hàng 0 và từ cột 0 đến cột 11
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, sheetWidth));
 
         // Format header row
@@ -354,34 +346,31 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         for (Cell cell : headerRow) {
             cell.setCellStyle(headerStyle);
         }
-        sheet.getRow(SUMARY_TABLE_START_ROW).getCell(0).setCellStyle(headerStyle);
+        sheet.getRow(SUMARY_TABLE_START_ROW).getCell(0).setCellStyle(headerStyle.copy());
+        sheet.getRow(SUMARY_TABLE_START_ROW).getCell(0).getCellStyle().setFillPattern(FillPatternType.NO_FILL);
         XSSFRow summaryTitleRow = sheet.getRow(SUMARY_TABLE_START_ROW + 1);
         for (Cell cell : summaryTitleRow) {
             cell.setCellStyle(headerStyle);
         }
-
-
-
         // Auto-size columns
-        for (int i = 0; i < 11; i++) {
+        for (int i = NO_COLUMN_INDEX; i <= TOTAL_REMUNERATION_COLUMN_INDEX; i++) {
             sheet.autoSizeColumn(i);
         }
     }
 
     private XSSFCellStyle formatTitle(XSSFWorkbook workbook) {
-        XSSFSheet sheet = workbook.getSheetAt(0);
         // Format font
         XSSFFont titleFont = getFont(workbook);
         titleFont.setBold(true);
         titleFont.setFontHeightInPoints((short) 20);
         titleFont.setColor(IndexedColors.RED1.getIndex());
-
         // Format style
-        XSSFCellStyle style = getCenterAlignStyle(workbook);
+        XSSFCellStyle style = workbook.createCellStyle();
+        getDefaultStyle(style, workbook);
+        getCenterAlignXYStyle(style, workbook);
         style.setFont(titleFont);
         // null đơn giản có nghĩa là "không sử dụng bảng màu cụ thể trong IndexedColors map - tập hợp các màu mặc định được định nghĩa sẵn,"
         // mà thay vào đó bạn sử dụng mã màu RGB trực tiếp.
-        System.out.println("Style format title: " + style.getFont().getFontName());
         style.setFillForegroundColor(new XSSFColor(new Color(194, 239, 236), null));
         style.setWrapText(true);// Thiết lập ô để chứa xuống dòng
 
@@ -390,44 +379,35 @@ public class ExcelFileServiceImpl implements ExcelFileService {
 
     private XSSFCellStyle formatHeader(XSSFWorkbook workbook) {
 
-        XSSFCellStyle headerStyle = borderStyle(workbook);
-
-        headerStyle.setAlignment(HorizontalAlignment.CENTER);
-        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        XSSFCellStyle headerStyle = workbook.createCellStyle();
+        borderStyle(headerStyle, workbook);
+        getDefaultStyle(headerStyle, workbook);
+        getCenterAlignXYStyle(headerStyle, workbook);
+        headerStyle.setFillForegroundColor(new XSSFColor(HEADER_COLOR, null));
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         headerStyle.getFont().setBold(true);
+        headerStyle.getFont().setColor(new XSSFColor(DARK_BLUE, null));
 
         return headerStyle;
     }
 
-    private XSSFCellStyle getCenterAlignStyle(XSSFWorkbook workbook) {
-        XSSFCellStyle style = workbook.createCellStyle();
-        style.cloneStyleFrom(getDefaultStyle(workbook));
+    private void getCenterAlignXYStyle(XSSFCellStyle style, XSSFWorkbook workbook) {
         style.setAlignment(HorizontalAlignment.CENTER);
         style.setVerticalAlignment(VerticalAlignment.CENTER);
-        return style;
     }
 
-    private XSSFCellStyle getDefaultStyle(XSSFWorkbook workbook) {
-        XSSFCellStyle style = workbook.createCellStyle();
+    private void getDefaultStyle(XSSFCellStyle style, XSSFWorkbook workbook) {
         style.setFillPattern(FillPatternType.NO_FILL);
         style.setFont(getFont(workbook));
-        return style;
+        style.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("#,##0"));
     }
 
-    private XSSFCellStyle getRightAlignStyle(XSSFWorkbook workbook) {
-        XSSFCellStyle style = workbook.createCellStyle();
-        style.cloneStyleFrom(getDefaultStyle(workbook));
-        style.setAlignment(HorizontalAlignment.RIGHT);
-        return style;
-    }
-
-    private XSSFCellStyle borderStyle(XSSFWorkbook workbook) {
-        XSSFCellStyle style = getDefaultStyle(workbook);
+    private void borderStyle(XSSFCellStyle style, XSSFWorkbook workbook) {
         style.setBorderBottom(BorderStyle.THIN);
         style.setBorderTop(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
-        return style;
+
     }
 
     private XSSFFont getFont(XSSFWorkbook workbook) {
@@ -437,5 +417,4 @@ public class ExcelFileServiceImpl implements ExcelFileService {
         font.setFontHeightInPoints((short) FONT_SIZE);
         return font;
     }
-
 }

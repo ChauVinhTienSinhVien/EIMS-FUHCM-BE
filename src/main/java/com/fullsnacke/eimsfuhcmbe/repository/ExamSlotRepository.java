@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
 

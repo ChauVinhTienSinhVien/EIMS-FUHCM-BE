@@ -39,6 +39,11 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
     @Override
     public ExamSlot createExamSlot(ExamSlot examSlot) {
+
+        if (isDuplicateExamSlot(examSlot)) {
+            throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
+        }
+
         return examSlotRepository.save(examSlot);
     }
 
@@ -48,6 +53,10 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
         if (examSlotInDB == null)
             throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
+
+        if (isDuplicateExamSlot(examSlotInRequest)) {
+            throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
+        }
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
@@ -137,6 +146,17 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     @Override
     public List<ExamSlot> getExamSlotsInTimeRange(ZonedDateTime startTime, ZonedDateTime endTime) {
         return examSlotRepository.findExamSlotsByTimeRange(startTime, endTime);
+    }
+
+    @Override
+    public List<ExamSlot> getExamSlotsByStatus(int status) {
+        return examSlotRepository.findExamSlotByStatus(status);
+    }
+
+    private boolean isDuplicateExamSlot(ExamSlot examSlot) {
+        List<ExamSlot> existingExamSlots = examSlotRepository.findBySubjectAndTime(
+                examSlot.getSubjectExam().getId(), examSlot.getStartAt(), examSlot.getEndAt());
+        return !existingExamSlots.isEmpty();
     }
 
 }

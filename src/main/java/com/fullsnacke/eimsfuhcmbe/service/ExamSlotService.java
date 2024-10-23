@@ -16,5 +16,6 @@ public interface ExamSlotService {
     List<List<Room>> getHallForExamSlot(int examSlotId);
     List<ExamSlot> getExamSlotsInTimeRange(ZonedDateTime startTime, ZonedDateTime endTime);
     void removeExamSlotHall(int examSlotId);
+    List<ExamSlot> getExamSlotsByStatus(int status);
 
 }

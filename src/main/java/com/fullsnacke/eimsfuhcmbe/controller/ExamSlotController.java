@@ -240,4 +240,20 @@ public class ExamSlotController {
         }
     }
 
+    @GetMapping("/to-day")
+    @Operation(summary = "Retrieve exam slots for today", description = "Fetches a list of exam slots that are scheduled for today.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsForToday() {
+        ZonedDateTime startTime = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime endTime = ZonedDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
+        }
+    }
+
 }

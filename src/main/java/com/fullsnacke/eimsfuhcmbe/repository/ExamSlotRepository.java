@@ -20,7 +20,6 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
             "JOIN FETCH e.subjectExam se " +
             "JOIN FETCH se.subjectId s " +
             "WHERE s.semesterId = :semester " +
-            "AND e.status = :status " +
             "ORDER BY e.startAt")
     List<ExamSlot> findExamSlotsBySemesterWithDetails(@Param("semester") Semester semester);
 
@@ -63,6 +62,18 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
             "AND e.status = :status " +
             "ORDER BY e.startAt")
     List<ExamSlot> findExamSlotsByStartAtBetween(ZonedDateTime startDate, ZonedDateTime endDate, int status);
+
+    @Query("SELECT e FROM ExamSlot e WHERE e.startAt >= :startTime AND e.endAt <= :endTime")
+    List<ExamSlot> findExamSlotsByTimeRange(@Param("startTime") ZonedDateTime startTime, @Param("endTime") ZonedDateTime endTime);
+
+    @Query("SELECT e FROM ExamSlot e WHERE e.subjectExam.id = :subjectId AND " +
+            "((e.startAt <= :endAt AND e.endAt >= :startAt))")
+    List<ExamSlot> findBySubjectAndTime(@Param("subjectId") int subjectId,
+                                        @Param("startAt") ZonedDateTime startAt,
+                                        @Param("endAt") ZonedDateTime endAt);
+
+    List<ExamSlot> findExamSlotByStatus(int status);
+
 }
 
 

@@ -49,7 +49,7 @@ public class ExamSlotHallServiceImpl implements ExamSlotHallService {
             examSlotHallRepository.save(examSlotHall);
 
             for (String roomId : roomIds) {
-                Room room = roomRepository.findRoomById(Integer.parseInt(roomId));
+                Room room = roomRepository.findRoomByRoomName(roomId);
                 if (room == null)
                     throw new EntityNotFoundException("Room not found");
 
@@ -90,7 +90,7 @@ public class ExamSlotHallServiceImpl implements ExamSlotHallService {
             examSlotHallRepository.save(examSlotHall);
 
             for (String roomId : roomIds) {
-                Room room = roomRepository.findRoomById(Integer.parseInt(roomId));
+                Room room = roomRepository.findRoomByRoomName(roomId);
                 if (room == null)
                     throw new EntityNotFoundException("Room not found");
 

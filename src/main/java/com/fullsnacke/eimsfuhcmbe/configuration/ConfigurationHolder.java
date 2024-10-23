@@ -66,4 +66,15 @@ public class ConfigurationHolder {
         return Integer.parseInt(conStringStringMap.get(ConfigType.TIME_BEFORE_CLOSE_REQUEST.getValue()));
     }
 
+    public int getCheckInTimeBeforeExamSlot(){
+        return Integer.parseInt(conStringStringMap.get(ConfigType.CHECK_IN_TIME_BEFORE_EXAM_SLOT.getValue()));
+    }
+
+    public int getCheckOutTimeAfterExamSlot(){
+        return Integer.parseInt(conStringStringMap.get(ConfigType.CHECK_OUT_TIME_AFTER_EXAM_SLOT.getValue()));
+    }
+
+    public int getExtraInvigilator(){
+        return Integer.parseInt(conStringStringMap.get(ConfigType.EXTRA_INVIGILATOR.getValue()));
+    }
 }

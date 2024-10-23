@@ -29,4 +29,10 @@ public class InvigilatorAttendanceResponseDTO {
     Instant startAt;
     Instant endAt;
     Integer examSlotId;
+    String invigilatorId;
+    String invigilatorFuId;
+    String invigilatorFirstName;
+    String invigilatorLastName;
+    String invigilatorEmail;
+    String invigilatorPhone;
 }

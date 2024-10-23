@@ -26,10 +26,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/examslots")
@@ -204,6 +205,10 @@ public class ExamSlotController {
             ExamSlot updateExamSlot =  examSlotServiceImpl.managerUpdateExamSlot(examSlot, id);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
 
+            if (updateExamSlot.getStatus() == ExamSlotStatus.REJECTED.getValue()) {
+                examSlotServiceImpl.removeExamSlotHall(updateExamSlot.getId());
+            }
+
             return ResponseEntity.ok(examSlotResponseDTO);
         } catch (ExamSlotNotFoundException e) {
             return ResponseEntity.notFound().build();
@@ -226,6 +231,22 @@ public class ExamSlotController {
         }
     }
 
+    @GetMapping("/in-time-range")
+    @Operation(summary = "Retrieve exam slots within a time range", description = "Fetches a list of exam slots that fall within the specified start and end times.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsInTimeRange(
+            @RequestParam("startTime") ZonedDateTime startTime,
+            @RequestParam("endTime") ZonedDateTime endTime) {
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
+        }
+    }
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an exam slot by ID", description = "Deletes a specific exam slot based on its ID. Returns a 204 No Content if successful, or a 404 Not Found if the exam slot does not exist.")
     public ResponseEntity<?> deleteExamSlotById(@PathVariable("id") int id) {
@@ -235,6 +256,43 @@ public class ExamSlotController {
         } catch (ExamSlotNotFoundException exception) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/to-day")
+    @Operation(summary = "Retrieve exam slots for today", description = "Fetches a list of exam slots that are scheduled for today.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsForToday() {
+        ZonedDateTime startTime = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        ZonedDateTime endTime = ZonedDateTime.now().withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        List<ExamSlot> examSlotListInTime = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
+        List<ExamSlot> examSlotList = new ArrayList<>();
+        for (ExamSlot e:examSlotListInTime) {
+            if (e.getStatus() == ExamSlotStatus.APPROVED.getValue()) {
+                examSlotList.add(e);
+            }
+        }
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
+        }
+    }
+
+    @GetMapping("/by-status/{status}")
+    @Operation(summary = "Retrieve exam slots by status", description = "Fetches a list of exam slots based on the status provided in the request. If no exam slots are found, it will return a 204 No Content response.")
+    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsByStatus(@PathVariable("status") String status) {
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsByStatus(ExamSlotStatus.valueOf(status).getValue());
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
+                    .map(examSlotMapper::toDto)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(examSlotResponseDTOList);
+        }
+
     }
 
     @GetMapping("/status")

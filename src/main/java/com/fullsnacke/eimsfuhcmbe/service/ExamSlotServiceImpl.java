@@ -18,9 +18,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 
 @Slf4j
@@ -48,21 +46,24 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
     @Override
     public ExamSlot createExamSlot(ExamSlot examSlot) {
+
+        if (isDuplicateExamSlot(examSlot)) {
+            throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
+        }
+
         return examSlotRepository.save(examSlot);
     }
 
     @Override
-    public ExamSlot updateExamSlotExamSlot(ExamSlot examSlotInRequest, int id) {
-//        int id = examSlotInRequest.getId();
+    public ExamSlot updateExamSlot(ExamSlot examSlotInRequest, int id) {
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
-
-        User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
 
         if (examSlotInDB == null)
             throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
 
-        if (user.getRole().getId() == 1)
-            examSlotInDB.setUpdatedBy(user);
+        if (isDuplicateExamSlot(examSlotInRequest)) {
+            throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
+        }
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
@@ -70,8 +71,15 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         return examSlotRepository.save(examSlotInDB);
     }
 
+    public ExamSlot updateExamSlotStatus(ExamSlot examSlotInRequest, int id) {
+        ExamSlot examSlotInDB = examSlotRepository.findExamSlotById(id);
+        if (examSlotInDB == null)
+            throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
+        examSlotInDB.setStatus(examSlotInRequest.getStatus());
+        return examSlotRepository.save(examSlotInDB);
+    }
+
     public ExamSlot managerUpdateExamSlot(ExamSlot examSlotInRequest, int id) {
-//        int id = examSlotInRequest.getId();
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
 
         User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
@@ -97,6 +105,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     @Override
     public void deleteExamSlot(int id) {
         ExamSlot examSlot = findById(id);
+        System.out.println(examSlot.getId());
             examSlotRepository.delete(examSlot);
     }
 
@@ -121,6 +130,17 @@ public class ExamSlotServiceImpl implements ExamSlotService {
             result.add(roomNames);
         }
         return result;
+    }
+
+    @Override
+    public void removeExamSlotHall(int examSlotId) {
+        ExamSlot examSlot = examSlotRepository.findExamSlotById(examSlotId);
+        List<ExamSlotHall> examSlotHalls = examSlotHallRepository.findByExamSlot(examSlot);
+        for (ExamSlotHall hall : examSlotHalls) {
+            List<ExamSlotRoom> rooms = examSlotRoomRepository.findByExamSlotHall(hall);
+            examSlotRoomRepository.deleteAll(rooms);
+            examSlotHallRepository.delete(hall);
+        }
     }
 
     @Override
@@ -162,4 +182,21 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
         return ZonedDateTime.of(date, localTime, zoneId);
     }
+
+    @Override
+    public List<ExamSlot> getExamSlotsInTimeRange(ZonedDateTime startTime, ZonedDateTime endTime) {
+        return examSlotRepository.findExamSlotsByTimeRange(startTime, endTime);
+    }
+
+    @Override
+    public List<ExamSlot> getExamSlotsByStatus(int status) {
+        return examSlotRepository.findExamSlotByStatus(status);
+    }
+
+    private boolean isDuplicateExamSlot(ExamSlot examSlot) {
+        List<ExamSlot> existingExamSlots = examSlotRepository.findBySubjectAndTime(
+                examSlot.getSubjectExam().getId(), examSlot.getStartAt(), examSlot.getEndAt());
+        return !existingExamSlots.isEmpty();
+    }
+
 }

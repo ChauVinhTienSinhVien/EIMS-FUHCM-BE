@@ -354,6 +354,10 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndDay(currentUser.get().getId(), day);
     }
 
+    public List<InvigilatorAttendance> getUserInvigilatorAttendanceBySemesterIdAndApproved(Integer invigilatorId, Integer semesterId) {
+        return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndSemesterIdAndApprove(invigilatorId, semesterId);
+    }
+
     public List<InvigilatorAttendance> getCurrentUserInvigilatorAttendanceBySemesterIdAndApproved(Integer semesterId) {
         Optional<User> currentUser = SecurityUntil.getLoggedInUser();
         if(currentUser.isEmpty()){

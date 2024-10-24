@@ -116,12 +116,26 @@ public class ExamSlotController {
     @PostMapping("/bulk")
     @Operation(summary = "Bulk import exam slots", description = "Accepts a list of exam slot data in the request body and creates multiple exam slots in the system. Returns a list of the created exam slots.")
     public ResponseEntity<List<ExamSlotResponseDTO>> importExamSlot(@RequestBody @Valid List<ExamSlotRequestDTO> examSlotRequestDTOList) {
-        List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
-        for (ExamSlotRequestDTO e:examSlotRequestDTOList) {
-            ExamSlot examSlot = examSlotServiceImpl.createExamSlot(examSlotMapper.toEntity(e));
-            ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
-            examSlotResponseDTOList.add(examSlotResponseDTO);
+        List<ExamSlot> createdExamSlots = new ArrayList<>();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User currentUser = userServiceImpl.getUserByEmail(email);
+
+        for (ExamSlotRequestDTO examSlotRequestDTO : examSlotRequestDTOList) {
+            ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
+            examSlot.setCreatedAt(Instant.now());
+            examSlot.setCreatedBy(currentUser);
+            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
+            examSlot.setSubjectExam(subjectExam);
+            examSlot.setStatus(ExamSlotStatus.NEEDS_ROOM_ASSIGNMENT.getValue());
+
+            createdExamSlots.add(examSlotServiceImpl.createExamSlot(examSlot));
         }
+
+        List<ExamSlotResponseDTO> examSlotResponseDTOList = createdExamSlots.stream()
+                .map(examSlotMapper::toDto)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(examSlotResponseDTOList);
     }
 

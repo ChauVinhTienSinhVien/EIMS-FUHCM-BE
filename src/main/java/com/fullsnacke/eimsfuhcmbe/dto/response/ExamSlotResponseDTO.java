@@ -23,14 +23,6 @@ public class ExamSlotResponseDTO {
 
     SubjectExamDTO subjectExamDTO;
 
-//    Integer subjectExamId; // subjectExam.id
-//
-//    String examType; // subjectExam.examType
-//
-//    String subjectName; //subjectExam.duration
-//
-//    String subjectCode; //subjectExam.subjectId.code
-
     ZonedDateTime startAt;
 
     ZonedDateTime endAt;
@@ -39,11 +31,13 @@ public class ExamSlotResponseDTO {
 
     Instant createdAt;
 
-    Integer createdBy;
+    String createdByLastName;
+    String createdByFirstName;
 
     ExamSlotStatus status;
 
-    Integer updatedBy;
+    String updatedByLastName;
+    String updatedByFirstName;
 
     Instant updatedAt;
 

@@ -36,14 +36,8 @@ public class ExcelFileServiceImpl implements ExcelFileService {
     ConfigurationHolder configurationHolder;
 
     @Override
-    public byte[] generateAttendanceAndTotalHoursExcelFileForSemester(int semesterId) {
-        AttendancesAndTotalHoursExcel excel = new AttendancesAndTotalHoursExcel(semesterRepository, invigilatorAttendanceRepository, configurationHolder);
-        return excel.generateAttendanceAndTotalHoursExcelFileForSemester(semesterId);
-    }
-
-    @Override
-    public byte[] generateAttendanceAndTotalHoursExcelFileForSemester(int semesterId, String fuId) {
+    public byte[] generateAttendanceAndTotalHoursExcelFileForSemester(int semesterId, String toEmail) {
         AttendancesAndToTalHoursOfAnInvigilatorExcel excel = new AttendancesAndToTalHoursOfAnInvigilatorExcel(semesterRepository, invigilatorAttendanceRepository, configurationHolder);
-        return excel.generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(semesterId, fuId);
+        return excel.generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(semesterId, toEmail);
     }
 }

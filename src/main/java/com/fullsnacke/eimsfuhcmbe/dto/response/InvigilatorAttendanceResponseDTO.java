@@ -29,6 +29,7 @@ public class InvigilatorAttendanceResponseDTO {
     Instant startAt;
     Instant endAt;
     Integer examSlotId;
+    ExamSlot examSlot;
     String invigilatorId;
     String invigilatorFuId;
     String invigilatorFirstName;

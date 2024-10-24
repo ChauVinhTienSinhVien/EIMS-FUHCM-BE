@@ -1,0 +1,31 @@
+#Database Configuration
+MYSQL_USER: admin
+MYSQL_PASSWORD: AVNS_UbtDq3BTYRVW5-cxT8f
+MYSQL_URL: jdbc:mysql://mysql-2119796b-fpt-2426.g.aivencloud.com:11658/invigilator_management_5
+#MYSQL_HOST: localhost
+#MYSQL_PORT: 3306
+#MYSQL_DATABASE: invigilator_management_4
+
+#Google OAuth2 Configuration
+GOOGLE_CLIENT_ID: 339520446621-0r4tq2rttaa2t9ltbq4nkeei24h70v8s.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET: 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
+
+#Server Configuration
+SERVER_PORT: 8080
+ACTIVE_PROFILE: dev
+WEB_NAME: EIMS-FUHCM-BE
+CONTEXT_PATH: /eims-fuhcm-be
+
+#JWT Configuration
+JWT_EXPIRATION_IN_MS: 86400000
+JWT_EXPIRATION_IN_MS_REMEMBER: 259200000
+JWT_SECRET_KEY: 5erQjS4X69A0qO3cOzXlOuVNhZX4g9YZZ0rNj9AUxOC653uWYnbjYHoRBLBz8WfL
+
+
+
+#Email Configuration
+EMAIL_HOST: smtp.gmail.com
+EMAIL_PORT: 587
+EMAIL_ID: nganvhhse183096@fpt.edu.vn
+EMAIL_PASSWORD: etembzflesofpbxe
+VERIFY_EMAIL_HOST: http://localhost:${SERVER_PORT}

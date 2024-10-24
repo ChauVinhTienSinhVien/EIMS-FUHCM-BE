@@ -3,7 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
-import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomException;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorRegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
@@ -137,7 +137,7 @@ public class InvigilatorRegistrationController {
             Set<ExamSlotDetail> result = invigilatorRegistrationService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(id);
             log.info("Already delete {} slot(s)", result.size());
             return ResponseEntity.ok(result);
-        } catch (CustomException e) {
+        } catch (CustomMessageException e) {
             log.error("Error occurred while deleting a registered slot: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

@@ -121,4 +121,7 @@ public class ConfigServiceImpl implements ConfigService{
         configRepository.saveAll(newConfigList);
     }
 
+    public List<Config> getConfigOfLatestSemester() {
+        return  configRepository.findBySemesterId(semesterRepository.findFirstByOrderByStartAtDesc().getId());
+    }
 }

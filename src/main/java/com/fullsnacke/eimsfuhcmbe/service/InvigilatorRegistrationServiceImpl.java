@@ -12,12 +12,14 @@ import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotRegisterStatusEnum;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
 import static com.fullsnacke.eimsfuhcmbe.enums.ConfigType.*;
 
 @Service
@@ -145,7 +148,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         for (InvigilatorRegistration registration : registrations) {
             Semester semester = registration.getExamSlot().getSubjectExam().getSubjectId().getSemesterId();
 
-            ExamSlotDetail detail = invigilatorRegistrationMapper.toExamSlotDetail(registration.getExamSlot());
+            ExamSlotDetail detail = invigilatorRegistrationMapper.toExamSlotDetailInvigilator(registration.getExamSlot());
 
             groupedRegistrations
                     .computeIfAbsent(semester.getId(), k -> new HashMap<>())
@@ -244,7 +247,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
             }
             registeredExamBySemester
                     .getExamSlotDetails()
-                    .add(invigilatorRegistrationMapper.toExamSlotDetail(registration.getExamSlot()));
+                    .add(invigilatorRegistrationMapper.toExamSlotDetailInvigilator(registration.getExamSlot()));
         }
 
         return new HashSet<>(registeredExamBySemesterMap.values());
@@ -252,8 +255,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
     public ListInvigilatorsByExamSlotResponseDTO listInvigilatorsByExamSlot(int examSlotId) {
         ExamSlot examSlot = examSlotRepository.findById(examSlotId)
-                .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
-
+                .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found."));
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository.findByExamSlot(examSlot);
 
         ListInvigilatorsByExamSlotResponseDTO response = invigilatorRegistrationMapper.toListInvigilatorsByExamSlotResponseDTO(examSlot);
@@ -278,9 +280,8 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         Set<ExamSlotDetail> examSlotDetails = new HashSet<>();
         for (ExamSlot examSlot : allExamSlots) {
             String status;
-            long count = registeredSlots.stream()
-                    .filter(registration -> registration.getExamSlot().equals(examSlot))
-                    .count();
+
+            int count = invigilatorRegistrationRepository.countByExamSlot(examSlot);
 
             if (registeredSlots.stream().anyMatch(registration -> registration.getExamSlot().equals(examSlot))) {
                 status = ExamSlotRegisterStatusEnum.REGISTERED.name();
@@ -289,7 +290,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
             } else {
                 status = ExamSlotRegisterStatusEnum.FULL.name();
             }
-            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
+            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetailInvigilator(examSlot);
             examSlotDetail.setStatus(status);
             examSlotDetails.add(examSlotDetail);
             examSlotDetail.setNumberOfRegistered((int) count);
@@ -322,14 +323,15 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     }
 
     private ExamSlot findRepresentativeExamSlot(Set<Integer> examSlotIds) {
-        return examSlotRepository.findById(examSlotIds.iterator().next())
-                .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
+        int examSlotId = examSlotIds.iterator().next();
+        return examSlotRepository.findById(examSlotId)
+                .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found."));
     }
 
     private Set<InvigilatorRegistration> createRegistrations(User invigilator, Set<Integer> examSlotIds) {
         return examSlotIds.stream()
                 .map(examSlotId -> examSlotRepository.findById(examSlotId)
-                        .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND)))
+                        .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found.")))
                 .map(examSlot -> InvigilatorRegistration.builder()
                         .invigilator(invigilator)
                         .examSlot(examSlot)
@@ -394,20 +396,20 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         for (ExamSlot newSlot : newExamSlots) {
             validateRequiredInvigilators(newSlot);
             checkOverlapWithinNewSlots(newSlot, newExamSlots);
-            examSlotDetails.add(invigilatorRegistrationMapper.toExamSlotDetail(newSlot));
+            examSlotDetails.add(invigilatorRegistrationMapper.toExamSlotDetailInvigilator(newSlot));
         }
     }
 
     private void validateRequiredInvigilators(ExamSlot slot) {
         if (slot.getRequiredInvigilators() <= 0) {
-            throw new CustomException(ErrorCode.EXAM_SLOT_FULL);
+            throw new CustomMessageException(HttpStatus.CONFLICT, "Exam slot ID " + slot.getId() + " is full.");
         }
     }
 
     private void checkOverlapWithinNewSlots(ExamSlot currentSlot, Set<ExamSlot> allNewSlots) {
         for (ExamSlot otherSlot : allNewSlots) {
             if (currentSlot.getId().intValue() != otherSlot.getId().intValue() && isOverlapping(currentSlot, otherSlot)) {
-                throw new CustomException(ErrorCode.OVERLAP_SLOT_IN_LIST);
+                throw new CustomMessageException(HttpStatus.CONFLICT, "Exam slot ID " + currentSlot.getId() + " overlaps with  " + otherSlot.getId() + " in the registration list.");
             }
         }
     }
@@ -417,9 +419,9 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
             ExamSlot existingSlot = registration.getExamSlot();
             for (ExamSlot newSlot : newExamSlots) {
                 if (existingSlot.getId().intValue() == newSlot.getId().intValue()) {
-                    throw new CustomException(ErrorCode.EXAM_SLOT_ALREADY_REGISTERED);
+                    throw new CustomMessageException(HttpStatus.CONFLICT, "Exam slot ID " + existingSlot.getId() + " already registered.");
                 } else if (isOverlapping(existingSlot, newSlot)) {
-                    throw new CustomException(ErrorCode.OVERLAP_SLOT);
+                    throw new CustomMessageException(HttpStatus.CONFLICT, "Exam slot ID " + existingSlot.getId() + " overlaps with another existing slot in the registration list.");
                 }
             }
         }

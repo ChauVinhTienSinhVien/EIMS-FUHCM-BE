@@ -4,11 +4,15 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotRoomMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserRegistrationResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotInvigilatorStatus;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
+import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.*;
 import lombok.AccessLevel;
@@ -16,9 +20,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,13 +44,14 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     ExamSlotRoomRepository examSlotRoomRepository;
     ExamSlotRoomMapper examSlotRoomMapper;
     ExamSlotHallRepository examSlotHallRepository;
+    UserRepository userRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds) {
         if(examSlotIds.isEmpty()) {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
         }
-//        List<ExamSlot> examSlots = examSlotRepository.findExamSlotsBySemesterWithDetails(semester);
+
         List<ExamSlot> examSlots = examSlotRepository.findByIdIn(examSlotIds);
 
         Map<Integer, List<InvigilatorRegistration>> registrationMap = invigilatorRegistrationRepository
@@ -89,6 +96,10 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             log.info("Registrations: {}", registrations.size());
             log.info("Halls: {}", halls.size());
             log.info("Rooms: {}", rooms.size());
+            if (halls.size() + rooms.size() < registrations.size()) {
+                log.error("Not enough halls and rooms for invigilators");
+                throw new CustomMessageException(HttpStatus.NOT_FOUND, "Insufficient number of invigilators available for exam slot ID: " + examSlot.getId());
+            }
 
             assignInvigilatorsToRoom(registrations, rooms);
             assignInvigilatorsToHalls(registrations, halls);
@@ -194,6 +205,16 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(unassignedList);
     }
 
+    public List<UserRegistrationResponseDTO> getAssignedInvigilators(int examSlotId) {
+        if(examSlotId <= 0) {
+            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
+        }
+
+        List<InvigilatorRegistration> assignedList = invigilatorRegistrationRepository.findAssignedRegistrationsByExamSlot_IdOrderByCreatedAtAsc(examSlotId);
+
+        return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(assignedList);
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public String exchangeInvigilators(UpdateInvigilatorAssignmentRequestDTO request) {
         int assignmentId = request.getAssignmentId();
@@ -232,7 +253,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .findByExamSlotIdAndInvigilatorFuId(examSlotId, oldInvigilatorFuId)
                 .orElseThrow(() -> {
                     log.error("Old invigilator not found: {}", oldInvigilatorFuId);
-                    return new CustomException(ErrorCode.OLD_INVIGILATOR_NOT_FOUND);
+                    return new CustomMessageException(HttpStatus.NOT_FOUND, "Invigilator with FuId " + oldInvigilatorFuId + " not found.");
                 });
 
         InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository
@@ -244,5 +265,62 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         exchangeInvigilators(oldAssignment, newInvigilator);
         return "Exchanged successfully";
+    }
+
+
+    public Set<ExamSlotDetail> getAllExamSlotsInSemesterWithStatus(int semesterId) {
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        // Chuyển đổi allExamSlots từ List sang Set
+        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotsBySemesterWithDetails(semester, ExamSlotStatus.APPROVED.getValue()));
+
+        // Tạo một Set để lưu trữ kết quả cuối cùng
+        Set<ExamSlotDetail> examSlotDetails = new HashSet<>();
+        for (ExamSlot examSlot : allExamSlots) {
+            // Lấy một ExamSlotHall làm đại diện
+            int assignedInvigilators = invigilatorRegistrationRepository.countByExamSlot(examSlot);
+            Optional<ExamSlotHall> representativeHall = examSlotHallRepository.findFirstByExamSlot(examSlot);
+
+            String status;
+            if(representativeHall.isPresent() && representativeHall.get().getHallInvigilator() != null) {
+                status = ExamSlotInvigilatorStatus.ASSIGNED.name();
+            } else {
+                status = ExamSlotInvigilatorStatus.UNASSIGNED.name();
+            }
+            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
+            examSlotDetail.setStatus(status);
+            examSlotDetails.add(examSlotDetail);
+        }
+
+        return examSlotDetails;
+    }
+
+    public List<ExamSlotDetail> getAllExamSlotsAssignedInSemester (int semesterId) {
+        var semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        var examSlots = examSlotRepository.findAssignedExamSlotsBySemesterIdAndFuId(semesterId, getCurrentUser().getFuId());
+
+        return examSlots.stream()
+                .map(invigilatorRegistrationMapper::toExamSlotDetailInvigilator)
+                .toList();
+    }
+
+    private User getCurrentUser() {
+        var context = SecurityContextHolder.getContext();
+        if (context == null || context.getAuthentication() == null) {
+            throw new AuthenticationProcessException(ErrorCode.AUTHENTICATION_CONTEXT_NOT_FOUND);
+        }
+
+        Authentication authentication = context.getAuthentication();
+
+        String email = authentication.getName();
+        if (email == null || email.isEmpty()) {
+            throw new AuthenticationProcessException(ErrorCode.AUTHENTICATION_EMAIL_MISSING);
+        }
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
 }

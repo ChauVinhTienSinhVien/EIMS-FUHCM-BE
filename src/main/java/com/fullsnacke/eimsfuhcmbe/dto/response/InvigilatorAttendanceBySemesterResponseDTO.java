@@ -9,6 +9,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class IntrospectResponse {
-    boolean valid;
+public class InvigilatorAttendanceBySemesterResponseDTO {
+    Integer semesterId;
+    Integer invigilatorId;
+    String firstName;
+    String lastName;
+    String email;
+    String phoneNum;
 }

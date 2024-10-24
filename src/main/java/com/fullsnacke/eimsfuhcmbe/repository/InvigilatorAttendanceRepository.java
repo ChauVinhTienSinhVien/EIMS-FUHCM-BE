@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.repository;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -57,7 +58,7 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN ia.invigilatorAssignment iaa " +
             "JOIN iaa.invigilatorRegistration ir " +
             "JOIN ir.examSlot es " +
-            "WHERE es.subjectExam.subjectId.semesterId.id = :semesterId AND ia.status = 2")
+            "WHERE es.subjectExam.subjectId.semesterId.id = :semesterId")
     List<ExamSlot> findExamSlotBySemesterId(Integer semesterId);
 
     @Query("SELECT ia FROM InvigilatorAttendance ia " +
@@ -93,4 +94,11 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN FETCH ir.examSlot es " +
             "WHERE ir.invigilator.id = :invigilatorId AND es.subjectExam.subjectId.semesterId.id = :semesterId")
     List<InvigilatorAttendance> findInvigilatorAttendanceByInvigilatorIdAndSemesterId(Integer invigilatorId, Integer semesterId);
+
+    @Query("SELECT DISTINCT ir.invigilator FROM InvigilatorAttendance ia " +
+       "JOIN ia.invigilatorAssignment iaa " +
+       "JOIN iaa.invigilatorRegistration ir " +
+       "JOIN ir.examSlot es " +
+       "WHERE es.subjectExam.subjectId.semesterId.id = :semesterId")
+    List<User> findInvigilatorBySemesterId(@Param("semesterId") Integer semesterId);
 }

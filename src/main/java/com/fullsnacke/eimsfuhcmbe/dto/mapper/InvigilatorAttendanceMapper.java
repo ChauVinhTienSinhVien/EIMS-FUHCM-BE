@@ -34,6 +34,7 @@ public interface InvigilatorAttendanceMapper {
     @Mapping(target = "invigilatorLastName", source = "invigilatorAssignment.invigilatorRegistration.invigilator.lastName")
     @Mapping(target = "invigilatorEmail", source = "invigilatorAssignment.invigilatorRegistration.invigilator.email")
     @Mapping(target = "invigilatorPhone", source = "invigilatorAssignment.invigilatorRegistration.invigilator.phoneNumber")
+    @Mapping(target = "examSlot", source = "invigilatorAssignment.invigilatorRegistration.examSlot")
     InvigilatorAttendanceResponseDTO toResponseDTO(InvigilatorAttendance entity);
 
     @Named("intToStatus")

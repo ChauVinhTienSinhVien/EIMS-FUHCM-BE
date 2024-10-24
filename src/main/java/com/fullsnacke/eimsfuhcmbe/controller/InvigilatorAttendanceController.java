@@ -294,7 +294,7 @@ public class InvigilatorAttendanceController {
         for (User invigilator : invigilatorList) {
             List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getUserInvigilatorAttendanceBySemesterIdAndApproved(invigilator.getId(), semesterId);
             double hourlyRate = Double.parseDouble(configurationHolder.getConfig(ConfigType.HOURLY_RATE.getValue()));
-            System.out.println("hourlyRate: " + hourlyRate);
+            System.out.println("hourlyRate 1: " + hourlyRate);
 
             if (attendanceList.isEmpty()) {
                 return ResponseEntity.noContent().build();

@@ -36,13 +36,18 @@ public class InvigilatorAttendance {
     Integer status;
 
     @Column(name = "updated_at")
-    @LastModifiedDate
     Instant updatedAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "updated_by")
-    @LastModifiedBy
     User updatedBy;
+
+    @Column(name = "approved_at")
+    Instant approvedAt;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "approved_by")
+    User approvedBy;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "invigilator_assignment_id", nullable = false)

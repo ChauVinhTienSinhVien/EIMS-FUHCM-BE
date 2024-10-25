@@ -2,6 +2,10 @@
 MYSQL_USER: admin
 MYSQL_PASSWORD: AVNS_UbtDq3BTYRVW5-cxT8f
 MYSQL_URL: jdbc:mysql://mysql-2119796b-fpt-2426.g.aivencloud.com:11658/invigilator_management_5
+#MYSQL_USER: root
+#MYSQL_PASSWORD: admin
+#MYSQL_URL: jdbc:mysql://localhost:3306/invigilator_management_5
+
 #MYSQL_HOST: localhost
 #MYSQL_PORT: 3306
 #MYSQL_DATABASE: invigilator_management_4
@@ -20,8 +24,6 @@ CONTEXT_PATH: /eims-fuhcm-be
 JWT_EXPIRATION_IN_MS: 86400000
 JWT_EXPIRATION_IN_MS_REMEMBER: 259200000
 JWT_SECRET_KEY: 5erQjS4X69A0qO3cOzXlOuVNhZX4g9YZZ0rNj9AUxOC653uWYnbjYHoRBLBz8WfL
-
-
 
 #Email Configuration
 EMAIL_HOST: smtp.gmail.com

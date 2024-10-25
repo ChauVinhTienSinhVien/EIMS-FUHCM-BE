@@ -15,9 +15,6 @@ import java.time.ZonedDateTime;
 
 @Mapper(componentModel = "spring")
 public interface InvigilatorAttendanceMapper {
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "status", source = "status", qualifiedByName = "statusToInt")
-    InvigilatorAttendance toEntity(InvigilatorAttendanceRequestDTO dto);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "checkIn", source = "checkIn")
@@ -34,6 +31,7 @@ public interface InvigilatorAttendanceMapper {
     @Mapping(target = "invigilatorLastName", source = "invigilatorAssignment.invigilatorRegistration.invigilator.lastName")
     @Mapping(target = "invigilatorEmail", source = "invigilatorAssignment.invigilatorRegistration.invigilator.email")
     @Mapping(target = "invigilatorPhone", source = "invigilatorAssignment.invigilatorRegistration.invigilator.phoneNumber")
+    @Mapping(target = "examSlot", source = "invigilatorAssignment.invigilatorRegistration.examSlot")
     InvigilatorAttendanceResponseDTO toResponseDTO(InvigilatorAttendance entity);
 
     @Named("intToStatus")
@@ -49,25 +47,6 @@ public interface InvigilatorAttendanceMapper {
         };
     }
 
-    @Named("statusToInt")
-    default Integer statusToInt(InvigilatorAttendanceStatus status) {
-        if (status == null) {
-            return null;
-        }
-        return switch (status) {
-            case PENDING -> 1;
-            case APPROVED -> 2;
-            case REJECTED -> 3;
-            default -> throw new IllegalArgumentException("Unknown ExamSlotStatus: " + status);
-        };
-    }
-
-    @Named("intToUser")
-    default User intToUser(Integer userId) {
-        User user = new User();
-        user.setId(userId);
-        return user;
-    }
 
     @Named("userToInt")
     default Integer userToInt(User user) {

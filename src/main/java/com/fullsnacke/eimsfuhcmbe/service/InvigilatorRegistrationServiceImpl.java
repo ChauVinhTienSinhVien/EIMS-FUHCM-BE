@@ -25,7 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -102,6 +102,12 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     public InvigilatorRegistrationResponseDTO registerExamSlotWithFuId(InvigilatorRegistrationRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
         return registerExamSlot(invigilator, request);
+    }
+
+    //dashboard
+    @Override
+    public List<InvigilatorRegistration> getAllRegistrationsInTimeRange(Instant startTime, Instant endTime) {
+        return invigilatorRegistrationRepository.findAllByTimeRange(startTime, endTime);
     }
 
     private InvigilatorRegistrationResponseDTO registerExamSlot(User invigilator, InvigilatorRegistrationRequestDTO request) {

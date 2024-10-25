@@ -4,11 +4,15 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAttendanceMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.UserMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAttendanceRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAttendanceListResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAttendanceResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAttendanceServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,6 +43,9 @@ public class InvigilatorAttendanceController {
 
     @Autowired
     private ConfigurationHolder configurationHolder;
+
+    @Autowired
+    private UserMapper userMapper;
 
 
     @PostMapping("/staff/add-by-day")
@@ -255,6 +263,16 @@ public class InvigilatorAttendanceController {
         return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
     }
 
+    @PutMapping("manager/update/{id}")
+    @Operation(summary = "Manager update invigilator attendance", description = "Manager update invigilator attendance")
+    public ResponseEntity<InvigilatorAttendanceResponseDTO> managerUpdate(@PathVariable("id") Integer id, @RequestBody InvigilatorAttendanceRequestDTO invigilatorAttendanceRequestDTO) {
+        boolean isCheckIn = invigilatorAttendanceRequestDTO.isCheckIn();
+        boolean isCheckOut = invigilatorAttendanceRequestDTO.isCheckOut();
+        InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceService.managerUpdate(id, isCheckIn, isCheckOut);
+        InvigilatorAttendanceResponseDTO invigilatorAttendanceResponseDTO = invigilatorAttendanceMapper.toResponseDTO(invigilatorAttendance);
+        return ResponseEntity.ok(invigilatorAttendanceResponseDTO);
+    }
+
     @PutMapping("manager/approve-all")
     @Operation(summary = "Manager approve a list of invigilator attendance", description = "Manager approve a list of invigilator attendance")
     public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> managerApproveAll(@RequestBody List<Integer> invigilatorAttendanceIds) {
@@ -277,6 +295,40 @@ public class InvigilatorAttendanceController {
                 .toList();
 
         return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
+    }
+
+    @GetMapping("manager/report/invigilator/{semesterId}")
+    @Operation(summary = "Get all checked invigilator attendance by semesterId", description = "Retrieve a list of all checked invigilator attendance records by SemesterId")
+    public ResponseEntity<List<InvigilatorAttendanceListResponseDTO>> getApprovedInvigilatorAttendanceBySemesterId(@PathVariable Integer semesterId) {
+        List<User> invigilatorList = invigilatorAttendanceService.getInvigilatorBySemesterId(semesterId);
+        List<InvigilatorAttendanceListResponseDTO> invigilatorAttendanceListResponseDTOList = new ArrayList<>();
+        for (User invigilator : invigilatorList) {
+            List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getUserInvigilatorAttendanceBySemesterIdAndApproved(invigilator.getId(), semesterId);
+            double hourlyRate = Double.parseDouble(configurationHolder.getConfig(ConfigType.HOURLY_RATE.getValue()));
+            System.out.println("hourlyRate 1: " + hourlyRate);
+
+            if (attendanceList.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            } else {
+                List<InvigilatorAttendanceResponseDTO> attendanceResponseDTOList = attendanceList.stream()
+                        .map(attendance -> invigilatorAttendanceMapper.toResponseDTO(attendance))
+                        .toList();
+                InvigilatorAttendanceListResponseDTO invigilatorAttendanceListResponseDTO = InvigilatorAttendanceListResponseDTO.builder()
+                        .invigilatorAttendanceList(attendanceResponseDTOList)
+                        .hourlyRate(hourlyRate)
+                        .build();
+                invigilatorAttendanceListResponseDTO.setTotalHours();
+                invigilatorAttendanceListResponseDTO.setPreCalculatedInvigilatorFree();
+                invigilatorAttendanceListResponseDTO.setFuId(invigilator.getFuId());
+                invigilatorAttendanceListResponseDTO.setFirstName(invigilator.getFirstName());
+                invigilatorAttendanceListResponseDTO.setLastName(invigilator.getLastName());
+                invigilatorAttendanceListResponseDTO.setEmail(invigilator.getEmail());
+                invigilatorAttendanceListResponseDTO.setPhoneNum(invigilator.getPhoneNumber());
+                invigilatorAttendanceListResponseDTO.setId(invigilator.getId());
+                invigilatorAttendanceListResponseDTOList.add(invigilatorAttendanceListResponseDTO);
+            }
+        }
+        return ResponseEntity.ok(invigilatorAttendanceListResponseDTOList);
     }
 
     @GetMapping("/invigilator/report/{semesterId}")

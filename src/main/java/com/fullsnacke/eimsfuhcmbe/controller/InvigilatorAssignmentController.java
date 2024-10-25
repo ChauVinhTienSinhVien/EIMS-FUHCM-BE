@@ -1,6 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @RestController
@@ -48,8 +50,6 @@ public class InvigilatorAssignmentController {
         return ResponseEntity.ok(invigilatorAssignmentService.getAllExamSlotsAssignedInSemester(semesterId));
     }
 
-
-
     //STAFF
     @PutMapping
     @Operation(summary = "Exchange a unassigned invigilator with a assigned invigilator")
@@ -57,9 +57,32 @@ public class InvigilatorAssignmentController {
         return ResponseEntity.ok(invigilatorAssignmentService.exchangeInvigilators(request));
     }
 
+    //MANAGER
+    @PutMapping("/manager-approve/bulk")
+    @Operation(summary = "Manager approve a list of invigilator assignments")
+    public ResponseEntity<?> managerApproveInvigilatorAssignments(@RequestParam List<Integer> invigilatorAssignmentIds) {
+        return ResponseEntity.ok(invigilatorAssignmentService.managerApproveInvigilatorAssignments(invigilatorAssignmentIds));
+    }
+
     @GetMapping("/examslots/semesterid={semesterId}")
     @Operation(summary = "Get all exam slots in a semester with status", description = "If invigilators was assigned to the exam slot then status will be ASSIGNED otherwise UNASSIGNED")
     public ResponseEntity<?> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity.ok(invigilatorAssignmentService.getAllExamSlotsInSemesterWithStatus(semesterId));
     }
+
+    //dashboard
+    @GetMapping("/dashboard/in-time-range")
+    @Operation(summary = "Retrieve invigilator assignments within a time range", description = "Fetches a list of invigilator assignments within the specified start and end times.")
+    public ResponseEntity<List<InvigilatorAssignment>> getInvigilatorAssignmentsInTimeRange(
+            @RequestParam("startTime") ZonedDateTime startTime,
+            @RequestParam("endTime") ZonedDateTime endTime) {
+
+        List<InvigilatorAssignment> assignments = invigilatorAssignmentService.getAllAssignmentsInTimeRange(startTime.toInstant(), endTime.toInstant());
+
+        if (assignments.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(assignments);
+    }
+
 }

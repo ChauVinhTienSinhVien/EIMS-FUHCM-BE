@@ -13,12 +13,20 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvigilatorAttendanceListResponseDTO {
     List<InvigilatorAttendanceResponseDTO> invigilatorAttendanceList;
+    private int totalExamSlots;
     private double hourlyRate;
     private double totalHours;
     private double preCalculatedInvigilatorFree;
+    private String fuId;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phoneNum;
+    private Integer id;
 
     public void setTotalHours() {
         double totalHours = 0;
+        int totalExamSlots = 0;
         if(!invigilatorAttendanceList.isEmpty()){
             for (InvigilatorAttendanceResponseDTO invigilatorAttendanceResponseDTO : invigilatorAttendanceList) {
                 if(invigilatorAttendanceResponseDTO.getCheckIn() != null && invigilatorAttendanceResponseDTO.getCheckOut() != null){
@@ -28,10 +36,12 @@ public class InvigilatorAttendanceListResponseDTO {
                     System.out.println("Start at: " + invigilatorAttendanceResponseDTO.getEndAt());
                     System.out.println("hours: " + hours);
                     totalHours += hours;
+                    totalExamSlots++;
                 }
             }
         }
         this.totalHours = totalHours;
+        this.totalExamSlots = totalExamSlots;
     }
 
     public void setPreCalculatedInvigilatorFree() {

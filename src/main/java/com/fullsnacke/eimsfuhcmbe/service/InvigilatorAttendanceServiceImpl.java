@@ -63,6 +63,24 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     }
 
     @Transactional
+    public List<InvigilatorAttendance> addInvigilatorAttendances(List<InvigilatorAssignment> invigilatorRegistrationList){
+        List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByInvigilatorAssignmentIn(invigilatorRegistrationList);
+        if(!invigilatorAttendances.isEmpty()){
+            throw new CustomException(ErrorCode.INVIGILATOR_ATTENDANCE_ARE_ALREADY_EXIST);
+        }
+        for (InvigilatorAssignment invigilatorAssignment : invigilatorRegistrationList) {
+            InvigilatorAttendance invigilatorAttendance = InvigilatorAttendance
+                    .builder()
+                    .invigilatorAssignment(invigilatorAssignment)
+                    .status(1)
+                    .build();
+            invigilatorAttendances.add(invigilatorAttendance);
+        }
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return invigilatorAttendances;
+    }
+
+    @Transactional
     public List<InvigilatorAttendance> addInvigilatorAttendancesByDay(Instant day) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotStartAtInDay(day);
 
@@ -354,6 +372,10 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndDay(currentUser.get().getId(), day);
     }
 
+    public List<InvigilatorAttendance> getUserInvigilatorAttendanceBySemesterIdAndApproved(Integer invigilatorId, Integer semesterId) {
+        return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndSemesterIdAndApprove(invigilatorId, semesterId);
+    }
+
     public List<InvigilatorAttendance> getCurrentUserInvigilatorAttendanceBySemesterIdAndApproved(Integer semesterId) {
         Optional<User> currentUser = SecurityUntil.getLoggedInUser();
         if(currentUser.isEmpty()){
@@ -368,5 +390,28 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
             throw new AuthenticationProcessException(ErrorCode.USER_NOT_FOUND);
         }
         return invigilatorAttendanceRepository.findInvigilatorAttendanceByInvigilatorIdAndSemesterId(currentUser.get().getId(), semesterId);
+    }
+
+    public List<User> getInvigilatorBySemesterId(Integer semesterId) {
+        return invigilatorAttendanceRepository.findInvigilatorBySemesterId(semesterId);
+    }
+
+    public InvigilatorAttendance managerUpdate(Integer id, boolean isCheckIn, boolean isCheckOut) {
+        InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(id).orElse(null);
+        if(invigilatorAttendanceInDb == null){
+            throw new CustomException(ErrorCode.INVIGILATOR_ATTENDANCE_NOT_FOUND);
+        }else{
+            if(isCheckOut){
+                invigilatorAttendanceInDb.setCheckOut(Instant.now());
+                invigilatorAttendanceInDb.setCheckIn(Instant.now());
+            }else if(isCheckIn) {
+                invigilatorAttendanceInDb.setCheckIn(Instant.now());
+            }else {
+                invigilatorAttendanceInDb.setCheckIn(null);
+                invigilatorAttendanceInDb.setCheckOut(null);
+            }
+            invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
+        }
+        return invigilatorAttendanceInDb;
     }
 }

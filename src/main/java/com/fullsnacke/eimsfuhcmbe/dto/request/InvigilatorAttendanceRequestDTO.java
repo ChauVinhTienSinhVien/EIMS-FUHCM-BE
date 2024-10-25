@@ -13,5 +13,6 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvigilatorAttendanceRequestDTO {
     Integer id;
-    String status;
+    boolean checkIn;
+    boolean checkOut;
 }

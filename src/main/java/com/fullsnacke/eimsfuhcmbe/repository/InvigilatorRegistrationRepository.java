@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -84,4 +87,8 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
             @Param("fuId") String fuId
     );
     int countByExamSlot(ExamSlot examSlot);
+
+    @Query("SELECT ir FROM InvigilatorRegistration ir WHERE ir.createdAt BETWEEN :startTime AND :endTime")
+    List<InvigilatorRegistration> findAllByTimeRange(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
+
 }

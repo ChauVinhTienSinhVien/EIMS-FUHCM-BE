@@ -3,7 +3,10 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
+import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
+import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorRegistration;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
+import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentService;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorRegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
@@ -16,6 +19,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -25,6 +33,7 @@ import java.util.Set;
 public class InvigilatorRegistrationController {
 
     InvigilatorRegistrationService invigilatorRegistrationService;
+    InvigilatorAssignmentService invigilatorAssignmentService;
 
     //INVIGILATOR
     @PostMapping
@@ -151,8 +160,20 @@ public class InvigilatorRegistrationController {
                 .body(invigilatorRegistrationService.getAllExamSlotsInSemesterWithStatus(semesterId));
     }
 
+    //DASHBOARD
+    @GetMapping("/dashboard/time-in-range")
+    @Operation(summary = "Retrieve invigilator registrations within a time range", description = "Fetches a list of invigilator registrations within the specified start and end times.")
+    public ResponseEntity<List<InvigilatorRegistration>> getInvigilatorRegistrationsInTimeRange(
+            @RequestParam("startTime") ZonedDateTime startTime,
+            @RequestParam("endTime") ZonedDateTime endTime) {
 
+        List<InvigilatorRegistration> registrations = invigilatorRegistrationService.getAllRegistrationsInTimeRange(startTime.toInstant(), endTime.toInstant());
 
+        if (registrations.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(registrations);
+    }
 
 
 

@@ -23,7 +23,7 @@ import org.springframework.web.filter.CorsFilter;
 public class WebConfig {
 
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilterFilter() {
+    public FilterRegistrationBean<CorsFilter> corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);

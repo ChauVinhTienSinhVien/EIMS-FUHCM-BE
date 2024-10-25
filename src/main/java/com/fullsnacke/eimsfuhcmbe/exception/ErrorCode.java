@@ -69,7 +69,9 @@ public enum ErrorCode{
 
 
     CHECKIN_TIME_IS_NOT_VALID("Check in time is not valid", HttpStatus.BAD_REQUEST),
-    CHECKOUT_TIME_IS_NOT_VALID("Check out time is not valid", HttpStatus.BAD_REQUEST),;
+    CHECKOUT_TIME_IS_NOT_VALID("Check out time is not valid", HttpStatus.BAD_REQUEST),
+    FAIL_TO_APPROVE_ASSIGNMENT("Fail to approve invigilator assignments", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVIGILATOR_ATTENDANCE_NOT_FOUND("Invigilator Attendance not found", HttpStatus.NOT_FOUND);
 
     private String message;
     private HttpStatusCode statusCode;

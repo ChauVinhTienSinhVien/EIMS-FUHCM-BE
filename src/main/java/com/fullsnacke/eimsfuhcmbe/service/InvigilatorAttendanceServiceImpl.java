@@ -63,6 +63,21 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     }
 
     @Transactional
+    public List<InvigilatorAttendance> addInvigilatorAttendances(List<InvigilatorAssignment> invigilatorRegistrationList){
+        List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
+        for (InvigilatorAssignment invigilatorAssignment : invigilatorRegistrationList) {
+            InvigilatorAttendance invigilatorAttendance = InvigilatorAttendance
+                    .builder()
+                    .invigilatorAssignment(invigilatorAssignment)
+                    .status(1)
+                    .build();
+            invigilatorAttendances.add(invigilatorAttendance);
+        }
+        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
+        return invigilatorAttendances;
+    }
+
+    @Transactional
     public List<InvigilatorAttendance> addInvigilatorAttendancesByDay(Instant day) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotStartAtInDay(day);
 
@@ -376,5 +391,24 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
     public List<User> getInvigilatorBySemesterId(Integer semesterId) {
         return invigilatorAttendanceRepository.findInvigilatorBySemesterId(semesterId);
+    }
+
+    public InvigilatorAttendance managerUpdate(Integer id, boolean isCheckIn, boolean isCheckOut) {
+        InvigilatorAttendance invigilatorAttendanceInDb = invigilatorAttendanceRepository.findById(id).orElse(null);
+        if(invigilatorAttendanceInDb == null){
+            throw new CustomException(ErrorCode.INVIGILATOR_ATTENDANCE_NOT_FOUND);
+        }else{
+            if(isCheckOut){
+                invigilatorAttendanceInDb.setCheckOut(Instant.now());
+                invigilatorAttendanceInDb.setCheckIn(Instant.now());
+            }else if(isCheckIn) {
+                invigilatorAttendanceInDb.setCheckIn(Instant.now());
+            }else {
+                invigilatorAttendanceInDb.setCheckIn(null);
+                invigilatorAttendanceInDb.setCheckOut(null);
+            }
+            invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
+        }
+        return invigilatorAttendanceInDb;
     }
 }

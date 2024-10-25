@@ -10,6 +10,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.UserRegistrationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotInvigilatorStatus;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
+import com.fullsnacke.eimsfuhcmbe.enums.InvigilatorAssignmentStatus;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,8 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     ExamSlotRoomMapper examSlotRoomMapper;
     ExamSlotHallRepository examSlotHallRepository;
     UserRepository userRepository;
+
+    InvigilatorAttendanceServiceImpl invigilatorAttendanceService;
 
     @Transactional(rollbackFor = Exception.class)
     public List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds) {
@@ -305,6 +309,27 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return examSlots.stream()
                 .map(invigilatorRegistrationMapper::toExamSlotDetailInvigilator)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<InvigilatorAssignment> managerApproveInvigilatorAssignments(List<Integer> invigilatorAssignmentIds) {
+        List<InvigilatorAssignment> invigilatorAssignments = invigilatorAssignmentRepository.findByIdIn(invigilatorAssignmentIds);
+        if (invigilatorAssignments.isEmpty()) {
+            throw new CustomException(ErrorCode.ASSIGNMENT_NOT_FOUND);
+        }else{
+            for (InvigilatorAssignment invigilatorAssignment : invigilatorAssignments) {
+                invigilatorAssignment.setStatus(InvigilatorAssignmentStatus.APPROVED.getValue());
+                invigilatorAssignment.setApprovedBy(getCurrentUser());
+                invigilatorAssignment.setApprovedAt(Instant.now());
+            }
+            if(invigilatorAssignmentRepository.saveAll(invigilatorAssignments).isEmpty()){
+                throw new CustomException(ErrorCode.FAIL_TO_APPROVE_ASSIGNMENT);
+            }else{
+                invigilatorAttendanceService.addInvigilatorAttendances(invigilatorAssignments);
+                return invigilatorAssignments;
+            }
+        }
     }
 
     private User getCurrentUser() {

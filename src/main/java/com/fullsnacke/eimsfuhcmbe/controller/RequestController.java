@@ -1,10 +1,12 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.entity.Request;
 import com.fullsnacke.eimsfuhcmbe.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
@@ -24,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RequestController {
     RequestService requestService;
+    RequestMapper requestMapper;
 
     //Đã được xài trong send Request của role invigilator
     //INVIGILATOR
@@ -32,6 +35,16 @@ public class RequestController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(requestService.createRequest(request));
+    }
+
+    @PostMapping("attendance-update")
+    @Operation(summary = "Request to Update attendance status of invigilator")
+    public ResponseEntity<?> updateAttendanceStatus(@RequestBody RequestRequestDTO request) {
+        Request updatedRequest = requestMapper.toEntity(request);
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(requestService.createAttendanceUpdateRequest(updatedRequest));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(responseDTO);
     }
 
     //Đã được xài trong view Request của role invigilator

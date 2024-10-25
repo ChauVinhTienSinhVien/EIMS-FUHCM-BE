@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.repository;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -45,9 +46,9 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN FETCH ir.examSlot es " +
             "JOIN FETCH es.subjectExam se " +
             "JOIN FETCH se.subjectId s " +
-            "WHERE s.semesterId.id = :semesterId " +
-            "AND ir.invigilator.fuId = :fuId ")
-    List<InvigilatorAttendance> findAttendancesBySemesterIdAndFuId(@Param("semesterId") Integer semesterId, @Param("fuId") String fuId);
+            "WHERE s.semesterId = :semester " +
+            "AND ir.invigilator.email = :email ")
+    List<InvigilatorAttendance> findAttendancesBySemesterIdAndEmail(@Param("semester") Semester semester, @Param("email") String email);
 
     @Query("SELECT es FROM InvigilatorAttendance ia " +
             "JOIN ia.invigilatorAssignment iaa " +

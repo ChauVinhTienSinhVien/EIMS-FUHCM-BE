@@ -238,8 +238,6 @@ public class ExamSlotController {
             return ResponseEntity.notFound().build();
         } else {
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(examSlot);
-//            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlotResponseDTO.getSubjectExamId().getId());
-//            examSlotResponseDTO.setSubjectExamId(subjectExam);
             return ResponseEntity.ok(examSlotResponseDTO);
         }
     }

@@ -18,6 +18,7 @@ import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.*;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,6 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.*;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -357,4 +359,11 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
     }
+
+    //dashboard
+    @Override
+    public List<InvigilatorAssignment> getAllAssignmentsInTimeRange(Instant startTime, Instant endTime) {
+        return invigilatorAssignmentRepository.findAllByTimeRange(startTime, endTime);
+    }
+
 }

@@ -7,9 +7,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public interface InvigilatorAssignmentRepository extends JpaRepository<InvigilatorAssignment, Integer> {
@@ -43,5 +45,8 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
     List<InvigilatorAssignment> findByIdIn(List<Integer> invigilatorAssignmentIds);
 
     List<InvigilatorAssignment> findInvigilatorAssignmentByInvigilatorRegistration_ExamSlot_Id(int examSlotId);
+
+    @Query("SELECT ia FROM InvigilatorAssignment ia WHERE ia.createdAt BETWEEN :startTime AND :endTime")
+    List<InvigilatorAssignment> findAllByTimeRange(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
 
 }

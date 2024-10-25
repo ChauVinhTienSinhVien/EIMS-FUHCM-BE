@@ -42,11 +42,20 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
             "WHERE FUNCTION('DATE', es.startAt) = FUNCTION('DATE', :day)")
     List<InvigilatorAssignment> findByExamSlotStartAtInDay(@Param("day") Instant day);
 
+    @Query("SELECT ia FROM InvigilatorAssignment ia " +
+            "JOIN FETCH ia.invigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "JOIN FETCH es.subjectExam se " +
+            "JOIN FETCH se.subjectId sub " +
+            "WHERE sub.semesterId.id = :semester")
+    List<InvigilatorAssignment> findBySemester (@Param("semester") int semesterId);
+
     List<InvigilatorAssignment> findByIdIn(List<Integer> invigilatorAssignmentIds);
 
     List<InvigilatorAssignment> findInvigilatorAssignmentByInvigilatorRegistration_ExamSlot_Id(int examSlotId);
 
     @Query("SELECT ia FROM InvigilatorAssignment ia WHERE ia.createdAt BETWEEN :startTime AND :endTime")
     List<InvigilatorAssignment> findAllByTimeRange(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
+
 
 }

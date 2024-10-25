@@ -1,11 +1,13 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotRoomMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAssignmentMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserRegistrationResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotInvigilatorStatus;
@@ -41,6 +43,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     SemesterRepository semesterRepository;
     InvigilatorRegistrationRepository invigilatorRegistrationRepository;
     InvigilatorAssignmentRepository invigilatorAssignmentRepository;
+    InvigilatorAssignmentMapper invigilatorAssignmentMapper;
     InvigilatorRegistrationMapper invigilatorRegistrationMapper;
     ExamSlotRepository examSlotRepository;
     ExamSlotRoomRepository examSlotRoomRepository;
@@ -209,14 +212,20 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(unassignedList);
     }
 
-    public List<UserRegistrationResponseDTO> getAssignedInvigilators(int examSlotId) {
+    public List<InvigilatorAssignmentResponseDTO> getAssignedInvigilators(int examSlotId) {
         if(examSlotId <= 0) {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
         }
 
-        List<InvigilatorRegistration> assignedList = invigilatorRegistrationRepository.findAssignedRegistrationsByExamSlot_IdOrderByCreatedAtAsc(examSlotId);
+        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findInvigilatorAssignmentByInvigilatorRegistration_ExamSlot_Id(examSlotId);
+        Map<Integer, InvigilatorAssignment> assignmentMap = assignedList.stream()
+                .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
 
-        return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(assignedList);
+        List<InvigilatorAssignmentResponseDTO> responseDTOList = invigilatorAssignmentMapper.mapInvigilatorAssignments(assignedList);
+        for(InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
+            assignment.setStatus(InvigilatorAssignmentStatus.fromValue(assignmentMap.get(assignment.getAssignmentId()).getStatus()).name());
+        }
+        return responseDTOList;
     }
 
     @Transactional(rollbackFor = Exception.class)

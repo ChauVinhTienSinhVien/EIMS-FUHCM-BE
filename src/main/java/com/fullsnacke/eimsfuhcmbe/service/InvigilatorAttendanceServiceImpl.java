@@ -64,7 +64,10 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
     @Transactional
     public List<InvigilatorAttendance> addInvigilatorAttendances(List<InvigilatorAssignment> invigilatorRegistrationList){
-        List<InvigilatorAttendance> invigilatorAttendances = new ArrayList<>();
+        List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByInvigilatorAssignmentIn(invigilatorRegistrationList);
+        if(!invigilatorAttendances.isEmpty()){
+            throw new CustomException(ErrorCode.INVIGILATOR_ATTENDANCE_ARE_ALREADY_EXIST);
+        }
         for (InvigilatorAssignment invigilatorAssignment : invigilatorRegistrationList) {
             InvigilatorAttendance invigilatorAttendance = InvigilatorAttendance
                     .builder()

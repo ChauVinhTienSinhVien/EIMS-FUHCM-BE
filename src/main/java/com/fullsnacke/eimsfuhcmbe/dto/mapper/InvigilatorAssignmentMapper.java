@@ -23,6 +23,10 @@ public interface InvigilatorAssignmentMapper {
     @Mapping(target = "assignmentId", source = "id")
     @Mapping(target = "gender", source = "invigilatorRegistration.invigilator.gender")
     @Mapping(target = "status", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "examSlotId", source = "invigilatorRegistration.examSlot.id")
+    @Mapping(target = "startAt", source = "invigilatorRegistration.examSlot.startAt")
+    @Mapping(target = "endAt", source = "invigilatorRegistration.examSlot.endAt")
     InvigilatorAssignmentResponseDTO toInvigilatorAssignmentResponseDto (InvigilatorAssignment assignment);
 
     @Named("mapInvigilatorAssignments")

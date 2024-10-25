@@ -55,6 +55,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
     InvigilatorAttendanceServiceImpl invigilatorAttendanceService;
 
+
     @Transactional(rollbackFor = Exception.class)
     public List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds) {
         if(examSlotIds.isEmpty()) {
@@ -146,6 +147,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             InvigilatorAssignment assignment = InvigilatorAssignment.builder()
                     .invigilatorRegistration(registration)
                     .isHallInvigilator(false)
+                    .status(InvigilatorAssignmentStatus.PENDING.getValue())
                     .build();
             assignments.add(assignment);
 
@@ -183,6 +185,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             InvigilatorAssignment assignment = InvigilatorAssignment.builder()
                     .invigilatorRegistration(registration)
                     .isHallInvigilator(true)
+                    .status(InvigilatorAssignmentStatus.PENDING.getValue())
                     .build();
             assignments.add(assignment);
 
@@ -306,20 +309,25 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
             examSlotDetail.setStatus(status);
             examSlotDetails.add(examSlotDetail);
+            examSlotDetail.setNumberOfRegistered(assignedInvigilators);
         }
 
         return examSlotDetails;
     }
 
-    public List<ExamSlotDetail> getAllExamSlotsAssignedInSemester (int semesterId) {
+    public List<InvigilatorAssignmentResponseDTO> getAllExamSlotsAssignedInSemester (int semesterId) {
         var semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
 
-        var examSlots = examSlotRepository.findAssignedExamSlotsBySemesterIdAndFuId(semesterId, getCurrentUser().getFuId());
+        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findBySemesterIdAndInvigilatorIdAndStatus(semester.getId(), getCurrentUser().getId(), InvigilatorAssignmentStatus.APPROVED.getValue());
+        Map<Integer, InvigilatorAssignment> assignmentMap = assignedList.stream()
+                .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
 
-        return examSlots.stream()
-                .map(invigilatorRegistrationMapper::toExamSlotDetailInvigilator)
-                .toList();
+        List<InvigilatorAssignmentResponseDTO> responseDTOList = invigilatorAssignmentMapper.mapInvigilatorAssignments(assignedList);
+        for(InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
+            assignment.setStatus(InvigilatorAssignmentStatus.fromValue(assignmentMap.get(assignment.getAssignmentId()).getStatus()).name());
+        }
+        return responseDTOList;
     }
 
     @Override

@@ -196,7 +196,7 @@ public class ExamSlotController {
                 return ResponseEntity.notFound().build();
             }
 
-            if (existingExamSlot.getUpdatedBy() != null) {
+            if (existingExamSlot.getApprovedBy() != null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 

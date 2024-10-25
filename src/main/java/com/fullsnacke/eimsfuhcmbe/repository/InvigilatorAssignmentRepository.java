@@ -50,6 +50,19 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
             "WHERE sub.semesterId.id = :semester")
     List<InvigilatorAssignment> findBySemester (@Param("semester") int semesterId);
 
+    @Query("SELECT ia FROM InvigilatorAssignment ia " +
+            "JOIN FETCH ia.invigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "JOIN FETCH es.subjectExam se " +
+            "JOIN FETCH se.subjectId sub " +
+            "JOIN FETCH ir.invigilator i " +
+            "WHERE sub.semesterId.id = :semesterId AND i.id = :invigilatorId AND ia.status = :status")
+    List<InvigilatorAssignment> findBySemesterIdAndInvigilatorIdAndStatus(
+            @Param("semesterId") int semesterId,
+            @Param("invigilatorId") int invigilatorId,
+            @Param("status") int status
+    );
+
     List<InvigilatorAssignment> findByIdIn(List<Integer> invigilatorAssignmentIds);
 
     List<InvigilatorAssignment> findInvigilatorAssignmentByInvigilatorRegistration_ExamSlot_Id(int examSlotId);

@@ -7,6 +7,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
+import com.fullsnacke.eimsfuhcmbe.enums.RequestTypeEnum;
 import com.fullsnacke.eimsfuhcmbe.service.RequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
@@ -32,19 +33,23 @@ public class RequestController {
     //INVIGILATOR
     @PostMapping
     public ResponseEntity<?> createRequest(@RequestBody RequestRequestDTO request) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(requestService.createRequest(request));
-    }
+        String requestType = request.getRequestType().toLowerCase();
+        ResponseEntity<?> responseEntity = ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request type");
 
-    @PostMapping("attendance-update")
-    @Operation(summary = "Request to Update attendance status of invigilator")
-    public ResponseEntity<?> updateAttendanceStatus(@RequestBody RequestRequestDTO request) {
-        Request updatedRequest = requestMapper.toEntity(request);
-        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(requestService.createAttendanceUpdateRequest(updatedRequest));
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(responseDTO);
+        if(requestType.equalsIgnoreCase(RequestTypeEnum.UPDATE_ATTENDANCE.name())) {
+            Request updatedRequest = requestMapper.toEntity(request);
+            RequestResponseDTO responseDTO = requestMapper.toResponseDTO(requestService.createAttendanceUpdateRequest(updatedRequest));
+            responseEntity = ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(responseDTO);
+        }else if(requestType.equalsIgnoreCase(RequestTypeEnum.CANCEL.name())) {
+            Request updatedRequest = requestMapper.toEntity(request);
+            RequestResponseDTO responseDTO = requestMapper.toResponseDTO(requestService.createAttendanceUpdateRequest(updatedRequest));
+            responseEntity = ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(responseDTO);
+        }
+        return responseEntity;
     }
 
     //Đã được xài trong view Request của role invigilator
@@ -54,6 +59,13 @@ public class RequestController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(requestService.getAllRequestOfCurrentInvigilator());
+    }
+
+    @GetMapping("/request-types")
+    public ResponseEntity<?> getAllRequestTypes() {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(RequestTypeEnum.values());
     }
 
     //Đang ko xài

@@ -64,7 +64,6 @@ public class ExamSlot {
     User updatedBy;
 
     @Column(name = "updated_at")
-    @LastModifiedDate
     Instant updatedAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -72,7 +71,6 @@ public class ExamSlot {
     User approvedBy;
 
     @Column(name = "approved_at")
-    @LastModifiedDate
     Instant approvedAt;
 
 }

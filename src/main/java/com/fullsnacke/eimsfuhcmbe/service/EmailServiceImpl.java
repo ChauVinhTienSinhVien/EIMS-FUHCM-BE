@@ -53,11 +53,15 @@ public class EmailServiceImpl implements EmailService {
     SpringTemplateEngine templateEngine;
     @NonFinal
     int count = 0;
+
+    //If the list of toEmails is sent successfully, the method returns null, otherwise it returns a list of failed emails
     public List<String> sendAttendanceAndHoursMailMessageInListEmails(int semesterId, List<String> toEmails) {
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
         try {
             List<String> failedEmails = new ArrayList<>();
             for(String email: toEmails){
-                if(sendAttendanceAndHoursMailMessageForInvigilator(semesterId, email) != null){
+                if(sendAttendanceAndHoursMailMessageForInvigilator(semester, email) != null){
                     failedEmails.add(email);
                 }
             }
@@ -67,10 +71,11 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private String sendAttendanceAndHoursMailMessageForInvigilator(int semesterId, String toEmail) {
+    //If an email is sent successfully, the method returns null, otherwise if it has any error while sending the email, it returns the email
+    private String sendAttendanceAndHoursMailMessageForInvigilator(Semester semester, String toEmail) {
         emailSupport = fromEmail;
         try {
-            byte[] excelData = excelFileService.generateAttendanceAndTotalHoursExcelFileForSemester(semesterId, toEmail);
+            byte[] excelData = excelFileService.generateAttendanceAndTotalHoursExcelFileForSemester(semester, toEmail);
             System.out.println("#" + ++count + "length: " + excelData.length);
             if (excelData == null || excelData.length == 0) {
                 return toEmail;
@@ -80,16 +85,11 @@ public class EmailServiceImpl implements EmailService {
             String fullName = invigilator.getLastName() + " " + invigilator.getFirstName();
             System.out.println("fullname: " + fullName);
 
-            Semester semester = semesterRepository.findSemesterById(semesterId);
-            System.out.println(semester.getName());
-
             Context context = new Context();
             context.setVariable("fullName", fullName);
             context.setVariable("semesterName", semester.getName());
             context.setVariable("emailSupport", emailSupport);
 
-            System.out.println(context.getVariableNames());
-            System.out.println(context.getVariable("emailSupport"));
             String text = templateEngine.process(EMAIL_TEMPLATE, context);
 
             MimeMessage message = getMimeMessage();
@@ -103,11 +103,11 @@ public class EmailServiceImpl implements EmailService {
             helper.addAttachment(ATTENDANCE_AND_TOTAL_HOURS_XLSX, new ByteArrayResource(excelData));
 
             emailSender.send(message);
-            System.out.println("Email sent successfully");
+            System.out.println("Email " + toEmail + " send successfully");
             return null;
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new CustomMessageException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return toEmail;
         }
     }
 

@@ -10,6 +10,7 @@ import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageE
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAttendanceRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -23,9 +24,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
 
-    private final SemesterRepository semesterRepository;
     private final InvigilatorAttendanceRepository invigilatorAttendanceRepository;
     private final ConfigurationHolder configurationHolder;
 
@@ -72,86 +73,64 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
     private final java.awt.Color SUMMARY_ROW_COLOR = new java.awt.Color(189, 215, 238);
     private final java.awt.Color DARK_BLUE = new Color(28, 69, 135);
 
-    public AttendancesAndToTalHoursOfAnInvigilatorExcel(SemesterRepository semesterRepository, InvigilatorAttendanceRepository invigilatorAttendanceRepository, ConfigurationHolder configurationHolder) {
-        this.semesterRepository = semesterRepository;
+    public AttendancesAndToTalHoursOfAnInvigilatorExcel(InvigilatorAttendanceRepository invigilatorAttendanceRepository, ConfigurationHolder configurationHolder) {
         this.invigilatorAttendanceRepository = invigilatorAttendanceRepository;
         this.configurationHolder = configurationHolder;
     }
 
-    public byte[] generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(int semesterId, String toEmail) {
-        Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
+    public byte[] generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(Semester semester, String toEmail) {
+        try {
+            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail);
 
-        List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semesterId, toEmail);
+            System.out.println("Completed attendances: " + completedAttendances.size());
+            if (completedAttendances.isEmpty()) {
+                return new byte[0];
+            }
 
-        System.out.println("Completed attendances: " + completedAttendances.size());
-        if (completedAttendances.isEmpty()) {
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            XSSFSheet sheet = workbook.createSheet(SHEET_NAME);
+
+            createMainTitle(sheet, semester);
+            createInvigiLatorInfo(sheet, completedAttendances.get(0).getInvigilatorAssignment().getInvigilatorRegistration().getInvigilator());
+            createSummaryTable(sheet);
+
+            //Main Table
+            createTableHeader(sheet);
+
+            int endRow = MAIN_TABLE_START_ROW + 1;
+            for (InvigilatorAttendance attendance : completedAttendances)
+                createARowAttendance(sheet, endRow++, attendance);
+
+            if ((MAIN_TABLE_START_ROW + 1) < (endRow - 1)) {
+                for (int i = TOTAL_HOURS_COLUMN; i <= TOTAL_REMUNERATION_COLUMN; i++) {
+                    sheet.addMergedRegion(new CellRangeAddress(MAIN_TABLE_START_ROW + 1, endRow - 1, i, i));
+                }
+            }
+
+            trueFalseStyle(sheet, CHECK_IN_COLUMN_CHAR, MAIN_TABLE_START_ROW + 1, endRow);
+            trueFalseStyle(sheet, CHECK_OUT_COLUMN_CHAR, MAIN_TABLE_START_ROW + 1, endRow);
+            setupHoursColumnStatus(sheet, MAIN_TABLE_START_ROW + 1, endRow);
+
+            sheet.addMergedRegion(new CellRangeAddress(MAIN_TITLE_ROW, MAIN_TITLE_ROW, 0, sheetMaxWidth - 1));
+
+            formatAutoFitColumn(sheet);
+
+            createSummaryRow(sheet, endRow++);
+
+            updateSummaryTable(sheet);
+
+            try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+                workbook.write(bos);
+                byte[] bytes = bos.toByteArray();
+                System.out.println("Excel file generated successfully! Size: " + bytes.length);
+                return bos.toByteArray();
+            } catch (IOException e) {
+                log.error("Error while writing excel file: " + e.getMessage());
+                return new byte[0];
+            }
+        } catch (Exception e) {
+            log.error("Error while generating excel file: " + e.getMessage());
             return new byte[0];
-        }
-
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet(SHEET_NAME);
-
-        createMainTitle(sheet, semester);
-        createInvigiLatorInfo(sheet, completedAttendances.get(0).getInvigilatorAssignment().getInvigilatorRegistration().getInvigilator());
-        createSummaryTable(sheet);
-        //Main Table
-        createTableHeader(sheet);
-        int endRow = MAIN_TABLE_START_ROW + 1;
-        for (InvigilatorAttendance attendance : completedAttendances) {
-            XSSFCellStyle style = workbook.createCellStyle();
-            getDefaultStyle(style, workbook);
-            borderStyle(style, workbook);
-
-            ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
-            XSSFRow row = sheet.createRow(endRow++);
-            row.createCell(NO_COLUMN).setCellValue(endRow - 1 - MAIN_TABLE_START_ROW);
-            row.createCell(EXAM_SLOT_ID_COLUMN).setCellValue(examSlot.getId());
-            row.createCell(DATE_COLUMN).setCellValue(examSlot.getStartAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            row.createCell(START_TIME_COLUMN).setCellValue(formatTime(examSlot.getStartAt()));
-            row.createCell(END_TIME_COLUMN).setCellValue(formatTime(examSlot.getEndAt()));
-            row.createCell(CHECK_IN_COLUMN).setCellValue(attendance.getCheckIn() != null);
-            row.createCell(CHECK_OUT_COLUMN).setCellValue(attendance.getCheckOut() != null);
-
-            String trueFormula = "HOUR(" + END_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + "-" + START_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + ") + MINUTE(" + END_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + "-" + START_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + ")/60";
-            String hoursFormula = "IF(AND(" + CHECK_IN_COLUMN_CHAR + (row.getRowNum() + 1) + "=TRUE," + CHECK_OUT_COLUMN_CHAR + (row.getRowNum() + 1) + "=TRUE)," + trueFormula + ", 0)";
-            row.createCell(HOURS_COLUMN).setCellFormula(hoursFormula);
-
-            row.createCell(TOTAL_HOURS_COLUMN);
-            row.createCell(HOURLY_RATE_COLUMN);
-            row.createCell(TOTAL_REMUNERATION_COLUMN);
-
-            for (int i = NO_COLUMN; i <= TOTAL_REMUNERATION_COLUMN; i++) {
-                row.getCell(i).setCellStyle(style);
-            }
-
-            totalSlotFormula += EXAM_SLOT_ID_COLUMN_CHAR + "" + (row.getRowNum() + 1) + ",";
-        }
-        if((MAIN_TABLE_START_ROW + 1) < (endRow - 1)){
-            for (int i = TOTAL_HOURS_COLUMN; i <= TOTAL_REMUNERATION_COLUMN; i++) {
-                sheet.addMergedRegion(new CellRangeAddress(MAIN_TABLE_START_ROW + 1, endRow - 1, i, i));
-            }
-        }
-
-        trueFalseStyle(sheet, CHECK_IN_COLUMN_CHAR, MAIN_TABLE_START_ROW + 1, endRow);
-        trueFalseStyle(sheet, CHECK_OUT_COLUMN_CHAR, MAIN_TABLE_START_ROW + 1, endRow);
-        setupHoursColumnStatus(sheet, MAIN_TABLE_START_ROW + 1, endRow);
-
-        sheet.addMergedRegion(new CellRangeAddress(MAIN_TITLE_ROW, MAIN_TITLE_ROW, 0, sheetMaxWidth - 1));
-
-        formatAutoFitColumn(sheet);
-
-        createSummaryRow(sheet, endRow++);
-
-        updateSummaryTable(sheet);
-
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            workbook.write(bos);
-            byte[] bytes = bos.toByteArray();
-            System.out.println("Excel file generated successfully! Size: " + bytes.length);
-            return bos.toByteArray();
-        } catch (IOException e) {
-            throw new CustomException(ErrorCode.EXCEL_FILE_GENERATION_ERROR);
         }
     }
 
@@ -334,6 +313,37 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
         for (int i = NO_COLUMN; i <= TOTAL_REMUNERATION_COLUMN; i++) {
             totalRow.getCell(i).setCellStyle(style);
         }
+    }
+
+    private void createARowAttendance(XSSFSheet sheet, int rowNum, InvigilatorAttendance attendance) {
+        XSSFWorkbook workbook = sheet.getWorkbook();
+        XSSFCellStyle style = workbook.createCellStyle();
+        getDefaultStyle(style, workbook);
+        borderStyle(style, workbook);
+
+        ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
+        XSSFRow row = sheet.createRow(rowNum++);
+        row.createCell(NO_COLUMN).setCellValue(rowNum - 1 - MAIN_TABLE_START_ROW);
+        row.createCell(EXAM_SLOT_ID_COLUMN).setCellValue(examSlot.getId());
+        row.createCell(DATE_COLUMN).setCellValue(examSlot.getStartAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        row.createCell(START_TIME_COLUMN).setCellValue(formatTime(examSlot.getStartAt()));
+        row.createCell(END_TIME_COLUMN).setCellValue(formatTime(examSlot.getEndAt()));
+        row.createCell(CHECK_IN_COLUMN).setCellValue(attendance.getCheckIn() != null);
+        row.createCell(CHECK_OUT_COLUMN).setCellValue(attendance.getCheckOut() != null);
+
+        String trueFormula = "HOUR(" + END_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + "-" + START_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + ") + MINUTE(" + END_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + "-" + START_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + ")/60";
+        String hoursFormula = "IF(AND(" + CHECK_IN_COLUMN_CHAR + (row.getRowNum() + 1) + "=TRUE," + CHECK_OUT_COLUMN_CHAR + (row.getRowNum() + 1) + "=TRUE)," + trueFormula + ", 0)";
+        row.createCell(HOURS_COLUMN).setCellFormula(hoursFormula);
+
+        row.createCell(TOTAL_HOURS_COLUMN);
+        row.createCell(HOURLY_RATE_COLUMN);
+        row.createCell(TOTAL_REMUNERATION_COLUMN);
+
+        for (int i = NO_COLUMN; i <= TOTAL_REMUNERATION_COLUMN; i++) {
+            row.getCell(i).setCellStyle(style);
+        }
+
+        totalSlotFormula += EXAM_SLOT_ID_COLUMN_CHAR + "" + (row.getRowNum() + 1) + ",";
     }
 
     private void formatTitle(XSSFCellStyle style, XSSFWorkbook workbook) {

@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class ExcelFileServiceImpl implements ExcelFileService {
-    SemesterRepository semesterRepository;
+
     InvigilatorAttendanceRepository invigilatorAttendanceRepository;
     ConfigurationHolder configurationHolder;
 
     @Override
-    public byte[] generateAttendanceAndTotalHoursExcelFileForSemester(int semesterId, String toEmail) {
-        AttendancesAndToTalHoursOfAnInvigilatorExcel excel = new AttendancesAndToTalHoursOfAnInvigilatorExcel(semesterRepository, invigilatorAttendanceRepository, configurationHolder);
-        return excel.generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(semesterId, toEmail);
+    public byte[] generateAttendanceAndTotalHoursExcelFileForSemester(Semester semester, String toEmail) {
+        AttendancesAndToTalHoursOfAnInvigilatorExcel excel = new AttendancesAndToTalHoursOfAnInvigilatorExcel(invigilatorAttendanceRepository, configurationHolder);
+        return excel.generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(semester, toEmail);
     }
 }

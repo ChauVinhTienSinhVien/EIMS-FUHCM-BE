@@ -19,6 +19,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -55,6 +56,7 @@ public class EmailServiceImpl implements EmailService {
     int count = 0;
 
     //If the list of toEmails is sent successfully, the method returns null, otherwise it returns a list of failed emails
+    @Override
     public List<String> sendAttendanceAndHoursMailMessageInListEmails(int semesterId, List<String> toEmails) {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));

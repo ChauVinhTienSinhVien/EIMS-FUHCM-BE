@@ -50,13 +50,18 @@ public class InvigilatorAssignmentController {
         return ResponseEntity.ok(invigilatorAssignmentService.getAllExamSlotsAssignedInSemester(semesterId));
     }
 
-
-
     //STAFF
     @PutMapping
     @Operation(summary = "Exchange a unassigned invigilator with a assigned invigilator")
     public ResponseEntity<?> exchangeInvigilators(@RequestBody UpdateInvigilatorAssignmentRequestDTO request) {
         return ResponseEntity.ok(invigilatorAssignmentService.exchangeInvigilators(request));
+    }
+
+    //MANAGER
+    @PutMapping("/manager-approve/bulk")
+    @Operation(summary = "Manager approve a list of invigilator assignments")
+    public ResponseEntity<?> managerApproveInvigilatorAssignments(@RequestParam List<Integer> invigilatorAssignmentIds) {
+        return ResponseEntity.ok(invigilatorAssignmentService.managerApproveInvigilatorAssignments(invigilatorAssignmentIds));
     }
 
     @GetMapping("/examslots/semesterid={semesterId}")

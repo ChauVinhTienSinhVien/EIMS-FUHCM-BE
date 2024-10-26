@@ -67,4 +67,12 @@ public class ExamSlot {
     @LastModifiedDate
     Instant updatedAt;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "approved_by")
+    User approvedBy;
+
+    @Column(name = "approved_at")
+    @LastModifiedDate
+    Instant approvedAt;
+
 }

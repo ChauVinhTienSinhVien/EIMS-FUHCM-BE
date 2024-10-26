@@ -79,6 +79,22 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
+    public Request createAttendanceUpdateRequest(Request request) {
+        if (request == null) {
+            throw new CustomException(ErrorCode.REQUEST_EMPTY);
+        }
+
+        Request attendanceChangeRequest =  new Request();
+        User currentUser = getCurrentUser();
+        attendanceChangeRequest.setCreatedBy(currentUser);
+        attendanceChangeRequest.setExamSlot(request.getExamSlot());
+        attendanceChangeRequest.setReason(request.getReason());
+        attendanceChangeRequest.setRequestType(RequestTypeEnum.UPDATE_ATTENDANCE.name());
+        attendanceChangeRequest.setStatus(RequestStatusEnum.PENDING.getValue());
+
+        return requestRepository.save(attendanceChangeRequest);
+    }
+
     public List<RequestResponseDTO> getAllRequestOfCurrentInvigilator() {
         User currentUser = getCurrentUser();
         List<Request> entity = requestRepository.findByCreatedBy(currentUser);

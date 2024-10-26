@@ -5,6 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.configuration.ConfigurationHolder;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAttendanceMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.UserMapper;
+import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorAttendanceRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAttendanceListResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAttendanceResponseDTO;
@@ -260,6 +261,16 @@ public class InvigilatorAttendanceController {
                 .toList();
 
         return ResponseEntity.ok(invigilatorAttendanceResponseDTOList);
+    }
+
+    @PutMapping("manager/update/{id}")
+    @Operation(summary = "Manager update invigilator attendance", description = "Manager update invigilator attendance")
+    public ResponseEntity<InvigilatorAttendanceResponseDTO> managerUpdate(@PathVariable("id") Integer id, @RequestBody InvigilatorAttendanceRequestDTO invigilatorAttendanceRequestDTO) {
+        boolean isCheckIn = invigilatorAttendanceRequestDTO.isCheckIn();
+        boolean isCheckOut = invigilatorAttendanceRequestDTO.isCheckOut();
+        InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceService.managerUpdate(id, isCheckIn, isCheckOut);
+        InvigilatorAttendanceResponseDTO invigilatorAttendanceResponseDTO = invigilatorAttendanceMapper.toResponseDTO(invigilatorAttendance);
+        return ResponseEntity.ok(invigilatorAttendanceResponseDTO);
     }
 
     @PutMapping("manager/approve-all")

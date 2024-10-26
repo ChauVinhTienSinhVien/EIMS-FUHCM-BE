@@ -3,6 +3,8 @@ package com.fullsnacke.eimsfuhcmbe.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -35,4 +37,19 @@ public class InvigilatorAssignment {
     @CreatedDate
     Instant createdAt;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "created_by")
+    @CreatedBy
+    User createdBy;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "approved_by")
+    User approvedBy;
+
+    @Column(name = "updated_at")
+    Instant approvedAt;
+
+    @Column(name = "status", nullable = false)
+    @ColumnDefault("1")
+    Integer status;
 }

@@ -4,6 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotSummaryByTimeRangeDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotSummaryDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Room;
@@ -28,10 +29,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -246,19 +249,27 @@ public class ExamSlotController {
         }
     }
 
-    @GetMapping("/in-time-range")
+    @GetMapping("/dashboard/exam-slot-summary/in-time-range")
     @Operation(summary = "Retrieve exam slots within a time range", description = "Fetches a list of exam slots that fall within the specified start and end times.")
-    public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsInTimeRange(
+    public ResponseEntity<List<ExamSlotSummaryByTimeRangeDTO>> getExamSlotsInTimeRange(
             @RequestParam("startTime") ZonedDateTime startTime,
             @RequestParam("endTime") ZonedDateTime endTime) {
         List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
         if (examSlotList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
-                    .map(examSlotMapper::toDto)
+            // Group by date and count the slots per day
+            Map<LocalDate, Long> slotsByDate = examSlotList.stream()
+                    .collect(Collectors.groupingBy(
+                            slot -> slot.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDate(), // Convert createdAt to LocalDate
+                            Collectors.counting()
+                    ));
+
+            // Convert the map to a list of ExamSlotSummaryByDateDTO
+            List<ExamSlotSummaryByTimeRangeDTO> summaryList = slotsByDate.entrySet().stream()
+                    .map(entry -> new ExamSlotSummaryByTimeRangeDTO(entry.getKey().toString(), entry.getValue().intValue()))
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(examSlotResponseDTOList);
+            return ResponseEntity.ok(summaryList);
         }
     }
 
@@ -273,7 +284,7 @@ public class ExamSlotController {
         }
     }
 
-    @GetMapping("/to-day")
+    @GetMapping("/dashboard/to-day")
     @Operation(summary = "Retrieve exam slots for today", description = "Fetches a list of exam slots that are scheduled for today.")
     public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsForToday() {
         ZonedDateTime startTime = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);

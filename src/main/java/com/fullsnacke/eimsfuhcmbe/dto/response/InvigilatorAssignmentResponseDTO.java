@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 @Setter
 @Getter
@@ -18,6 +19,10 @@ import java.time.Instant;
 public class InvigilatorAssignmentResponseDTO {
 
     int assignmentId;
+
+    int examSlotId;
+    ZonedDateTime startAt;
+    ZonedDateTime endAt;
 
     String status;
 

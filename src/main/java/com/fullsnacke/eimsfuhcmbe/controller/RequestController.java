@@ -6,6 +6,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RequestTypeResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
 import com.fullsnacke.eimsfuhcmbe.enums.RequestTypeEnum;
 import com.fullsnacke.eimsfuhcmbe.service.RequestService;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,10 +65,12 @@ public class RequestController {
     }
 
     @GetMapping("/request-types")
-    public ResponseEntity<?> getAllRequestTypes() {
+    public ResponseEntity<RequestTypeResponseDTO> getAllRequestTypes() {
+        List<String> requestTypes = new ArrayList<>();
+        Arrays.stream(RequestTypeEnum.values()).forEach(requestTypeEnum -> requestTypes.add(requestTypeEnum.name()));
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(Arrays.toString(RequestTypeEnum.values()));
+                .body(RequestTypeResponseDTO.builder().requestTypes(requestTypes).build());
     }
 
     //Đang ko xài

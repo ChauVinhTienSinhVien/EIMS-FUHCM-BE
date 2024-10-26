@@ -58,9 +58,6 @@ public class RequestServiceImpl implements RequestService {
         } else if (request.getReason() == null || request.getReason().isEmpty()) {
             throw new CustomException(ErrorCode.REASON_EMPTY);
         }
-//        else if(request.getRequestType() == null) {
-//            throw new CustomMessageException(ErrorCode.REQUEST_TYPE_EMPTY);
-//        }
         try {
             var currentUser = getCurrentUser();
             log.info("Current User: {}", currentUser.getFuId());
@@ -85,7 +82,7 @@ public class RequestServiceImpl implements RequestService {
             throw new CustomException(ErrorCode.REQUEST_EMPTY);
         }
 
-        Request attendanceChangeRequest =  new Request();
+        Request attendanceChangeRequest = new Request();
         User currentUser = getCurrentUser();
         attendanceChangeRequest.setCreatedBy(currentUser);
         attendanceChangeRequest.setExamSlot(request.getExamSlot());
@@ -207,12 +204,16 @@ public class RequestServiceImpl implements RequestService {
                         invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
                         return null;
                     });
+            if (registration != null && registration.getExamSlot() == entity.getExamSlot()) {
+                throw new CustomException(ErrorCode.INVIGILATOR_ALREADY_ASSIGNED);
+            }
 
             invigilatorAssignmentService.exchangeInvigilators(entity, request);
         }
         //update request
         entity.setStatus(status.getValue());
-//        entity.setUpdatedAt(Instant.now());
+        entity.setUpdatedAt(java.time.Instant.now());
+        entity.setUpdatedBy(getCurrentUser());
         entity.setComment(request.getNote());
 
         //save update request

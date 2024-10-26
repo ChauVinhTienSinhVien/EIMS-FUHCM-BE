@@ -56,6 +56,7 @@ public class EmailServiceImpl implements EmailService {
     int count = 0;
 
     //If the list of toEmails is sent successfully, the method returns null, otherwise it returns a list of failed emails
+    @Override
     public List<String> sendAttendanceAndHoursMailMessageInListEmails(int semesterId, List<String> toEmails) {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));

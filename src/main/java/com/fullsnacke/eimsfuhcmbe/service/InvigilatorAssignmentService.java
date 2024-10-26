@@ -26,4 +26,6 @@ public interface InvigilatorAssignmentService {
     List<InvigilatorAssignment> getAllAssignmentsInTimeRange(Instant start, Instant end);
     List<InvigilatorAssignment> managerApproveInvigilatorAssignments(List<Integer> invigilatorAssignmentIds);
 
+    InvigilatorAssignmentReportResponseDTO getInvigilatorAssignmentReport(int semesterId);
+
 }

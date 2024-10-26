@@ -97,4 +97,11 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
        "JOIN ir.examSlot es " +
        "WHERE es.subjectExam.subjectId.semesterId.id = :semesterId")
     List<User> findInvigilatorBySemesterId(@Param("semesterId") Integer semesterId);
+
+    @Query("SELECT ia FROM InvigilatorAttendance ia " +
+            "JOIN FETCH ia.invigilatorAssignment iaa " +
+            "JOIN FETCH iaa.invigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "WHERE ir.invigilator = :invigilator AND es.subjectExam.subjectId.semesterId = :semester")
+    List<InvigilatorAttendance> findBySemesterAndInvigilator(Semester semester, User invigilator);
 }

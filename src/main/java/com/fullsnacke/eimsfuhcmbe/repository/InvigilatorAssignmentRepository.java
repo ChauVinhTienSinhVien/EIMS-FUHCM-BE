@@ -70,5 +70,9 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
     @Query("SELECT ia FROM InvigilatorAssignment ia WHERE ia.createdAt BETWEEN :startTime AND :endTime")
     List<InvigilatorAssignment> findAllByTimeRange(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
 
+    Integer countInvigilatorAssignmentByStatusAndInvigilatorRegistration_Invigilator(Integer status, User invigilator);
+
+
+
 
 }

@@ -23,5 +23,5 @@ public class ExamSlotDetail{
     ZonedDateTime endAt;
     String status;
     Integer requiredInvigilators;
-    int numberOfRegistered;
+    Integer numberOfRegistered;
 }

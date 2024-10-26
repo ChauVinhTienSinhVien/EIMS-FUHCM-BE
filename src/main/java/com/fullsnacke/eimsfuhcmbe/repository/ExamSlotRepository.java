@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.repository;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import lombok.Data;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
 
@@ -73,6 +75,7 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
                                         @Param("endAt") ZonedDateTime endAt);
 
     List<ExamSlot> findExamSlotByStatus(int status);
+
 
 }
 

@@ -445,9 +445,12 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         User currentUser = getCurrentUser();
         Semester semester = getSemesterById(semesterId);
 
-        Set<ExamSlot> registrations = invigilatorRegistrationRepository
+        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
                 .findCancellableExamSlotsBySemesterId(semester, currentUser);
 
-        return invigilatorRegistrationMapper.mapCancelExamSlotDetails(registrations);
+        return invigilatorRegistrationMapper.mapCancelExamSlotDetails(registrations
+                .stream()
+                .map(InvigilatorRegistration::getExamSlot)
+                .collect(Collectors.toSet()));
     }
 }

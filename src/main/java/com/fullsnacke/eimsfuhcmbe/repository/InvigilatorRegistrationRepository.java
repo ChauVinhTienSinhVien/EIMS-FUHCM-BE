@@ -91,7 +91,7 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
             "JOIN FETCH ir.examSlot es " +
             "WHERE es.subjectExam.subjectId.semesterId = :semester AND ir.invigilator = :invigilator AND ir.id NOT IN (SELECT ia.invigilatorRegistration.id FROM InvigilatorAssignment ia)")
     Set<ExamSlot> findCancellableExamSlotsBySemesterId(
-            @Param("semesterId") Semester semester,
+            @Param("semester") Semester semester,
             @Param("invigilator") User invigilator
     );
 

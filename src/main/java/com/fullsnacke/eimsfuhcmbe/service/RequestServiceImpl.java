@@ -4,6 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
@@ -93,6 +94,33 @@ public class RequestServiceImpl implements RequestService {
         attendanceChangeRequest.setStatus(RequestStatusEnum.PENDING.getValue());
 
         return requestRepository.save(attendanceChangeRequest);
+    }
+
+    @Override
+    public RequestResponseDTO updateAttendanceStatus(UpdateStatusRequestDTO request) {
+        Request entity = requestRepository.findById(request.getRequestId())
+                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
+
+        RequestStatusEnum status;
+        try {
+            status = RequestStatusEnum.valueOf(request.getStatus().toUpperCase());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
+        }
+        if(status != RequestStatusEnum.APPROVED && status != RequestStatusEnum.REJECTED) {
+            throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
+        }
+        if (entity.getStatus() != RequestStatusEnum.PENDING.getValue()) {
+            throw new CustomException(ErrorCode.REQUEST_ALREADY_PROCESSED);
+        }
+
+        entity.setStatus(status.getValue());
+        entity.setComment(request.getNote());
+        requestRepository.save(entity);
+
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+        responseDTO.setStatus(status.name());
+        return responseDTO;
     }
 
     public List<RequestResponseDTO> getAllRequestOfCurrentInvigilator() {

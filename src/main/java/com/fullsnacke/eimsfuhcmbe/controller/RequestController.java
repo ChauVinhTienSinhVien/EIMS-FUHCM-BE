@@ -46,8 +46,7 @@ public class RequestController {
                     .status(HttpStatus.CREATED)
                     .body(responseDTO);
         }else if(requestType.equalsIgnoreCase(RequestTypeEnum.CANCEL.name())) {
-            Request updatedRequest = requestMapper.toEntity(request);
-            RequestResponseDTO responseDTO = requestMapper.toResponseDTO(requestService.createAttendanceUpdateRequest(updatedRequest));
+            RequestResponseDTO responseDTO = requestService.createRequest(request);
             responseEntity = ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(responseDTO);
@@ -82,7 +81,6 @@ public class RequestController {
                 .body(requestService.getRequestById(requestId));
     }
 
-
     //MANAGER
     @GetMapping("invigilatorid={invigilatorId}")
     @Operation(summary = "Get all requests by invigilator id")
@@ -100,6 +98,7 @@ public class RequestController {
                 .status(HttpStatus.OK)
                 .body(requestService.getAllRequestBySemester(semesterId));
     }
+
     //MANAGER
     @PutMapping
     @Operation(summary = "Update request status", description = "Update request status by request id")
@@ -112,4 +111,10 @@ public class RequestController {
                 .body(requestService.updateRequestStatus(request));
     }
 
+    @PutMapping("/update-attendance/status")
+    public ResponseEntity<?> updateAttendanceStatus(@RequestBody UpdateStatusRequestDTO request) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.updateAttendanceStatus(request));
+    }
 }

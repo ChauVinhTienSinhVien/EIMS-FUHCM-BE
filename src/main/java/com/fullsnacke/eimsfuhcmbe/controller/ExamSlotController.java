@@ -4,6 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotSummaryDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Room;
 import com.fullsnacke.eimsfuhcmbe.entity.SubjectExam;
@@ -13,6 +14,7 @@ import com.fullsnacke.eimsfuhcmbe.exception.repository.examslot.ExamSlotNotFound
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SubjectExamRepository;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -50,6 +52,8 @@ public class ExamSlotController {
 
     @Autowired
     private SubjectExamRepository subjectExamRepository;
+    @Autowired
+    private InvigilatorAssignmentServiceImpl invigilatorAssignmentServiceImpl;
 
     @GetMapping
     @Operation(summary = "Retrieve all exam slots", description = "Fetches a list of all exam slots from the system. If no exam slots are found, it will return a 204 No Content response.")
@@ -312,6 +316,31 @@ public class ExamSlotController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(examSlotServiceImpl.getExamSlotsStatusIn(startAt, endAt));
+    }
+
+    @GetMapping("/dashboard/invigilation-summary")
+    @Operation(summary = "Retrieve exam slots summary", description = "Fetches a summary of exam slots based on the semester ID provided in the request. Returns the exam slots data if found, otherwise returns a 404 Not Found.")
+    public ResponseEntity<List<ExamSlotSummaryDTO>> getExamSlotsSummary(@RequestParam("startTime") ZonedDateTime startTime,@RequestParam("endTime") ZonedDateTime endTime) {
+        List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
+        if (examSlotList.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<ExamSlotSummaryDTO> examSlotSummaryDTOList = new ArrayList<>();
+        for (ExamSlot e:examSlotList) {
+            if (e.getStatus() == ExamSlotStatus.APPROVED.getValue()) {
+                ExamSlotSummaryDTO examSlotSummaryDTO = new ExamSlotSummaryDTO();
+                ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
+                examSlotSummaryDTO.setExamSlot(examSlotResponseDTO);
+                int totalInvigilatorsAssigned = invigilatorAssignmentServiceImpl.getAssignedInvigilators(e.getId()).size();
+                examSlotSummaryDTO.setTotalInvigilatorsAssigned(totalInvigilatorsAssigned);
+                int totalInvigilatorsRegistered = invigilatorAssignmentServiceImpl.getUnassignedInvigilators(e.getId()).size();
+                examSlotSummaryDTO.setTotalInvigilatorsRegistered(totalInvigilatorsRegistered);
+                examSlotSummaryDTOList.add(examSlotSummaryDTO);
+            }
+        }
+
+        return ResponseEntity.ok(examSlotSummaryDTOList);
     }
 
 }

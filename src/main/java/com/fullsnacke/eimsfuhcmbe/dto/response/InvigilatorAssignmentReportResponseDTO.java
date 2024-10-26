@@ -17,7 +17,7 @@ public class InvigilatorAssignmentReportResponseDTO {
     int totalRequiredInvigilationSlots;
     int totalNonInvigilatedSlots;
 
-    int totalAssignedHours;
+    double totalAssignedHours;
     double totalInvigilatedHours;
     double totalRequiredInvigilationHours;
 

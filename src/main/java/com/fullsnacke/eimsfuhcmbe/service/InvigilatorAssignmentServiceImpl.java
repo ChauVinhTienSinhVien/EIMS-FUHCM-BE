@@ -389,9 +389,9 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         int totalRequiredSlots = 0;
         int totalNonInvigilatedSlots = 0;
 
-        int totalAssignedHours = 0;
-        double totalInvigilatedHours = 0.0;
-        double totalRequiredInvigilationHours = 0.0;
+        double totalAssignedHours = 0;
+        double totalInvigilatedHours = 0;
+        double totalRequiredInvigilationHours = 0;
 
         for (InvigilatorAttendance attendance : attendances) {
 //            // Thay thế dòng gây lỗi bằng đoạn code sau
@@ -400,19 +400,19 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 //// Sử dụng zonedDateTime thay vì trực tiếp sử dụng Instant
 //            String formattedDate = DateTimeFormatter.ofPattern("dd/MM/yyyy").format(zonedDateTime);
 //            String formattedTime = DateTimeFormatter.ofPattern("HH:mm").format(zonedDateTime);
+            ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
             if (attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().isAfter(ZonedDateTime.now())) {
                 if (attendance.getCheckIn() != null && attendance.getCheckOut() != null) {
                     totalInvigilatedSlots++;
-                    ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
                     totalInvigilatedHours += (examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.HOURS) + examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.MINUTES) / 60.0);
                 } else {
                     totalNonInvigilatedSlots++;
                 }
             } else {
                 totalRequiredSlots++;
-                ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
                 totalRequiredInvigilationHours += (examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.HOURS) + examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.MINUTES) / 60.0);
             }
+            totalAssignedHours += (examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.HOURS) + examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.MINUTES) / 60.0);
         }
 
         return InvigilatorAssignmentReportResponseDTO.builder()

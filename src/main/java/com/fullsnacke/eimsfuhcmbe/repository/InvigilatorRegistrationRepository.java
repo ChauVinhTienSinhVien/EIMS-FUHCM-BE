@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.repository;
 
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -85,5 +86,13 @@ public interface InvigilatorRegistrationRepository extends JpaRepository<Invigil
 
     @Query("SELECT ir FROM InvigilatorRegistration ir WHERE ir.createdAt BETWEEN :startTime AND :endTime")
     List<InvigilatorRegistration> findAllByTimeRange(@Param("startTime") Instant startTime, @Param("endTime") Instant endTime);
+
+    @Query("SELECT ir FROM InvigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "WHERE es.subjectExam.subjectId.semesterId = :semester AND ir.invigilator = :invigilator AND ir.id NOT IN (SELECT ia.invigilatorRegistration.id FROM InvigilatorAssignment ia)")
+    Set<ExamSlot> findCancellableExamSlotsBySemesterId(
+            @Param("semesterId") Semester semester,
+            @Param("invigilator") User invigilator
+    );
 
 }

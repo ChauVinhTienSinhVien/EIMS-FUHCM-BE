@@ -440,4 +440,14 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     private int allowedSlot(Semester semester) {
         return Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue());
     }
+
+    public Set<ExamSlotDetail> getCancellableExamSlots(int semesterId) {
+        User currentUser = getCurrentUser();
+        Semester semester = getSemesterById(semesterId);
+
+        Set<ExamSlot> registrations = invigilatorRegistrationRepository
+                .findCancellableExamSlotsBySemesterId(semester, currentUser);
+
+        return invigilatorRegistrationMapper.mapCancelExamSlotDetails(registrations);
+    }
 }

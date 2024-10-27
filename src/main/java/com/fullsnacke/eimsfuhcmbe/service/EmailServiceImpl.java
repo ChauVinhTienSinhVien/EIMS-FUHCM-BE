@@ -9,6 +9,7 @@ import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -99,7 +100,7 @@ public class EmailServiceImpl implements EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
             helper.setPriority(2);
             helper.setSubject(ATTENDANCE_AND_TOTAL_AMOUNT_REPORT);
-            helper.setFrom(fromEmail);
+            helper.setFrom(new InternetAddress(fromEmail, "EIMS-FUHCM"));
             helper.setTo(toEmail);
             helper.setText(text, true);
 

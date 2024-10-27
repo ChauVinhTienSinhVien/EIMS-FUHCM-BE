@@ -394,12 +394,6 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         double totalRequiredInvigilationHours = 0;
 
         for (InvigilatorAttendance attendance : attendances) {
-//            // Thay thế dòng gây lỗi bằng đoạn code sau
-//            ZonedDateTime zonedDateTime = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().toInstant().atZone(ZoneId.systemDefault());
-//
-//// Sử dụng zonedDateTime thay vì trực tiếp sử dụng Instant
-//            String formattedDate = DateTimeFormatter.ofPattern("dd/MM/yyyy").format(zonedDateTime);
-//            String formattedTime = DateTimeFormatter.ofPattern("HH:mm").format(zonedDateTime);
             ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
             if (attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().isAfter(ZonedDateTime.now())) {
                 if (attendance.getCheckIn() != null && attendance.getCheckOut() != null) {

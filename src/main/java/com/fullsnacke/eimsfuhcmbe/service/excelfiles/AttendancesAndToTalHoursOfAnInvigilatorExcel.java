@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -80,9 +81,14 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
 
     public byte[] generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(Semester semester, String toEmail) {
         try {
-            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail);
+            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail, Instant.now());
+//            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail);
 
             System.out.println("Completed attendances: " + completedAttendances.size());
+            completedAttendances.stream().forEach(invigilatorAttendance -> {
+                System.out.println("Exam slot ID: " + invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getId());
+                System.out.println("StartAt: " + invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt());
+            });
             if (completedAttendances.isEmpty()) {
                 return new byte[0];
             }

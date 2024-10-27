@@ -84,7 +84,7 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN FETCH ia.invigilatorAssignment iaa " +
             "JOIN FETCH iaa.invigilatorRegistration ir " +
             "JOIN FETCH ir.examSlot es " +
-            "WHERE ir.invigilator.id = :invigilatorId AND es.subjectExam.subjectId.semesterId.id = :semesterId AND ia.checkIn IS NOT NULL AND ia.checkOut IS NOT NULL")
+            "WHERE ir.invigilator.id = :invigilatorId AND es.subjectExam.subjectId.semesterId.id = :semesterId AND ia.checkIn IS NOT NULL AND ia.checkOut IS NOT NULL AND ia.approvedBy IS NOT NULL")
     List<InvigilatorAttendance> findInvigilatorAttendanceByInvigilatorIdAndSemesterIdAndApprove(Integer invigilatorId, Integer semesterId);
 
     @Query("SELECT ia FROM InvigilatorAttendance ia " +

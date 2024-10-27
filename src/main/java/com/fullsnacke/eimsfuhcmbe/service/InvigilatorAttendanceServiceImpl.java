@@ -287,9 +287,12 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     @Transactional
     public List<InvigilatorAttendance> managerApproveByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
+        User approvedBy = SecurityUntil.getLoggedInUser().get();
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
             if(invigilatorAttendance.getStatus() == InvigilatorAttendanceStatus.PENDING.getValue()){
                 invigilatorAttendance.setStatus(InvigilatorAttendanceStatus.APPROVED.getValue());
+                invigilatorAttendance.setApprovedAt(Instant.now());
+                invigilatorAttendance.setApprovedBy(approvedBy);
             }
         }
         invigilatorAttendanceRepository.saveAll(invigilatorAttendances);

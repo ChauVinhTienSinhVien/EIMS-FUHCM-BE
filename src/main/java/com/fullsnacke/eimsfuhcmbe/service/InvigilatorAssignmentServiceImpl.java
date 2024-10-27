@@ -198,6 +198,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         try {
             invigilatorAssignmentRepository.saveAll(assignments);
+            invigilatorAttendanceService.addInvigilatorAttendances(assignments);
             examSlotHallRepository.saveAll(hallsToUpdate);
         } catch (Exception e) {
             log.error("Error in assigning invigilator to hall: {}", e.getMessage());

@@ -52,7 +52,6 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     ExamSlotRoomMapper examSlotRoomMapper;
     ExamSlotHallRepository examSlotHallRepository;
     UserRepository userRepository;
-
     InvigilatorAttendanceServiceImpl invigilatorAttendanceService;
     private final InvigilatorAttendanceRepository invigilatorAttendanceRepository;
 
@@ -160,6 +159,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         try {
             invigilatorAssignmentRepository.saveAll(assignments);
+            invigilatorAttendanceService.addInvigilatorAttendances(assignments);
             examSlotRoomRepository.saveAll(roomsToUpdate);
         } catch (Exception e) {
             log.error("Error in assigning invigilator to room: {}", e.getMessage());

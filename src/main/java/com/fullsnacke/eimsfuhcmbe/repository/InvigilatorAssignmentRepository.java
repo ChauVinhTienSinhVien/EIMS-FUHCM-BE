@@ -56,11 +56,10 @@ public interface InvigilatorAssignmentRepository extends JpaRepository<Invigilat
             "JOIN FETCH es.subjectExam se " +
             "JOIN FETCH se.subjectId sub " +
             "JOIN FETCH ir.invigilator i " +
-            "WHERE sub.semesterId.id = :semesterId AND i.id = :invigilatorId AND ia.status = :status")
+            "WHERE sub.semesterId.id = :semesterId AND i.id = :invigilatorId")
     List<InvigilatorAssignment> findBySemesterIdAndInvigilatorIdAndStatus(
             @Param("semesterId") int semesterId,
-            @Param("invigilatorId") int invigilatorId,
-            @Param("status") int status
+            @Param("invigilatorId") int invigilatorId
     );
 
     List<InvigilatorAssignment> findByIdIn(List<Integer> invigilatorAssignmentIds);

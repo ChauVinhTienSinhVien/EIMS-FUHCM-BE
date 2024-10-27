@@ -320,7 +320,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         var semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
 
-        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findBySemesterIdAndInvigilatorIdAndStatus(semester.getId(), getCurrentUser().getId(), InvigilatorAssignmentStatus.APPROVED.getValue());
+        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findBySemesterIdAndInvigilatorIdAndStatus(semester.getId(), getCurrentUser().getId());
         Map<Integer, InvigilatorAssignment> assignmentMap = assignedList.stream()
                 .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
 

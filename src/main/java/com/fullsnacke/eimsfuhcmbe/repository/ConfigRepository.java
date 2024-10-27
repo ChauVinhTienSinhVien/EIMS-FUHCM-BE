@@ -10,4 +10,5 @@ public interface ConfigRepository extends JpaRepository<Config, Integer> {
     List<Config> findBySemesterId(Integer semesterId);
     Config findBySemesterIdAndConfigType(Integer semesterId, String configType);
 
+    Config findConfigById(Integer id);
 }

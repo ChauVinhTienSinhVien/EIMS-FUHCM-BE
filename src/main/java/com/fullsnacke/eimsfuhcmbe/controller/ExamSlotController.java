@@ -255,10 +255,6 @@ public class ExamSlotController {
             @RequestParam("startTime") ZonedDateTime startTime,
             @RequestParam("endTime") ZonedDateTime endTime) {
         List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
-        System.out.println("Exam Slot List");
-        for (ExamSlot e:examSlotList) {
-            System.out.println(e.getId());
-        }
         if (examSlotList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {

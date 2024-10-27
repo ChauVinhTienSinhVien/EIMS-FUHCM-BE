@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -81,7 +82,8 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
 
     public byte[] generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(Semester semester, String toEmail) {
         try {
-            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail, Instant.now());
+
+            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail, Instant.now().atZone(ZoneId.systemDefault()));
 //            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail);
 
             System.out.println("Completed attendances: " + completedAttendances.size());

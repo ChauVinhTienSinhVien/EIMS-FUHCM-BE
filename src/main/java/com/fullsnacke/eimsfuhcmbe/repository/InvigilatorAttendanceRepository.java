@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface InvigilatorAttendanceRepository extends JpaRepository<InvigilatorAttendance, Integer> {
@@ -50,7 +51,7 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "AND ir.invigilator.email = :email " +
             "AND es.endAt < :now ")
 //    List<InvigilatorAttendance> findAttendancesBySemesterIdAndEmail(@Param("semester") Semester semester, @Param("email") String email);
-    List<InvigilatorAttendance> findAttendancesBySemesterIdAndEmail(@Param("semester") Semester semester, @Param("email") String email, @Param("now") Instant now);
+    List<InvigilatorAttendance> findAttendancesBySemesterIdAndEmail(@Param("semester") Semester semester, @Param("email") String email, @Param("now") ZonedDateTime now);
 
     @Query("SELECT es FROM InvigilatorAttendance ia " +
             "JOIN ia.invigilatorAssignment iaa " +

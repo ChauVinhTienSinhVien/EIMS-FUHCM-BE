@@ -8,6 +8,7 @@ import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
+import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +41,6 @@ public class EmailServiceImpl implements EmailService {
     public static final String EMAIL_TEMPLATE = "AttendenceAndTotalAmountReportTemplate";
     private final InvigilatorAssignmentRepository invigilatorAssignmentRepository;
 
-    @Value("${spring.mail.verify.host}")
-    @NonFinal
-    String host;
-    @Value("${spring.mail.username}")
     @NonFinal
     String fromEmail;
     @NonFinal
@@ -61,6 +58,10 @@ public class EmailServiceImpl implements EmailService {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
         try {
+            User manager = SecurityUntil.getLoggedInUser().orElseThrow(
+                    () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+            );
+            fromEmail = manager.getEmail();
             List<String> failedEmails = new ArrayList<>();
             for(String email: toEmails){
                 if(sendAttendanceAndHoursMailMessageForInvigilator(semester, email) != null){

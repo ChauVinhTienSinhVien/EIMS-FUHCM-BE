@@ -200,7 +200,6 @@ public class RequestServiceImpl implements RequestService {
                                 .fuId(request.getNewInvigilatorFuId())
                                 .examSlotId(Set.of(entity.getExamSlot().getId()))
                                 .build();
-
                         invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
                         return null;
                     });

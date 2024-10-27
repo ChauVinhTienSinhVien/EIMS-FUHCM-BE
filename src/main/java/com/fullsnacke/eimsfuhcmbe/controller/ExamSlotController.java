@@ -165,7 +165,7 @@ public class ExamSlotController {
                 return ResponseEntity.notFound().build();
             }
 
-            if (existingExamSlot.getUpdatedBy() != null) {
+            if (existingExamSlot.getApprovedBy() != null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
@@ -180,7 +180,7 @@ public class ExamSlotController {
             examSlot.setCreatedAt(existingExamSlot.getCreatedAt());
             examSlot.setCreatedBy(existingExamSlot.getCreatedBy());
             examSlot.setUpdatedBy(currentUser);
-            examSlot.setUpdatedAt(existingExamSlot.getUpdatedAt());
+            examSlot.setUpdatedAt(Instant.now());
             SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
             examSlot.setSubjectExam(subjectExam);
 
@@ -217,8 +217,11 @@ public class ExamSlotController {
 
             examSlot.setCreatedAt(existingExamSlot.getCreatedAt());
             examSlot.setCreatedBy(existingExamSlot.getCreatedBy());
-            examSlot.setUpdatedBy(currentUser);
+            examSlot.setUpdatedBy(existingExamSlot.getUpdatedBy());
             examSlot.setUpdatedAt(existingExamSlot.getUpdatedAt());
+            examSlot.setApprovedBy(currentUser);
+            examSlot.setApprovedAt(Instant.now());
+
             SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
             examSlot.setSubjectExam(subjectExam);
 

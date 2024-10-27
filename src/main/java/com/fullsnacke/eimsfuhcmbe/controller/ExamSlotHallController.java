@@ -5,14 +5,19 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotHallRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotHallResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotHall;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotHallServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotService;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -32,6 +37,9 @@ public class ExamSlotHallController {
     private ExamSlotRepository examSlotRepository;
     @Autowired
     private ExamSlotServiceImpl examSlotService;
+
+    @Autowired
+    private UserServiceImpl userServiceImpl;
 
     @GetMapping
     @Operation(summary = "Retrieve all exam slot halls", description = "Fetches a list of all exam slot halls from the system. If no exam slot halls are found, it will return a 204 No Content response.")
@@ -66,6 +74,14 @@ public class ExamSlotHallController {
         examSlot.setRequiredInvigilators(requiredInvigilators);
         examSlot.setStatus(ExamSlotStatus.PENDING.getValue());
         examSlotService.updateExamSlotStatus(examSlot, examSlot.getId());
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        User currentUser = userServiceImpl.getUserByEmail(email);
+
+        examSlot.setCreatedBy(currentUser);
+
         return examSlotHallResponseDTOList;
     }
 

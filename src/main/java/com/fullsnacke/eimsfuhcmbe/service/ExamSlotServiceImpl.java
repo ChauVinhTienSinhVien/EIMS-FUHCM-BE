@@ -67,6 +67,8 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
+        examSlotInDB.setUpdatedAt(examSlotInRequest.getUpdatedAt());
+        examSlotInDB.setUpdatedBy(examSlotInRequest.getUpdatedBy());
 
         return examSlotRepository.save(examSlotInDB);
     }
@@ -87,11 +89,11 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         if (examSlotInDB == null)
             throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
 
-        if (user.getRole().getId() == 1)
-            examSlotInDB.setUpdatedBy(user);
 
         examSlotInDB.setStatus(examSlotInRequest.getStatus());
         examSlotInDB.setUpdatedBy(examSlotInRequest.getUpdatedBy());
+        examSlotInDB.setApprovedAt(examSlotInRequest.getApprovedAt());
+        examSlotInDB.setApprovedBy(examSlotInRequest.getApprovedBy());
 
         return examSlotRepository.save(examSlotInDB);
     }

@@ -77,6 +77,9 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
     List<ExamSlot> findExamSlotByStatus(int status);
 
 
+    @Query("SELECT e FROM ExamSlot e WHERE e.subjectExam.subjectId.semesterId = :semester ORDER BY e.startAt ASC")
+    ExamSlot findOldestExamSlotBySemester(@Param("semester") Semester semester);
+
 }
 
 

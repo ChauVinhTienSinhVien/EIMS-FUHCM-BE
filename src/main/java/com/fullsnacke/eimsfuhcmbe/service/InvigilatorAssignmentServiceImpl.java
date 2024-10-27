@@ -106,15 +106,15 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             log.info("Registrations: {}", registrations.size());
             log.info("Halls: {}", halls.size());
             log.info("Rooms: {}", rooms.size());
-            if(halls.get(0).getHallInvigilator() != null){
-                log.error("Hall already has invigilator");
-                throw new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot already has assigned");
-            }
             if (halls.size() + rooms.size() > registrations.size()) {
                 log.error("Not enough halls and rooms for invigilators");
                 throw new CustomMessageException(HttpStatus.NOT_FOUND, "Insufficient number of invigilators available for exam slot ID: " + examSlot.getId());
             }
 
+            if(!halls.isEmpty() && halls.get(0).getHallInvigilator() != null){
+                log.error("Hall already has invigilator");
+                throw new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot already has assigned");
+            }
             assignInvigilatorsToRoom(registrations, rooms);
             assignInvigilatorsToHalls(registrations, halls);
         }

@@ -291,7 +291,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
             if (registeredSlots.stream().anyMatch(registration -> registration.getExamSlot().equals(examSlot))) {
                 status = ExamSlotRegisterStatusEnum.REGISTERED.name();
-            } else if (examSlot.getRequiredInvigilators() != 0 && count <= examSlot.getRequiredInvigilators()) {
+            } else if (examSlot.getRequiredInvigilators() != 0 && count < examSlot.getRequiredInvigilators()) {
                 status = ExamSlotRegisterStatusEnum.NOT_FULL.name();
             } else {
                 status = ExamSlotRegisterStatusEnum.FULL.name();

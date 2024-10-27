@@ -134,7 +134,8 @@ public class AuthenticationService {
     public void addPassword(AuthenticationRequestDTO requestBody) {
         Optional<User> userOptional = SecurityUntil.getLoggedInUser();
 
-        String currentUserEmail = userOptional.map(User::getEmail).orElse(null);
+        //String currentUserEmail = userOptional.map(User::getEmail).orElse(null);
+        String currentUserEmail = requestBody.getEmail();
         User user = userRepository.findByEmail(currentUserEmail).orElse(null);
         
         if (user == null) {

@@ -111,7 +111,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 throw new CustomMessageException(HttpStatus.NOT_FOUND, "Insufficient number of invigilators available for exam slot ID: " + examSlot.getId());
             }
 
-            if(!halls.isEmpty() && halls.get(0).getHallInvigilator() != null){
+            if (!halls.isEmpty() && halls.get(0).getHallInvigilator() != null) {
                 log.error("Hall already has invigilator");
                 throw new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot already has assigned");
             }
@@ -400,18 +400,21 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         for (InvigilatorAttendance attendance : attendances) {
             ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
+            double minutes = ChronoUnit.MINUTES.between(examSlot.getStartAt(), examSlot.getEndAt()) / 60.0;
+            System.out.println("Exam Slot ID: " + examSlot.getId());
+            System.out.println("Minutes: " + minutes);
             if (attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().isAfter(ZonedDateTime.now())) {
                 if (attendance.getCheckIn() != null && attendance.getCheckOut() != null) {
                     totalInvigilatedSlots++;
-                    totalInvigilatedHours += (examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.HOURS) + examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.MINUTES) / 60.0);
+                    totalInvigilatedHours += minutes;
                 } else {
                     totalNonInvigilatedSlots++;
                 }
             } else {
                 totalRequiredSlots++;
-                totalRequiredInvigilationHours += (examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.HOURS) + examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.MINUTES) / 60.0);
+                totalRequiredInvigilationHours += minutes;
             }
-            totalAssignedHours += (examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.HOURS) + examSlot.getStartAt().until(examSlot.getEndAt(), ChronoUnit.MINUTES) / 60.0);
+            totalAssignedHours += minutes;
         }
 
         return InvigilatorAssignmentReportResponseDTO.builder()

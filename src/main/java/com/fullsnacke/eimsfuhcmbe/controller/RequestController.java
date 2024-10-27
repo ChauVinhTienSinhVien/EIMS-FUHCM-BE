@@ -57,6 +57,7 @@ public class RequestController {
     //Đã được xài trong view Request của role invigilator
     //INVIGILATOR
     @GetMapping("/myinfo")
+    @Operation(summary = "Get all requests of current invigilator")
     public ResponseEntity<?> getAllRequest() {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -64,6 +65,7 @@ public class RequestController {
     }
 
     @GetMapping("/request-types")
+    @Operation(summary = "Get all request types")
     public ResponseEntity<RequestTypeResponseDTO> getAllRequestTypes() {
         List<String> requestTypes = new ArrayList<>();
         Arrays.stream(RequestTypeEnum.values()).forEach(requestTypeEnum -> requestTypes.add(requestTypeEnum.name()));
@@ -92,7 +94,7 @@ public class RequestController {
 
     //MANAGER
     @GetMapping("semesterid={semesterId}")
-    @Operation(summary = "Get all requests")
+    @Operation(summary = "Get all requests by semester id for manager view request page")
     public ResponseEntity<?> getAllRequestBySemester(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
                 .status(HttpStatus.OK)

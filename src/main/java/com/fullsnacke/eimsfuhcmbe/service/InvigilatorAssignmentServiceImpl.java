@@ -402,7 +402,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         for (InvigilatorAttendance attendance : attendances) {
             ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
             double minutes = ChronoUnit.MINUTES.between(examSlot.getStartAt(), examSlot.getEndAt()) / 60.0;
-            if (attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getStartAt().isAfter(ZonedDateTime.now())) {
+            if (attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().isBefore(ZonedDateTime.now())) {
                 if (attendance.getCheckIn() != null && attendance.getCheckOut() != null) {
                     totalInvigilatedSlots++;
                     totalInvigilatedHours += minutes;

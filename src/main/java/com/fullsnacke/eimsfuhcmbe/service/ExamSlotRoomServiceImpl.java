@@ -39,6 +39,11 @@ public class ExamSlotRoomServiceImpl implements ExamSlotRoomService {
     }
 
     @Override
+    public List<ExamSlotRoom> getExamSlotRoomByExamSlotId(Integer examSlotId) {
+        return examSlotRoomRepository.findByExamSlotHall_ExamSlot_Id(examSlotId);
+    }
+
+    @Override
     public ExamSlotRoom updateExamSlotRoom(ExamSlotRoom examSlotRoom) {
         ExamSlotRoom examSlotRoomInDB = examSlotRoomRepository.findExamSlotRoomById(examSlotRoom.getId());
 

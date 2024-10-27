@@ -255,13 +255,17 @@ public class ExamSlotController {
             @RequestParam("startTime") ZonedDateTime startTime,
             @RequestParam("endTime") ZonedDateTime endTime) {
         List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
+        System.out.println("Exam Slot List");
+        for (ExamSlot e:examSlotList) {
+            System.out.println(e.getId());
+        }
         if (examSlotList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
             // Group by date and count the slots per day
             Map<LocalDate, Long> slotsByDate = examSlotList.stream()
                     .collect(Collectors.groupingBy(
-                            slot -> slot.getCreatedAt().atZone(ZoneId.systemDefault()).toLocalDate(), // Convert createdAt to LocalDate
+                            slot -> slot.getStartAt().toLocalDate(), // Extract just the LocalDate part
                             Collectors.counting()
                     ));
 

@@ -301,15 +301,16 @@ public class InvigilatorAttendanceController {
     @Operation(summary = "Get all checked invigilator attendance by semesterId", description = "Retrieve a list of all checked invigilator attendance records by SemesterId")
     public ResponseEntity<List<InvigilatorAttendanceListResponseDTO>> getApprovedInvigilatorAttendanceBySemesterId(@PathVariable Integer semesterId) {
         List<User> invigilatorList = invigilatorAttendanceService.getInvigilatorBySemesterId(semesterId);
+        for (User invigilator : invigilatorList) {
+            System.out.println("invigilator: " + invigilator.getFirstName());
+        }
         List<InvigilatorAttendanceListResponseDTO> invigilatorAttendanceListResponseDTOList = new ArrayList<>();
         for (User invigilator : invigilatorList) {
             List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getUserInvigilatorAttendanceBySemesterIdAndApproved(invigilator.getId(), semesterId);
             double hourlyRate = Double.parseDouble(configurationHolder.getConfig(ConfigType.HOURLY_RATE.getValue()));
             System.out.println("hourlyRate 1: " + hourlyRate);
 
-            if (attendanceList.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            } else {
+            if (!attendanceList.isEmpty()) {
                 List<InvigilatorAttendanceResponseDTO> attendanceResponseDTOList = attendanceList.stream()
                         .map(attendance -> invigilatorAttendanceMapper.toResponseDTO(attendance))
                         .toList();

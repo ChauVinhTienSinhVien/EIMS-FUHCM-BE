@@ -85,4 +85,8 @@ public class InvigilatorAssignmentController {
         return ResponseEntity.ok(assignments);
     }
 
+    @GetMapping("report")
+    public ResponseEntity<?> getInvigilatorAssignmentReport(@RequestParam int semesterId) {
+        return ResponseEntity.ok(invigilatorAssignmentService.getInvigilatorAssignmentReport(semesterId));
+    }
 }

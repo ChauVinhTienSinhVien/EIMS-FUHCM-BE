@@ -291,7 +291,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
             if (registeredSlots.stream().anyMatch(registration -> registration.getExamSlot().equals(examSlot))) {
                 status = ExamSlotRegisterStatusEnum.REGISTERED.name();
-            } else if (examSlot.getRequiredInvigilators() != 0 && count <= examSlot.getRequiredInvigilators()) {
+            } else if (examSlot.getRequiredInvigilators() != 0 && count < examSlot.getRequiredInvigilators()) {
                 status = ExamSlotRegisterStatusEnum.NOT_FULL.name();
             } else {
                 status = ExamSlotRegisterStatusEnum.FULL.name();
@@ -439,5 +439,18 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
 
     private int allowedSlot(Semester semester) {
         return Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue());
+    }
+
+    public Set<ExamSlotDetail> getCancellableExamSlots(int semesterId) {
+        User currentUser = getCurrentUser();
+        Semester semester = getSemesterById(semesterId);
+
+        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
+                .findCancellableExamSlotsBySemesterId(semester, currentUser);
+
+        return invigilatorRegistrationMapper.mapCancelExamSlotDetails(registrations
+                .stream()
+                .map(InvigilatorRegistration::getExamSlot)
+                .collect(Collectors.toSet()));
     }
 }

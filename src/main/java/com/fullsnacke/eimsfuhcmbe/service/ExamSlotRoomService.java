@@ -15,5 +15,6 @@ public interface ExamSlotRoomService {
     ExamSlotRoom deleteExamSlotRoom(int examSlotRoomId);
     ExamSlotRoom getExamSlotRoomById(int examSlotRoomId);
     List<String> getAllUnavailableRooms(ZonedDateTime startAt, ZonedDateTime endAt);
+    List<ExamSlotRoom> getExamSlotRoomByExamSlotId(Integer examSlotId);
 
 }

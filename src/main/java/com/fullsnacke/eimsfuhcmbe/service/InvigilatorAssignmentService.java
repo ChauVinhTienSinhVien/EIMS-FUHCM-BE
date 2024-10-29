@@ -20,10 +20,12 @@ public interface InvigilatorAssignmentService {
     String exchangeInvigilators(UpdateInvigilatorAssignmentRequestDTO request);
     String exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request);
     Set<ExamSlotDetail> getAllExamSlotsInSemesterWithStatus(int semesterId);
-    List<ExamSlotDetail> getAllExamSlotsAssignedInSemester (int semesterId);
+    List<InvigilatorAssignmentResponseDTO> getAllExamSlotsAssignedInSemester (int semesterId);
 
     //dashboard
     List<InvigilatorAssignment> getAllAssignmentsInTimeRange(Instant start, Instant end);
     List<InvigilatorAssignment> managerApproveInvigilatorAssignments(List<Integer> invigilatorAssignmentIds);
+
+    InvigilatorAssignmentReportResponseDTO getInvigilatorAssignmentReport(int semesterId);
 
 }

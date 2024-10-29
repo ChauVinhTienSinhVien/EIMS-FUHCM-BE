@@ -18,4 +18,6 @@ public interface RequestService {
     List<ManagerRequestResponseDTO> getAllRequestBySemester(int semesterId);
 
     Request createAttendanceUpdateRequest(Request request);
+
+    RequestResponseDTO updateAttendanceStatus(UpdateStatusRequestDTO request);
 }

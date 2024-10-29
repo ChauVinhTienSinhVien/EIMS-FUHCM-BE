@@ -3,12 +3,14 @@ package com.fullsnacke.eimsfuhcmbe.repository;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAssignment;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public interface InvigilatorAttendanceRepository extends JpaRepository<InvigilatorAttendance, Integer> {
@@ -45,9 +47,11 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN FETCH ir.examSlot es " +
             "JOIN FETCH es.subjectExam se " +
             "JOIN FETCH se.subjectId s " +
-            "WHERE s.semesterId.id = :semesterId " +
-            "AND ir.invigilator.fuId = :fuId ")
-    List<InvigilatorAttendance> findAttendancesBySemesterIdAndFuId(@Param("semesterId") Integer semesterId, @Param("fuId") String fuId);
+            "WHERE s.semesterId = :semester " +
+            "AND ir.invigilator.email = :email " +
+            "AND es.endAt < :now ")
+//    List<InvigilatorAttendance> findAttendancesBySemesterIdAndEmail(@Param("semester") Semester semester, @Param("email") String email);
+    List<InvigilatorAttendance> findAttendancesBySemesterIdAndEmail(@Param("semester") Semester semester, @Param("email") String email, @Param("now") ZonedDateTime now);
 
     @Query("SELECT es FROM InvigilatorAttendance ia " +
             "JOIN ia.invigilatorAssignment iaa " +
@@ -80,7 +84,7 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN FETCH ia.invigilatorAssignment iaa " +
             "JOIN FETCH iaa.invigilatorRegistration ir " +
             "JOIN FETCH ir.examSlot es " +
-            "WHERE ir.invigilator.id = :invigilatorId AND es.subjectExam.subjectId.semesterId.id = :semesterId AND ia.checkIn IS NOT NULL AND ia.checkOut IS NOT NULL")
+            "WHERE ir.invigilator.id = :invigilatorId AND es.subjectExam.subjectId.semesterId.id = :semesterId AND ia.checkIn IS NOT NULL AND ia.checkOut IS NOT NULL AND ia.approvedBy IS NOT NULL")
     List<InvigilatorAttendance> findInvigilatorAttendanceByInvigilatorIdAndSemesterIdAndApprove(Integer invigilatorId, Integer semesterId);
 
     @Query("SELECT ia FROM InvigilatorAttendance ia " +
@@ -96,4 +100,11 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
        "JOIN ir.examSlot es " +
        "WHERE es.subjectExam.subjectId.semesterId.id = :semesterId")
     List<User> findInvigilatorBySemesterId(@Param("semesterId") Integer semesterId);
+
+    @Query("SELECT ia FROM InvigilatorAttendance ia " +
+            "JOIN FETCH ia.invigilatorAssignment iaa " +
+            "JOIN FETCH iaa.invigilatorRegistration ir " +
+            "JOIN FETCH ir.examSlot es " +
+            "WHERE ir.invigilator = :invigilator AND es.subjectExam.subjectId.semesterId = :semester")
+    List<InvigilatorAttendance> findBySemesterAndInvigilator(Semester semester, User invigilator);
 }

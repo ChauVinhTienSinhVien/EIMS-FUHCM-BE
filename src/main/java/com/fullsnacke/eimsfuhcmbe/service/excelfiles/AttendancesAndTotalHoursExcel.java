@@ -190,7 +190,7 @@ public class AttendancesAndTotalHoursExcel {
         getDefaultStyle(style, workbook);
 
         if (isFirstRow) {
-            totalInvigilatorsFormula += "A" + (row.getRowNum() + 1) + ",";
+            totalInvigilatorsFormula += " A" + (row.getRowNum() + 1) + ",";
             row.createCell(NO_COLUMN_INDEX).setCellValue(order);
             XSSFCellStyle noStyle = formatHeader(workbook).copy();
             getCenterAlignXYStyle(noStyle, workbook);

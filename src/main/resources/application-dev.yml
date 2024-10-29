@@ -1,10 +1,10 @@
 #Database Configuration
 MYSQL_USER: admin
 MYSQL_PASSWORD: AVNS_UbtDq3BTYRVW5-cxT8f
-MYSQL_URL: jdbc:mysql://mysql-2119796b-fpt-2426.g.aivencloud.com:11658/invigilator_management_5
+MYSQL_URL: jdbc:mysql://mysql-2119796b-fpt-2426.g.aivencloud.com:11658/invigilator_management_6
 #MYSQL_USER: root
 #MYSQL_PASSWORD: admin
-#MYSQL_URL: jdbc:mysql://localhost:3306/invigilator_management_5
+#MYSQL_URL: jdbc:mysql://localhost:3306/invigilator_management_6
 
 #MYSQL_HOST: localhost
 #MYSQL_PORT: 3306

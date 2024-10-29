@@ -1,90 +1,124 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
+import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
+import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
+import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
+import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
+    private final SemesterRepository semesterRepository;
+    private final UserRepository userRepository;
     public static final String UTF_8_ENCODING = "UTF-8";
-    public static final String ATTENDANCE_AND_TOTAL_HOURS_REPORT = "Attendance and Total Hours Report";
+    public static final String ATTENDANCE_AND_TOTAL_AMOUNT_REPORT = "Attendance and Total Amount Report";
     public static final String ATTENDANCE_AND_TOTAL_HOURS_XLSX = "AttendanceAndTotalHours.xlsx";
+    public static final String EMAIL_TEMPLATE = "AttendenceAndTotalAmountReportTemplate";
+    private final InvigilatorAssignmentRepository invigilatorAssignmentRepository;
 
-    @Value("${spring.mail.verify.host}")
     @NonFinal
-    String host;
-    @Value("${spring.mail.username}")
+    String fromEmail;
     @NonFinal
-    String formEmail;
+    String emailSupport;
 
     JavaMailSender emailSender;
     ExcelFileService excelFileService;
+    SpringTemplateEngine templateEngine;
+    @NonFinal
+    int count = 0;
 
-
-    public void sendSimpleMailMessage(String name, String to) {
+    //If the list of toEmails is sent successfully, the method returns null, otherwise it returns a list of failed emails
+    @Override
+    public List<String> sendAttendanceAndHoursMailMessageInListEmails(int semesterId, List<String> toEmails) {
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setSubject("New User Account Verification");
-            message.setFrom(formEmail);
-            message.setTo(to);
-            message.setText("Hello " + name + ",\n\n" +
-                    "Please click the link below to verify your account:\n\n" +
-                    host + "/verify?token=" + to + "dfasdfsdfaewrwefasfsdf\n\n" +
-                    "Thank you,\n" +
-                    "EIMS Team");
-            emailSender.send(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Detailed error message: " + e.getMessage());
-            if (e.getCause() != null) {
-                System.err.println("Cause: " + e.getCause().getMessage());
+            User manager = SecurityUntil.getLoggedInUser().orElseThrow(
+                    () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+            );
+            fromEmail = manager.getEmail();
+            List<String> failedEmails = new ArrayList<>();
+            for(String email: toEmails){
+                if(sendAttendanceAndHoursMailMessageForInvigilator(semester, email) != null){
+                    failedEmails.add(email);
+                }
             }
-            throw new CustomMessageException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send email: " + e.getMessage());
+            return failedEmails;
+        } catch (Exception e) {
+            throw new CustomMessageException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
-    public void sendAttendanceAndHoursMailMessage(String to, int semesterId) {
+    //If an email is sent successfully, the method returns null, otherwise if it has any error while sending the email, it returns the email
+    private String sendAttendanceAndHoursMailMessageForInvigilator(Semester semester, String toEmail) {
+        emailSupport = fromEmail;
         try {
-            byte[] excelData = excelFileService.generateAttendanceAndTotalHoursExcelFileForSemester(semesterId);
-            System.out.println(excelData.length);
+            byte[] excelData = excelFileService.generateAttendanceAndTotalHoursExcelFileForSemester(semester, toEmail);
+            System.out.println("#" + ++count + "length: " + excelData.length);
             if (excelData == null || excelData.length == 0) {
-                throw new CustomException(ErrorCode.EXCEL_FILE_GENERATION_ERROR);
+                return toEmail;
             }
+            User invigilator = userRepository.findUserByEmail(toEmail);
+
+            String fullName = invigilator.getLastName() + " " + invigilator.getFirstName();
+            System.out.println("fullname: " + fullName);
+
+            Context context = new Context();
+            context.setVariable("fullName", fullName);
+            context.setVariable("semesterName", semester.getName());
+            context.setVariable("emailSupport", emailSupport);
+
+            String text = templateEngine.process(EMAIL_TEMPLATE, context);
+
             MimeMessage message = getMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
             helper.setPriority(2);
-            helper.setSubject(ATTENDANCE_AND_TOTAL_HOURS_REPORT);
-            helper.setFrom(formEmail);
-            helper.setTo(to);
-            helper.setText("Hello,\n\n" +
-                    "Please find the attached excel file for the attendance and total hours report for the semester.\n\n" +
-                    "Thank you,\n" +
-                    "EIMS Team");
+            helper.setSubject(ATTENDANCE_AND_TOTAL_AMOUNT_REPORT);
+            helper.setFrom(new InternetAddress(fromEmail, "EIMS-FUHCM"));
+            helper.setTo(toEmail);
+            helper.setText(text, true);
+
             helper.addAttachment(ATTENDANCE_AND_TOTAL_HOURS_XLSX, new ByteArrayResource(excelData));
+
             emailSender.send(message);
-            System.out.println("Email sent successfully");
+            System.out.println("Email " + toEmail + " send successfully");
+            return null;
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            throw new CustomMessageException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            return toEmail;
         }
-
     }
 
     private MimeMessage getMimeMessage() {
         return emailSender.createMimeMessage();
     }
+
+
+
 }

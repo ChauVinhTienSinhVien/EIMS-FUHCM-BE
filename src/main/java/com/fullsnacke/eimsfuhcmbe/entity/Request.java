@@ -46,7 +46,8 @@ public class Request {
     @Column(name = "comment")
     String comment;
 
-    @Column(name = "status", nullable = false, columnDefinition = "int default 1")
+    @Column(name = "status", nullable = false)
+    @ColumnDefault("1")
     Integer status;
 
     @Column(name = "updated_at")

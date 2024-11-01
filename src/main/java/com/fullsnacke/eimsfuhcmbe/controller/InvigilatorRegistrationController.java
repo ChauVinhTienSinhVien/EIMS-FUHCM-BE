@@ -56,7 +56,7 @@ public class InvigilatorRegistrationController {
     //INVIGILATOR
     @GetMapping("/myinfo")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots for the current invigilator")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.getAllCurrentInvigilatorRegisteredSlots());
@@ -65,7 +65,7 @@ public class InvigilatorRegistrationController {
     //MANAGER/STAFF
     @GetMapping("/{fuId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by fuID")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(@PathVariable("fuId") String fuId){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(@PathVariable("fuId") String fuId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.getAllRegisteredSlotsByInvigilator(fuId));
@@ -74,7 +74,7 @@ public class InvigilatorRegistrationController {
     //MANAGER/STAFF
     @GetMapping("/semesterid={semesterId}/invigilator={fuId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester and fuId")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlotsInSemesterByInvigilator(@PathVariable("semesterId") int semesterId, @PathVariable("fuId") String fuId){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlotsInSemesterByInvigilator(@PathVariable("semesterId") int semesterId, @PathVariable("fuId") String fuId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.getAllRegisteredSlotsInSemesterByInvigilator(semesterId, fuId));
@@ -83,7 +83,7 @@ public class InvigilatorRegistrationController {
     //INVIGILATOR
     @GetMapping("/myinfo/semesterid={semesterId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of current invigilator")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@PathVariable("semesterId") int semesterId){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.getAllCurrentInvigilatorRegisteredSlotsInSemester(semesterId));
@@ -92,7 +92,7 @@ public class InvigilatorRegistrationController {
     //MANAGER/STAFF
     @GetMapping("/semesterid={semesterId}")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of all invigilators")
-    public ResponseEntity<Set<RegisteredExamBySemesterResponseDTO>> getAllRegisteredSlotsInSemester(@PathVariable("semesterId") @RequestBody int semesterId){
+    public ResponseEntity<Set<RegisteredExamBySemesterResponseDTO>> getAllRegisteredSlotsInSemester(@PathVariable("semesterId") @RequestBody int semesterId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.getRegisteredExamBySemester(semesterId));
@@ -154,10 +154,15 @@ public class InvigilatorRegistrationController {
 
     //INVIGILATOR
     @GetMapping("/register/semesterid={semesterId}")
-    public ResponseEntity<RegisteredExamBySemesterResponseDTO> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId){
+    public ResponseEntity<RegisteredExamBySemesterResponseDTO> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.getAllExamSlotsInSemesterWithStatus(semesterId));
+    }
+
+    @GetMapping("cancel")
+    public ResponseEntity<Set<ExamSlotDetail>> getListCancelInSemester(@RequestParam int semesterId) {
+        return ResponseEntity.ok(invigilatorRegistrationService.getCancellableExamSlots(semesterId));
     }
 
     //DASHBOARD
@@ -174,7 +179,6 @@ public class InvigilatorRegistrationController {
         }
         return ResponseEntity.ok(registrations);
     }
-
 
 
 }

@@ -28,7 +28,7 @@ public enum ErrorCode{
     OVERLAP_SLOT("Exam slot overlaps with existing assignments in the same semester", HttpStatus.CONFLICT),
     OVERLAP_SLOT_IN_LIST("The exam slot overlaps with another existing slot in the registration list.", HttpStatus.CONFLICT),
     EXCEEDED_ALLOWED_SLOT("Exceeded allowed slot.", HttpStatus.CONFLICT),
-
+    INVIGILATOR_ALREADY_ASSIGNED("Invigilator already assigned.", HttpStatus.CONFLICT),
     // Semester Management
     SEMESTER_NOT_FOUND("Semester not found.", HttpStatus.BAD_REQUEST),
 

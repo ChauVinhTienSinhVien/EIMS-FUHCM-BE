@@ -5,10 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAssignmentMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
-import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorAssignmentResponseDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.UserRegistrationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotInvigilatorStatus;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
@@ -32,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.Instant;
+import java.time.chrono.ChronoZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,12 +52,13 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     ExamSlotRoomMapper examSlotRoomMapper;
     ExamSlotHallRepository examSlotHallRepository;
     UserRepository userRepository;
-
     InvigilatorAttendanceServiceImpl invigilatorAttendanceService;
+    private final InvigilatorAttendanceRepository invigilatorAttendanceRepository;
+
 
     @Transactional(rollbackFor = Exception.class)
     public List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds) {
-        if(examSlotIds.isEmpty()) {
+        if (examSlotIds.isEmpty()) {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
         }
 
@@ -72,7 +73,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             log.info("ExamSlot ID: {}, Registrations Size: {}", examSlotId, registrations.size());
         });
 
-        if(registrationMap.isEmpty()) {
+        if (registrationMap.isEmpty()) {
             throw new CustomException(ErrorCode.NO_INVIGILATOR_REGISTRATION);
         }
 
@@ -105,7 +106,12 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             log.info("Registrations: {}", registrations.size());
             log.info("Halls: {}", halls.size());
             log.info("Rooms: {}", rooms.size());
-            if (halls.size() + rooms.size() < registrations.size()) {
+            if (!halls.isEmpty() && halls.get(0).getHallInvigilator() != null) {
+                log.error("Hall already has invigilator");
+                throw new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot already has assigned");
+            }
+
+            if (halls.size() + rooms.size() > registrations.size()) {
                 log.error("Not enough halls and rooms for invigilators");
                 throw new CustomMessageException(HttpStatus.NOT_FOUND, "Insufficient number of invigilators available for exam slot ID: " + examSlot.getId());
             }
@@ -146,6 +152,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             InvigilatorAssignment assignment = InvigilatorAssignment.builder()
                     .invigilatorRegistration(registration)
                     .isHallInvigilator(false)
+                    .status(InvigilatorAssignmentStatus.PENDING.getValue())
                     .build();
             assignments.add(assignment);
 
@@ -157,6 +164,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         try {
             invigilatorAssignmentRepository.saveAll(assignments);
+            invigilatorAttendanceService.addInvigilatorAttendances(assignments);
             examSlotRoomRepository.saveAll(roomsToUpdate);
         } catch (Exception e) {
             log.error("Error in assigning invigilator to room: {}", e.getMessage());
@@ -183,6 +191,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             InvigilatorAssignment assignment = InvigilatorAssignment.builder()
                     .invigilatorRegistration(registration)
                     .isHallInvigilator(true)
+                    .status(InvigilatorAssignmentStatus.PENDING.getValue())
                     .build();
             assignments.add(assignment);
 
@@ -194,6 +203,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
         try {
             invigilatorAssignmentRepository.saveAll(assignments);
+            invigilatorAttendanceService.addInvigilatorAttendances(assignments);
             examSlotHallRepository.saveAll(hallsToUpdate);
         } catch (Exception e) {
             log.error("Error in assigning invigilator to hall: {}", e.getMessage());
@@ -205,7 +215,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
 
 
     public List<UserRegistrationResponseDTO> getUnassignedInvigilators(int examSlotId) {
-        if(examSlotId <= 0) {
+        if (examSlotId <= 0) {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
         }
 
@@ -215,7 +225,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     }
 
     public List<InvigilatorAssignmentResponseDTO> getAssignedInvigilators(int examSlotId) {
-        if(examSlotId <= 0) {
+        if (examSlotId <= 0) {
             throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
         }
 
@@ -224,7 +234,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
                 .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
 
         List<InvigilatorAssignmentResponseDTO> responseDTOList = invigilatorAssignmentMapper.mapInvigilatorAssignments(assignedList);
-        for(InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
+        for (InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
             assignment.setStatus(InvigilatorAssignmentStatus.fromValue(assignmentMap.get(assignment.getAssignmentId()).getStatus()).name());
         }
         return responseDTOList;
@@ -298,7 +308,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             Optional<ExamSlotHall> representativeHall = examSlotHallRepository.findFirstByExamSlot(examSlot);
 
             String status;
-            if(representativeHall.isPresent() && representativeHall.get().getHallInvigilator() != null) {
+            if (representativeHall.isPresent() && representativeHall.get().getHallInvigilator() != null) {
                 status = ExamSlotInvigilatorStatus.ASSIGNED.name();
             } else {
                 status = ExamSlotInvigilatorStatus.UNASSIGNED.name();
@@ -306,20 +316,25 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
             ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
             examSlotDetail.setStatus(status);
             examSlotDetails.add(examSlotDetail);
+            examSlotDetail.setNumberOfRegistered(assignedInvigilators);
         }
 
         return examSlotDetails;
     }
 
-    public List<ExamSlotDetail> getAllExamSlotsAssignedInSemester (int semesterId) {
+    public List<InvigilatorAssignmentResponseDTO> getAllExamSlotsAssignedInSemester(int semesterId) {
         var semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
 
-        var examSlots = examSlotRepository.findAssignedExamSlotsBySemesterIdAndFuId(semesterId, getCurrentUser().getFuId());
+        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findBySemesterIdAndInvigilatorIdAndStatus(semester.getId(), getCurrentUser().getId());
+        Map<Integer, InvigilatorAssignment> assignmentMap = assignedList.stream()
+                .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
 
-        return examSlots.stream()
-                .map(invigilatorRegistrationMapper::toExamSlotDetailInvigilator)
-                .toList();
+        List<InvigilatorAssignmentResponseDTO> responseDTOList = invigilatorAssignmentMapper.mapInvigilatorAssignments(assignedList);
+        for (InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
+            assignment.setStatus(InvigilatorAssignmentStatus.fromValue(assignmentMap.get(assignment.getAssignmentId()).getStatus()).name());
+        }
+        return responseDTOList;
     }
 
     @Override
@@ -328,15 +343,15 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         List<InvigilatorAssignment> invigilatorAssignments = invigilatorAssignmentRepository.findByIdIn(invigilatorAssignmentIds);
         if (invigilatorAssignments.isEmpty()) {
             throw new CustomException(ErrorCode.ASSIGNMENT_NOT_FOUND);
-        }else{
+        } else {
             for (InvigilatorAssignment invigilatorAssignment : invigilatorAssignments) {
                 invigilatorAssignment.setStatus(InvigilatorAssignmentStatus.APPROVED.getValue());
                 invigilatorAssignment.setApprovedBy(getCurrentUser());
                 invigilatorAssignment.setApprovedAt(Instant.now());
             }
-            if(invigilatorAssignmentRepository.saveAll(invigilatorAssignments).isEmpty()){
+            if (invigilatorAssignmentRepository.saveAll(invigilatorAssignments).isEmpty()) {
                 throw new CustomException(ErrorCode.FAIL_TO_APPROVE_ASSIGNMENT);
-            }else{
+            } else {
                 invigilatorAttendanceService.addInvigilatorAttendances(invigilatorAssignments);
                 return invigilatorAssignments;
             }
@@ -365,5 +380,52 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     public List<InvigilatorAssignment> getAllAssignmentsInTimeRange(Instant startTime, Instant endTime) {
         return invigilatorAssignmentRepository.findAllByTimeRange(startTime, endTime);
     }
+
+    @Override
+    public InvigilatorAssignmentReportResponseDTO getInvigilatorAssignmentReport(int semesterId) {
+        var semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        User currentUser = getCurrentUser();
+
+        List<InvigilatorAttendance> attendances = invigilatorAttendanceRepository.findBySemesterAndInvigilator(semester, currentUser);
+
+        int totalAssignments = attendances.size();
+        int totalInvigilatedSlots = 0;
+        int totalRequiredSlots = 0;
+        int totalNonInvigilatedSlots = 0;
+
+        double totalAssignedHours = 0;
+        double totalInvigilatedHours = 0;
+        double totalRequiredInvigilationHours = 0;
+
+        for (InvigilatorAttendance attendance : attendances) {
+            ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
+            double minutes = ChronoUnit.MINUTES.between(examSlot.getStartAt(), examSlot.getEndAt()) / 60.0;
+            if (attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().isBefore(ZonedDateTime.now())) {
+                if (attendance.getCheckIn() != null && attendance.getCheckOut() != null) {
+                    totalInvigilatedSlots++;
+                    totalInvigilatedHours += minutes;
+                } else {
+                    totalNonInvigilatedSlots++;
+                }
+            } else {
+                totalRequiredSlots++;
+                totalRequiredInvigilationHours += minutes;
+            }
+            totalAssignedHours += minutes;
+        }
+
+        return InvigilatorAssignmentReportResponseDTO.builder()
+                .totalAssigned(totalAssignments)
+                .totalInvigilatedSlots(totalInvigilatedSlots)
+                .totalRequiredInvigilationSlots(totalRequiredSlots)
+                .totalNonInvigilatedSlots(totalNonInvigilatedSlots)
+                .totalAssignedHours(totalAssignedHours)
+                .totalInvigilatedHours(totalInvigilatedHours)
+                .totalRequiredInvigilationHours(totalRequiredInvigilationHours)
+                .build();
+    }
+
 
 }

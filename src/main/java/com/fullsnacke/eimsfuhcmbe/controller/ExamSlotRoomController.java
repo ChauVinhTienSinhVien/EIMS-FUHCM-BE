@@ -5,6 +5,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.ExamSlotRoomRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotRoomResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotRoom;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotRoomService;
+import com.fullsnacke.eimsfuhcmbe.service.ExamSlotRoomServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,21 @@ public class ExamSlotRoomController {
     public List<String> getAllAvailableRooms(@RequestParam ZonedDateTime startAt, @RequestParam ZonedDateTime endAt) {
         return examSlotRoomService.getAllUnavailableRooms(startAt, endAt);
     }
+
+    @GetMapping("/dashboard/exam-slot/{examSlotId}")
+    @Operation(summary = "Retrieve all exam slot rooms by exam slot ID", description = "Fetches a list of all exam slot rooms by exam slot ID from the system. If no exam slot rooms are found, it will return a 204 No Content response.")
+    public List<String> getExamSlotRoomsByExamSlotId(@PathVariable int examSlotId) {
+        List<String> examSlotRoomResponseDTOList = new ArrayList<>();
+        List<ExamSlotRoom> examSlotRoomList = examSlotRoomService.getExamSlotRoomByExamSlotId(examSlotId);
+
+        for (ExamSlotRoom examSlotRoom : examSlotRoomList) {
+
+            examSlotRoomResponseDTOList.add(examSlotRoom.getRoom().getRoomName());
+        }
+
+        return examSlotRoomResponseDTOList;
+    }
+
 
 
 

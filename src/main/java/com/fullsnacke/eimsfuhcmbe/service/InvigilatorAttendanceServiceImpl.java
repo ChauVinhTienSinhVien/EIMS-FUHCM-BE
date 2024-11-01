@@ -181,7 +181,6 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     @Transactional
     public List<InvigilatorAttendance> checkInByExamSlotId(Integer examSlotId) {
         ExamSlot checkInExamSlot = examSlotRepository.findById(examSlotId).orElse(null);
-        System.out.println(Instant.now());
         if(checkInExamSlot == null){
             throw new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND);
         }
@@ -190,6 +189,8 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         }
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
+            System.out.println("invigilatorAttendance = " + invigilatorAttendance.getCheckOut());
+            System.out.println("invigilatorAttendance = " + invigilatorAttendance.getCheckIn());
             if(isCheckIn(invigilatorAttendance)){
                 invigilatorAttendance.setCheckIn(Instant.now());
             }
@@ -232,20 +233,13 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
                 startAt = startAt.minus(configurationHolder.getCheckInTimeBeforeExamSlot(), ChronoUnit.MINUTES);
 
                 if(DateValidationUtil.isWithinTimeRange(startAt, endAt)){
-                    invigilatorAttendance.setCheckOut(Instant.now());
+                    invigilatorAttendance.setCheckIn(Instant.now());
                     invigilatorAttendances.add(invigilatorAttendance);
                 }else {
                     throw new CustomException(ErrorCode.CHECKIN_TIME_IS_NOT_VALID);
                 }
             }
         }
-
-        for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
-            if(isCheckIn(invigilatorAttendance)){
-                invigilatorAttendance.setCheckIn(Instant.now());
-            }
-        }
-
         invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
         return invigilatorAttendances;
     }
@@ -293,9 +287,12 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     @Transactional
     public List<InvigilatorAttendance> managerApproveByExamSlotId(Integer examSlotId) {
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotId(examSlotId);
+        User approvedBy = SecurityUntil.getLoggedInUser().get();
         for (InvigilatorAttendance invigilatorAttendance : invigilatorAttendances) {
             if(invigilatorAttendance.getStatus() == InvigilatorAttendanceStatus.PENDING.getValue()){
                 invigilatorAttendance.setStatus(InvigilatorAttendanceStatus.APPROVED.getValue());
+                invigilatorAttendance.setApprovedAt(Instant.now());
+                invigilatorAttendance.setApprovedBy(approvedBy);
             }
         }
         invigilatorAttendanceRepository.saveAll(invigilatorAttendances);

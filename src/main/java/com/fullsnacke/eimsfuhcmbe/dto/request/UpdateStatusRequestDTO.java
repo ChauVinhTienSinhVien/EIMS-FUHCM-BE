@@ -10,5 +10,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class UpdateStatusRequestDTO {
+    private int requestId;
+    private String note;
     String status;
 }

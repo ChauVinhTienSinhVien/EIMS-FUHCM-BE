@@ -5,9 +5,14 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ConfigMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ConfigRequestDto;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ConfigResponseDto;
 import com.fullsnacke.eimsfuhcmbe.entity.Config;
+import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
 import com.fullsnacke.eimsfuhcmbe.enums.ConfigUnit;
+import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
+import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.service.ConfigServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.util.DateValidationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +37,13 @@ public class ConfigController {
 
     @Autowired
     private ConfigurationHolder configurationHolder;
+
+    @Autowired
+    private ExamSlotRepository examSlotRepository;
+
+    @Autowired
+    private ConfigRepository configRepository;
+
 
     @GetMapping("/hourly-rate")
     @Operation(summary = "Get hourly-rate config", description = "Retrieve hourly-rate configuration")
@@ -143,7 +157,16 @@ public class ConfigController {
         Config config = configMapper.toEntity(configRequestDto);
         config.setId(id);
 
-        Config updatedConfig = configServiceImpl.updateConfig(config);
+        Config updatedConfig = configRepository.findConfigById(id);
+
+        ExamSlot examSlot = examSlotRepository.findOldestExamSlotBySemester(updatedConfig.getSemester());
+        int day =  configurationHolder.getTimeBeforeOpenRegistration();
+
+        if(!DateValidationUtil.isBeforeDeadline(examSlot.getStartAt().toInstant().minus(Duration.ofDays(day)))){
+            return ResponseEntity.badRequest().build();
+        }
+
+        updatedConfig = configServiceImpl.updateConfig(config);
         ConfigResponseDto configResponseDto = configMapper.toDto(updatedConfig);
 
         return ResponseEntity.ok(configResponseDto);

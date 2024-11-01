@@ -56,7 +56,8 @@ public class ExamSlot {
     @CreatedBy
     User createdBy;
 
-    @Column(name = "status", nullable = false, columnDefinition = "int default 1")
+    @Column(name = "status", nullable = false)
+    @ColumnDefault("1")
     Integer status;
 
     @ManyToOne(fetch = FetchType.EAGER)

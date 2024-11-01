@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ManagerRequestResponseDTO {
-    String requestId;
+    int requestId;
     String fuId;
     String email;
     String reason;

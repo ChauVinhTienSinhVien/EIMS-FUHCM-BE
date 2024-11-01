@@ -79,6 +79,4 @@ public class RoomController {
         return ResponseEntity.ok(roomResponseDTOList);
 
     }
-
-
 }

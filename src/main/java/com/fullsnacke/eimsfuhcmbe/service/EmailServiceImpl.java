@@ -8,6 +8,8 @@ import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
+import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -39,10 +42,6 @@ public class EmailServiceImpl implements EmailService {
     public static final String EMAIL_TEMPLATE = "AttendenceAndTotalAmountReportTemplate";
     private final InvigilatorAssignmentRepository invigilatorAssignmentRepository;
 
-    @Value("${spring.mail.verify.host}")
-    @NonFinal
-    String host;
-    @Value("${spring.mail.username}")
     @NonFinal
     String fromEmail;
     @NonFinal
@@ -55,10 +54,15 @@ public class EmailServiceImpl implements EmailService {
     int count = 0;
 
     //If the list of toEmails is sent successfully, the method returns null, otherwise it returns a list of failed emails
+    @Override
     public List<String> sendAttendanceAndHoursMailMessageInListEmails(int semesterId, List<String> toEmails) {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
         try {
+            User manager = SecurityUntil.getLoggedInUser().orElseThrow(
+                    () -> new CustomException(ErrorCode.USER_NOT_FOUND)
+            );
+            fromEmail = manager.getEmail();
             List<String> failedEmails = new ArrayList<>();
             for(String email: toEmails){
                 if(sendAttendanceAndHoursMailMessageForInvigilator(semester, email) != null){
@@ -96,7 +100,7 @@ public class EmailServiceImpl implements EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, UTF_8_ENCODING);
             helper.setPriority(2);
             helper.setSubject(ATTENDANCE_AND_TOTAL_AMOUNT_REPORT);
-            helper.setFrom(fromEmail);
+            helper.setFrom(new InternetAddress(fromEmail, "EIMS-FUHCM"));
             helper.setTo(toEmail);
             helper.setText(text, true);
 

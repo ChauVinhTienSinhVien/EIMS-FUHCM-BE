@@ -6,6 +6,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RequestTypeResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.Request;
 import com.fullsnacke.eimsfuhcmbe.enums.RequestTypeEnum;
 import com.fullsnacke.eimsfuhcmbe.service.RequestService;
@@ -18,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -43,8 +46,7 @@ public class RequestController {
                     .status(HttpStatus.CREATED)
                     .body(responseDTO);
         }else if(requestType.equalsIgnoreCase(RequestTypeEnum.CANCEL.name())) {
-            Request updatedRequest = requestMapper.toEntity(request);
-            RequestResponseDTO responseDTO = requestMapper.toResponseDTO(requestService.createAttendanceUpdateRequest(updatedRequest));
+            RequestResponseDTO responseDTO = requestService.createRequest(request);
             responseEntity = ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(responseDTO);
@@ -55,6 +57,7 @@ public class RequestController {
     //Đã được xài trong view Request của role invigilator
     //INVIGILATOR
     @GetMapping("/myinfo")
+    @Operation(summary = "Get all requests of current invigilator")
     public ResponseEntity<?> getAllRequest() {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -62,10 +65,13 @@ public class RequestController {
     }
 
     @GetMapping("/request-types")
-    public ResponseEntity<?> getAllRequestTypes() {
+    @Operation(summary = "Get all request types")
+    public ResponseEntity<RequestTypeResponseDTO> getAllRequestTypes() {
+        List<String> requestTypes = new ArrayList<>();
+        Arrays.stream(RequestTypeEnum.values()).forEach(requestTypeEnum -> requestTypes.add(requestTypeEnum.name()));
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(RequestTypeEnum.values());
+                .body(RequestTypeResponseDTO.builder().requestTypes(requestTypes).build());
     }
 
     //Đang ko xài
@@ -76,7 +82,6 @@ public class RequestController {
                 .status(HttpStatus.OK)
                 .body(requestService.getRequestById(requestId));
     }
-
 
     //MANAGER
     @GetMapping("invigilatorid={invigilatorId}")
@@ -89,12 +94,13 @@ public class RequestController {
 
     //MANAGER
     @GetMapping("semesterid={semesterId}")
-    @Operation(summary = "Get all requests")
+    @Operation(summary = "Get all requests by semester id for manager view request page")
     public ResponseEntity<?> getAllRequestBySemester(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(requestService.getAllRequestBySemester(semesterId));
     }
+
     //MANAGER
     @PutMapping
     @Operation(summary = "Update request status", description = "Update request status by request id")
@@ -107,4 +113,10 @@ public class RequestController {
                 .body(requestService.updateRequestStatus(request));
     }
 
+    @PutMapping("/update-attendance/status")
+    public ResponseEntity<?> updateAttendanceStatus(@RequestBody UpdateStatusRequestDTO request) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(requestService.updateAttendanceStatus(request));
+    }
 }

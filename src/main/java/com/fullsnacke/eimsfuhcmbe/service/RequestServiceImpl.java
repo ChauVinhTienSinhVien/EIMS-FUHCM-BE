@@ -4,6 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
@@ -57,9 +58,6 @@ public class RequestServiceImpl implements RequestService {
         } else if (request.getReason() == null || request.getReason().isEmpty()) {
             throw new CustomException(ErrorCode.REASON_EMPTY);
         }
-//        else if(request.getRequestType() == null) {
-//            throw new CustomMessageException(ErrorCode.REQUEST_TYPE_EMPTY);
-//        }
         try {
             var currentUser = getCurrentUser();
             log.info("Current User: {}", currentUser.getFuId());
@@ -84,7 +82,7 @@ public class RequestServiceImpl implements RequestService {
             throw new CustomException(ErrorCode.REQUEST_EMPTY);
         }
 
-        Request attendanceChangeRequest =  new Request();
+        Request attendanceChangeRequest = new Request();
         User currentUser = getCurrentUser();
         attendanceChangeRequest.setCreatedBy(currentUser);
         attendanceChangeRequest.setExamSlot(request.getExamSlot());
@@ -93,6 +91,33 @@ public class RequestServiceImpl implements RequestService {
         attendanceChangeRequest.setStatus(RequestStatusEnum.PENDING.getValue());
 
         return requestRepository.save(attendanceChangeRequest);
+    }
+
+    @Override
+    public RequestResponseDTO updateAttendanceStatus(UpdateStatusRequestDTO request) {
+        Request entity = requestRepository.findById(request.getRequestId())
+                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
+
+        RequestStatusEnum status;
+        try {
+            status = RequestStatusEnum.valueOf(request.getStatus().toUpperCase());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
+        }
+        if(status != RequestStatusEnum.APPROVED && status != RequestStatusEnum.REJECTED) {
+            throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
+        }
+        if (entity.getStatus() != RequestStatusEnum.PENDING.getValue()) {
+            throw new CustomException(ErrorCode.REQUEST_ALREADY_PROCESSED);
+        }
+
+        entity.setStatus(status.getValue());
+        entity.setComment(request.getNote());
+        requestRepository.save(entity);
+
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+        responseDTO.setStatus(status.name());
+        return responseDTO;
     }
 
     public List<RequestResponseDTO> getAllRequestOfCurrentInvigilator() {
@@ -175,16 +200,19 @@ public class RequestServiceImpl implements RequestService {
                                 .fuId(request.getNewInvigilatorFuId())
                                 .examSlotId(Set.of(entity.getExamSlot().getId()))
                                 .build();
-
                         invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
                         return null;
                     });
+            if (registration != null && registration.getExamSlot() == entity.getExamSlot()) {
+                throw new CustomException(ErrorCode.INVIGILATOR_ALREADY_ASSIGNED);
+            }
 
             invigilatorAssignmentService.exchangeInvigilators(entity, request);
         }
         //update request
         entity.setStatus(status.getValue());
-//        entity.setUpdatedAt(Instant.now());
+        entity.setUpdatedAt(java.time.Instant.now());
+        entity.setUpdatedBy(getCurrentUser());
         entity.setComment(request.getNote());
 
         //save update request

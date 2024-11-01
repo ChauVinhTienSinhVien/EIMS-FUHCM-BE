@@ -3,6 +3,7 @@ package com.fullsnacke.eimsfuhcmbe.controller;
 import com.fullsnacke.eimsfuhcmbe.service.EmailService;
 import com.fullsnacke.eimsfuhcmbe.service.ExcelFileService;
 import com.fullsnacke.eimsfuhcmbe.service.ExcelFileServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,9 +25,9 @@ public class EmailController {
     ExcelFileService excelFileService;
 
     @GetMapping()
+    @Operation(summary = "Send attendance and total hours report to invigilator and response a list of failed emails if it not null" )
     public ResponseEntity<?> sendAttendanceAndTotalHoursReportToInvigilator(@RequestParam int semesterId, @RequestParam List<String> toEmails) {
         List<String> failedEmails = emailService.sendAttendanceAndHoursMailMessageInListEmails(semesterId, toEmails);
-//        excelFileService.generateAttendanceAndTotalHoursExcelFileForSemester(semesterId, "nganvhheimsfuhcm@gmail.com");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(failedEmails.size() == 0 ? "Emails sent successfully" : "Failed emails: " + failedEmails);

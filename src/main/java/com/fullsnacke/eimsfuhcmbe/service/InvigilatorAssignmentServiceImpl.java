@@ -4,7 +4,6 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.ExamSlotRoomMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorAssignmentMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.InvigilatorRegistrationMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateInvigilatorAssignmentRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.*;
 import com.fullsnacke.eimsfuhcmbe.entity.*;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotInvigilatorStatus;
@@ -15,7 +14,6 @@ import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.*;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,10 +25,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
 import java.time.Instant;
-import java.time.chrono.ChronoZonedDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,6 +52,7 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
     private final InvigilatorAttendanceRepository invigilatorAttendanceRepository;
 
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds) {
         if (examSlotIds.isEmpty()) {
@@ -127,6 +124,207 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         return examSlotRoomRepository.findByIdIn(examSlotRoomIds).stream()
                 .map(examSlotRoomMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public List<UserRegistrationResponseDTO> getUnassignedInvigilators(int examSlotId) {
+        if (examSlotId <= 0) {
+            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
+        }
+
+        List<InvigilatorRegistration> unassignedList = invigilatorRegistrationRepository.findUnassignedRegistrationsByExamSlot_IdOrderByCreatedAtAsc(examSlotId);
+
+        return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(unassignedList);
+    }
+
+    @Override
+    public List<InvigilatorAssignmentResponseDTO> getAssignedInvigilators(int examSlotId) {
+        if (examSlotId <= 0) {
+            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
+        }
+
+        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findInvigilatorAssignmentByInvigilatorRegistration_ExamSlot_Id(examSlotId);
+        Map<Integer, InvigilatorAssignment> assignmentMap = assignedList.stream()
+                .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
+
+        List<InvigilatorAssignmentResponseDTO> responseDTOList = invigilatorAssignmentMapper.mapInvigilatorAssignments(assignedList);
+        for (InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
+            assignment.setStatus(InvigilatorAssignmentStatus.fromValue(assignmentMap.get(assignment.getAssignmentId()).getStatus()).name());
+        }
+        return responseDTOList;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request) {
+
+        int examSlotId = requestEntity.getExamSlot().getId();
+        String oldInvigilatorFuId = requestEntity.getCreatedBy().getFuId();
+
+        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository
+                .findByExamSlotIdAndInvigilatorFuId(examSlotId, oldInvigilatorFuId)
+                .orElseThrow(() -> {
+                    log.error("Old invigilator not found: {}", oldInvigilatorFuId);
+                    return new CustomMessageException(HttpStatus.NOT_FOUND, "Invigilator with FuId " + oldInvigilatorFuId + " not found.");
+                });
+
+        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository
+                .findByExamSlotIdAndInvigilatorFuId(examSlotId, request.getNewInvigilatorFuId())
+                .orElseThrow(() -> {
+                    log.error("New invigilator not found: {}", request.getNewInvigilatorFuId());
+                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
+                });
+
+        exchangeInvigilators(oldAssignment, newInvigilator);
+        return "Exchanged successfully";
+    }
+
+    @Override
+    public Set<ExamSlotDetail> getAllExamSlotsInSemesterWithStatus(int semesterId) {
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        // Chuyển đổi allExamSlots từ List sang Set
+        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotsBySemesterWithDetails(semester, ExamSlotStatus.APPROVED.getValue()));
+
+        // Tạo một Set để lưu trữ kết quả cuối cùng
+        Set<ExamSlotDetail> examSlotDetails = new HashSet<>();
+        for (ExamSlot examSlot : allExamSlots) {
+            // Lấy một ExamSlotHall làm đại diện
+            int assignedInvigilators = invigilatorRegistrationRepository.countByExamSlot(examSlot);
+            Optional<ExamSlotHall> representativeHall = examSlotHallRepository.findFirstByExamSlot(examSlot);
+
+            String status;
+            if (representativeHall.isPresent() && representativeHall.get().getHallInvigilator() != null) {
+                status = ExamSlotInvigilatorStatus.ASSIGNED.name();
+            } else {
+                status = ExamSlotInvigilatorStatus.UNASSIGNED.name();
+            }
+            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
+            examSlotDetail.setStatus(status);
+            examSlotDetails.add(examSlotDetail);
+            examSlotDetail.setNumberOfRegistered(assignedInvigilators);
+        }
+
+        return examSlotDetails;
+    }
+
+    @Override
+    public List<InvigilatorAssignmentResponseDTO> getAllExamSlotsAssignedInSemester(int semesterId) {
+        var semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findBySemesterIdAndInvigilatorIdAndStatus(semester.getId(), getCurrentUser().getId());
+        Map<Integer, InvigilatorAssignment> assignmentMap = assignedList.stream()
+                .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
+
+        List<InvigilatorAssignmentResponseDTO> responseDTOList = invigilatorAssignmentMapper.mapInvigilatorAssignments(assignedList);
+        for (InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
+            assignment.setStatus(InvigilatorAssignmentStatus.fromValue(assignmentMap.get(assignment.getAssignmentId()).getStatus()).name());
+        }
+        return responseDTOList;
+    }
+
+    @Override
+    @Transactional
+    public List<InvigilatorAssignment> managerApproveInvigilatorAssignments(List<Integer> invigilatorAssignmentIds) {
+        List<InvigilatorAssignment> invigilatorAssignments = invigilatorAssignmentRepository.findByIdIn(invigilatorAssignmentIds);
+        if (invigilatorAssignments.isEmpty()) {
+            throw new CustomException(ErrorCode.ASSIGNMENT_NOT_FOUND);
+        } else {
+            for (InvigilatorAssignment invigilatorAssignment : invigilatorAssignments) {
+                invigilatorAssignment.setStatus(InvigilatorAssignmentStatus.APPROVED.getValue());
+                invigilatorAssignment.setApprovedBy(getCurrentUser());
+                invigilatorAssignment.setApprovedAt(Instant.now());
+            }
+            if (invigilatorAssignmentRepository.saveAll(invigilatorAssignments).isEmpty()) {
+                throw new CustomException(ErrorCode.FAIL_TO_APPROVE_ASSIGNMENT);
+            } else {
+                invigilatorAttendanceService.addInvigilatorAttendances(invigilatorAssignments);
+                return invigilatorAssignments;
+            }
+        }
+    }
+
+    //dashboard
+    @Override
+    public List<InvigilatorAssignment> getAllAssignmentsInTimeRange(Instant startTime, Instant endTime) {
+        return invigilatorAssignmentRepository.findAllByTimeRange(startTime, endTime);
+    }
+
+    @Override
+    public InvigilatorAssignmentReportResponseDTO getInvigilatorAssignmentReport(int semesterId) {
+        var semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        User currentUser = getCurrentUser();
+
+        List<InvigilatorAttendance> attendances = invigilatorAttendanceRepository.findBySemesterAndInvigilator(semester, currentUser);
+
+        int totalAssignments = attendances.size();
+        int totalInvigilatedSlots = 0;
+        int totalRequiredSlots = 0;
+        int totalNonInvigilatedSlots = 0;
+
+        double totalAssignedHours = 0;
+        double totalInvigilatedHours = 0;
+        double totalRequiredInvigilationHours = 0;
+
+        for (InvigilatorAttendance attendance : attendances) {
+            ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
+            double minutes = ChronoUnit.MINUTES.between(examSlot.getStartAt(), examSlot.getEndAt()) / 60.0;
+            if (attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().isBefore(ZonedDateTime.now())) {
+                if (attendance.getCheckIn() != null && attendance.getCheckOut() != null) {
+                    totalInvigilatedSlots++;
+                    totalInvigilatedHours += minutes;
+                } else {
+                    totalNonInvigilatedSlots++;
+                }
+            } else {
+                totalRequiredSlots++;
+                totalRequiredInvigilationHours += minutes;
+            }
+            totalAssignedHours += minutes;
+        }
+
+        return InvigilatorAssignmentReportResponseDTO.builder()
+                .totalAssigned(totalAssignments)
+                .totalInvigilatedSlots(totalInvigilatedSlots)
+                .totalRequiredInvigilationSlots(totalRequiredSlots)
+                .totalNonInvigilatedSlots(totalNonInvigilatedSlots)
+                .totalAssignedHours(totalAssignedHours)
+                .totalInvigilatedHours(totalInvigilatedHours)
+                .totalRequiredInvigilationHours(totalRequiredInvigilationHours)
+                .build();
+    }
+
+
+    //----------------------PRIVATE METHODS----------------------//
+    private User getCurrentUser() {
+        var context = SecurityContextHolder.getContext();
+        if (context == null || context.getAuthentication() == null) {
+            throw new AuthenticationProcessException(ErrorCode.AUTHENTICATION_CONTEXT_NOT_FOUND);
+        }
+
+        Authentication authentication = context.getAuthentication();
+
+        String email = authentication.getName();
+        if (email == null || email.isEmpty()) {
+            throw new AuthenticationProcessException(ErrorCode.AUTHENTICATION_EMAIL_MISSING);
+        }
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private void exchangeInvigilators(InvigilatorAssignment oldAssignment, InvigilatorRegistration newInvigilator) {
+        try {
+            oldAssignment.setInvigilatorRegistration(newInvigilator);
+            invigilatorAssignmentRepository.save(oldAssignment);
+        } catch (Exception e) {
+            log.error("Error in updating invigilator assignment: {}", e.getMessage());
+            throw new CustomException(ErrorCode.EXCHANGE_INVIGILATORS_FAILED);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -211,220 +409,6 @@ public class InvigilatorAssignmentServiceImpl implements InvigilatorAssignmentSe
         }
 
         registrations.subList(0, assignmentCount).clear();
-    }
-
-
-    public List<UserRegistrationResponseDTO> getUnassignedInvigilators(int examSlotId) {
-        if (examSlotId <= 0) {
-            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
-        }
-
-        List<InvigilatorRegistration> unassignedList = invigilatorRegistrationRepository.findUnassignedRegistrationsByExamSlot_IdOrderByCreatedAtAsc(examSlotId);
-
-        return invigilatorRegistrationMapper.mapBasicInvigilatorRegistration(unassignedList);
-    }
-
-    public List<InvigilatorAssignmentResponseDTO> getAssignedInvigilators(int examSlotId) {
-        if (examSlotId <= 0) {
-            throw new CustomException(ErrorCode.EXAM_SLOT_ID_MISSING);
-        }
-
-        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findInvigilatorAssignmentByInvigilatorRegistration_ExamSlot_Id(examSlotId);
-        Map<Integer, InvigilatorAssignment> assignmentMap = assignedList.stream()
-                .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
-
-        List<InvigilatorAssignmentResponseDTO> responseDTOList = invigilatorAssignmentMapper.mapInvigilatorAssignments(assignedList);
-        for (InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
-            assignment.setStatus(InvigilatorAssignmentStatus.fromValue(assignmentMap.get(assignment.getAssignmentId()).getStatus()).name());
-        }
-        return responseDTOList;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public String exchangeInvigilators(UpdateInvigilatorAssignmentRequestDTO request) {
-        int assignmentId = request.getAssignmentId();
-        int newRegistrationId = request.getNewRegistrationId();
-        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository.findById(assignmentId)
-                .orElseThrow(() -> {
-                    log.error("Assignment not found: {}", assignmentId);
-                    return new CustomException(ErrorCode.ASSIGNMENT_NOT_FOUND);
-                });
-        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository.findById(newRegistrationId)
-                .orElseThrow(() -> {
-                    log.error("New invigilator not found: {}", newRegistrationId);
-                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
-                });
-        exchangeInvigilators(oldAssignment, newInvigilator);
-        return "Exchanged successfully";
-    }
-
-    private void exchangeInvigilators(InvigilatorAssignment oldAssignment, InvigilatorRegistration newInvigilator) {
-        try {
-            oldAssignment.setInvigilatorRegistration(newInvigilator);
-            invigilatorAssignmentRepository.save(oldAssignment);
-        } catch (Exception e) {
-            log.error("Error in updating invigilator assignment: {}", e.getMessage());
-            throw new CustomException(ErrorCode.EXCHANGE_INVIGILATORS_FAILED);
-        }
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public String exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request) {
-
-        int examSlotId = requestEntity.getExamSlot().getId();
-        String oldInvigilatorFuId = requestEntity.getCreatedBy().getFuId();
-
-        InvigilatorAssignment oldAssignment = invigilatorAssignmentRepository
-                .findByExamSlotIdAndInvigilatorFuId(examSlotId, oldInvigilatorFuId)
-                .orElseThrow(() -> {
-                    log.error("Old invigilator not found: {}", oldInvigilatorFuId);
-                    return new CustomMessageException(HttpStatus.NOT_FOUND, "Invigilator with FuId " + oldInvigilatorFuId + " not found.");
-                });
-
-        InvigilatorRegistration newInvigilator = invigilatorRegistrationRepository
-                .findByExamSlotIdAndInvigilatorFuId(examSlotId, request.getNewInvigilatorFuId())
-                .orElseThrow(() -> {
-                    log.error("New invigilator not found: {}", request.getNewInvigilatorFuId());
-                    return new CustomException(ErrorCode.INVIGILATOR_NOT_FOUND);
-                });
-
-        exchangeInvigilators(oldAssignment, newInvigilator);
-        return "Exchanged successfully";
-    }
-
-
-    public Set<ExamSlotDetail> getAllExamSlotsInSemesterWithStatus(int semesterId) {
-        Semester semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
-
-        // Chuyển đổi allExamSlots từ List sang Set
-        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotsBySemesterWithDetails(semester, ExamSlotStatus.APPROVED.getValue()));
-
-        // Tạo một Set để lưu trữ kết quả cuối cùng
-        Set<ExamSlotDetail> examSlotDetails = new HashSet<>();
-        for (ExamSlot examSlot : allExamSlots) {
-            // Lấy một ExamSlotHall làm đại diện
-            int assignedInvigilators = invigilatorRegistrationRepository.countByExamSlot(examSlot);
-            Optional<ExamSlotHall> representativeHall = examSlotHallRepository.findFirstByExamSlot(examSlot);
-
-            String status;
-            if (representativeHall.isPresent() && representativeHall.get().getHallInvigilator() != null) {
-                status = ExamSlotInvigilatorStatus.ASSIGNED.name();
-            } else {
-                status = ExamSlotInvigilatorStatus.UNASSIGNED.name();
-            }
-            ExamSlotDetail examSlotDetail = invigilatorRegistrationMapper.toExamSlotDetail(examSlot);
-            examSlotDetail.setStatus(status);
-            examSlotDetails.add(examSlotDetail);
-            examSlotDetail.setNumberOfRegistered(assignedInvigilators);
-        }
-
-        return examSlotDetails;
-    }
-
-    public List<InvigilatorAssignmentResponseDTO> getAllExamSlotsAssignedInSemester(int semesterId) {
-        var semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
-
-        List<InvigilatorAssignment> assignedList = invigilatorAssignmentRepository.findBySemesterIdAndInvigilatorIdAndStatus(semester.getId(), getCurrentUser().getId());
-        Map<Integer, InvigilatorAssignment> assignmentMap = assignedList.stream()
-                .collect(Collectors.toMap(InvigilatorAssignment::getId, assignment -> assignment));
-
-        List<InvigilatorAssignmentResponseDTO> responseDTOList = invigilatorAssignmentMapper.mapInvigilatorAssignments(assignedList);
-        for (InvigilatorAssignmentResponseDTO assignment : responseDTOList) {
-            assignment.setStatus(InvigilatorAssignmentStatus.fromValue(assignmentMap.get(assignment.getAssignmentId()).getStatus()).name());
-        }
-        return responseDTOList;
-    }
-
-    @Override
-    @Transactional
-    public List<InvigilatorAssignment> managerApproveInvigilatorAssignments(List<Integer> invigilatorAssignmentIds) {
-        List<InvigilatorAssignment> invigilatorAssignments = invigilatorAssignmentRepository.findByIdIn(invigilatorAssignmentIds);
-        if (invigilatorAssignments.isEmpty()) {
-            throw new CustomException(ErrorCode.ASSIGNMENT_NOT_FOUND);
-        } else {
-            for (InvigilatorAssignment invigilatorAssignment : invigilatorAssignments) {
-                invigilatorAssignment.setStatus(InvigilatorAssignmentStatus.APPROVED.getValue());
-                invigilatorAssignment.setApprovedBy(getCurrentUser());
-                invigilatorAssignment.setApprovedAt(Instant.now());
-            }
-            if (invigilatorAssignmentRepository.saveAll(invigilatorAssignments).isEmpty()) {
-                throw new CustomException(ErrorCode.FAIL_TO_APPROVE_ASSIGNMENT);
-            } else {
-                invigilatorAttendanceService.addInvigilatorAttendances(invigilatorAssignments);
-                return invigilatorAssignments;
-            }
-        }
-    }
-
-    private User getCurrentUser() {
-        var context = SecurityContextHolder.getContext();
-        if (context == null || context.getAuthentication() == null) {
-            throw new AuthenticationProcessException(ErrorCode.AUTHENTICATION_CONTEXT_NOT_FOUND);
-        }
-
-        Authentication authentication = context.getAuthentication();
-
-        String email = authentication.getName();
-        if (email == null || email.isEmpty()) {
-            throw new AuthenticationProcessException(ErrorCode.AUTHENTICATION_EMAIL_MISSING);
-        }
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    //dashboard
-    @Override
-    public List<InvigilatorAssignment> getAllAssignmentsInTimeRange(Instant startTime, Instant endTime) {
-        return invigilatorAssignmentRepository.findAllByTimeRange(startTime, endTime);
-    }
-
-    @Override
-    public InvigilatorAssignmentReportResponseDTO getInvigilatorAssignmentReport(int semesterId) {
-        var semester = semesterRepository.findById(semesterId)
-                .orElseThrow(() -> new CustomException(ErrorCode.SEMESTER_NOT_FOUND));
-
-        User currentUser = getCurrentUser();
-
-        List<InvigilatorAttendance> attendances = invigilatorAttendanceRepository.findBySemesterAndInvigilator(semester, currentUser);
-
-        int totalAssignments = attendances.size();
-        int totalInvigilatedSlots = 0;
-        int totalRequiredSlots = 0;
-        int totalNonInvigilatedSlots = 0;
-
-        double totalAssignedHours = 0;
-        double totalInvigilatedHours = 0;
-        double totalRequiredInvigilationHours = 0;
-
-        for (InvigilatorAttendance attendance : attendances) {
-            ExamSlot examSlot = attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot();
-            double minutes = ChronoUnit.MINUTES.between(examSlot.getStartAt(), examSlot.getEndAt()) / 60.0;
-            if (attendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().isBefore(ZonedDateTime.now())) {
-                if (attendance.getCheckIn() != null && attendance.getCheckOut() != null) {
-                    totalInvigilatedSlots++;
-                    totalInvigilatedHours += minutes;
-                } else {
-                    totalNonInvigilatedSlots++;
-                }
-            } else {
-                totalRequiredSlots++;
-                totalRequiredInvigilationHours += minutes;
-            }
-            totalAssignedHours += minutes;
-        }
-
-        return InvigilatorAssignmentReportResponseDTO.builder()
-                .totalAssigned(totalAssignments)
-                .totalInvigilatedSlots(totalInvigilatedSlots)
-                .totalRequiredInvigilationSlots(totalRequiredSlots)
-                .totalNonInvigilatedSlots(totalNonInvigilatedSlots)
-                .totalAssignedHours(totalAssignedHours)
-                .totalInvigilatedHours(totalInvigilatedHours)
-                .totalRequiredInvigilationHours(totalRequiredInvigilationHours)
-                .build();
     }
 
 

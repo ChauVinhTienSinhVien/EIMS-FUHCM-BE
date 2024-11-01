@@ -17,7 +17,6 @@ public interface InvigilatorAssignmentService {
     List<ExamSlotRoomResponseDTO> assignInvigilators(List<Integer> examSlotIds);
     List<UserRegistrationResponseDTO> getUnassignedInvigilators(int examSlotId);
     List<InvigilatorAssignmentResponseDTO> getAssignedInvigilators(int examSlotId);
-    String exchangeInvigilators(UpdateInvigilatorAssignmentRequestDTO request);
     String exchangeInvigilators(Request requestEntity, ExchangeInvigilatorsRequestDTO request);
     Set<ExamSlotDetail> getAllExamSlotsInSemesterWithStatus(int semesterId);
     List<InvigilatorAssignmentResponseDTO> getAllExamSlotsAssignedInSemester (int semesterId);

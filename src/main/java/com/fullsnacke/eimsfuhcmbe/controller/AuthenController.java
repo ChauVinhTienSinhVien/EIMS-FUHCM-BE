@@ -10,6 +10,7 @@ import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.authentication.AuthenticationService;
+import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/v1/oauth")
@@ -38,9 +40,12 @@ public class AuthenController {
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
                 .path("/")
-                .secure(false)
+                .secure(true)
                 .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        // Manually append SameSite=None to the cookie header
+        String cookieHeader = cookie + "; SameSite=None";
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieHeader);
         return ResponseEntity.ok().body(authResponse);
     }
 
@@ -53,9 +58,12 @@ public class AuthenController {
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
                 .path("/")
-                .secure(false)
+                .secure(true)
                 .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        // Manually append SameSite=None to the cookie header
+        String cookieHeader = cookie + "; SameSite=None";
+        response.addHeader(HttpHeaders.SET_COOKIE, cookieHeader);
         return ResponseEntity.ok(authResponse);
     }
 
@@ -84,11 +92,22 @@ public class AuthenController {
         return ResponseEntity.ok().build();
     }
 
+//    @GetMapping("/user/info")
+//    public ResponseEntity<UserResponseDTO> getUserInfo(Principal principal) {
+//        User user = userServiceImpl.getUserByEmail(principal.getName());
+//        UserResponseDTO userResponseDTO = userMapper.toDto(user);
+//        return ResponseEntity.ok().body(userResponseDTO);
+//    }
+
     @GetMapping("/user/info")
-    public ResponseEntity<UserResponseDTO> getUserInfo(Principal principal) {
-        User user = userServiceImpl.getUserByEmail(principal.getName());
-        UserResponseDTO userResponseDTO = userMapper.toDto(user);
-        return ResponseEntity.ok().body(userResponseDTO);
+    public ResponseEntity<UserResponseDTO> getUserInfo( ) {
+        Optional<User> user = SecurityUntil.getLoggedInUser();
+        if (user.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }else {
+            UserResponseDTO userResponseDTO = userMapper.toDto(user.get());
+            return ResponseEntity.ok().body(userResponseDTO);
+        }
     }
 
 }

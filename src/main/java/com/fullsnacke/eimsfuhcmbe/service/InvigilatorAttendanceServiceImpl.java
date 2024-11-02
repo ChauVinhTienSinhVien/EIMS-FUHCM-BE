@@ -411,4 +411,8 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
         }
         return invigilatorAttendanceInDb;
     }
+
+    public List<InvigilatorAttendance> getInvigilatorAttendancesByStatus(int status) {
+        return invigilatorAttendanceRepository.findByStatus(status);
+    }
 }

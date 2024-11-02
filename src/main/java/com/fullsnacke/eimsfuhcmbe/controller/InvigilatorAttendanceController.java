@@ -130,6 +130,21 @@ public class InvigilatorAttendanceController {
             }
         }
 
+        @GetMapping("/manager/by-status/{status}")
+        @Operation(summary = "Get all invigilator attendance by status", description = "Retrieve a list of all invigilator attendance records by status")
+        public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorAttendanceByStatus(@PathVariable("status") int status) {
+            List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getInvigilatorAttendancesByStatus(status);
+
+            if (attendanceList.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            } else {
+                List<InvigilatorAttendanceResponseDTO> attendanceResponseDTOList = attendanceList.stream()
+                        .map(attendance -> invigilatorAttendanceMapper.toResponseDTO(attendance))
+                        .toList();
+                return ResponseEntity.ok(attendanceResponseDTOList);
+            }
+        }
+
         //Staff
         @PutMapping("/staff/checkin/{id}")
         @Operation(summary = "Staff Check in invigilator by InvigilatorAttendanceId", description = "Check in an invigilator by InvigilatorAttendanceId")

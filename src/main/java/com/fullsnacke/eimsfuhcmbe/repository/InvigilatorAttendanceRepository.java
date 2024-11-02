@@ -107,4 +107,6 @@ public interface InvigilatorAttendanceRepository extends JpaRepository<Invigilat
             "JOIN FETCH ir.examSlot es " +
             "WHERE ir.invigilator = :invigilator AND es.subjectExam.subjectId.semesterId = :semester")
     List<InvigilatorAttendance> findBySemesterAndInvigilator(Semester semester, User invigilator);
+
+    List<InvigilatorAttendance> findByStatus(int status);
 }

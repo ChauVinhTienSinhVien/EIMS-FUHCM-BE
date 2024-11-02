@@ -1,5 +1,8 @@
 package com.fullsnacke.eimsfuhcmbe.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum InvigilatorAttendanceStatus {
     PENDING(1),
     APPROVED(2),
@@ -9,10 +12,6 @@ public enum InvigilatorAttendanceStatus {
 
     InvigilatorAttendanceStatus(int value) {
         this.value = value;
-    }
-
-    public int getValue() {
-        return value;
     }
 
     public static InvigilatorAttendanceStatus fromValue(int value) {

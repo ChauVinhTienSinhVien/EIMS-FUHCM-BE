@@ -32,9 +32,9 @@ public class RequestController {
     RequestService requestService;
     RequestMapper requestMapper;
 
-    //Đã được xài trong send Request của role invigilator
     //INVIGILATOR
     @PostMapping
+    @Operation(summary = "Create request", description = "Create request for invigilator")
     public ResponseEntity<?> createRequest(@RequestBody RequestRequestDTO request) {
         String requestType = request.getRequestType().toLowerCase();
         ResponseEntity<?> responseEntity = ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request type");
@@ -54,7 +54,6 @@ public class RequestController {
         return responseEntity;
     }
 
-    //Đã được xài trong view Request của role invigilator
     //INVIGILATOR
     @GetMapping("/myinfo")
     @Operation(summary = "Get all requests of current invigilator")
@@ -64,6 +63,7 @@ public class RequestController {
                 .body(requestService.getAllRequestOfCurrentInvigilator());
     }
 
+    //INVIGILATOR / MANAGER
     @GetMapping("/request-types")
     @Operation(summary = "Get all request types")
     public ResponseEntity<RequestTypeResponseDTO> getAllRequestTypes() {
@@ -74,7 +74,7 @@ public class RequestController {
                 .body(RequestTypeResponseDTO.builder().requestTypes(requestTypes).build());
     }
 
-    //Đang ko xài
+    //MANAGER
     @GetMapping("requestid={requestId}")
     @Operation(summary = "Get request detail by request id")
     public ResponseEntity<?> getRequestById(@PathVariable int requestId) {
@@ -113,6 +113,7 @@ public class RequestController {
                 .body(requestService.updateRequestStatus(request));
     }
 
+    //MANAGER
     @PutMapping("/update-attendance/status")
     public ResponseEntity<?> updateAttendanceStatus(@RequestBody UpdateStatusRequestDTO request) {
         return ResponseEntity

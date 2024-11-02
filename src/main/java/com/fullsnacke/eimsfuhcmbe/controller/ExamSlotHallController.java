@@ -41,6 +41,7 @@ public class ExamSlotHallController {
     @Autowired
     private UserServiceImpl userServiceImpl;
 
+    //STAFF
     @GetMapping
     @Operation(summary = "Retrieve all exam slot halls", description = "Fetches a list of all exam slot halls from the system. If no exam slot halls are found, it will return a 204 No Content response.")
     public List<ExamSlotHallResponseDTO> getAllExamSlotHall() {
@@ -55,6 +56,7 @@ public class ExamSlotHallController {
         return examSlotHallResponseDTOList;
     }
 
+    //STAFF
     @PostMapping
     @Operation(summary = "Create a new exam slot hall", description = "Creates a new exam slot hall in the system.")
     public List<ExamSlotHallResponseDTO> addExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {
@@ -85,6 +87,7 @@ public class ExamSlotHallController {
         return examSlotHallResponseDTOList;
     }
 
+    //STAFF
     @PutMapping
     @Operation(summary = "Update an exam slot hall", description = "Updates an exam slot hall in the system.")
     public List<ExamSlotHallResponseDTO> updateExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {

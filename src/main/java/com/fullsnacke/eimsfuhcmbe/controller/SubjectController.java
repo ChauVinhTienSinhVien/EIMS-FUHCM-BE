@@ -29,6 +29,7 @@ public class SubjectController {
     @Autowired
     private SubjectMapper subjectMapper;
 
+    //STAFF
     @GetMapping
     @Operation(summary = "Get all subjects", description = "Retrieve a list of all subjects")
     public ResponseEntity<List<SubjectResponseDTO>> getAllSubjects() {
@@ -45,6 +46,7 @@ public class SubjectController {
         }
     }
 
+    //STAFF
     @PostMapping
     @Operation(summary = "Add a subject", description = "Add a new subject")
     public ResponseEntity<?> createSubject(@RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
@@ -65,6 +67,7 @@ public class SubjectController {
         return ResponseEntity.created(uri).body(subjectResponseDTO);
     }
 
+    //STAFF
     @PostMapping("/bulk")
     @Operation(summary = "Add multiple subjects", description = "Add multiple subjects")
     public ResponseEntity<List<SubjectResponseDTO>> importSubjects(@RequestBody @Valid List<SubjectRequestDTO> subjectRequestDTOList) {
@@ -83,6 +86,7 @@ public class SubjectController {
         return ResponseEntity.ok(subjectResponseDTOList);
     }
 
+    //STAFF
     @PutMapping("/{id}")
     @Operation(summary = "Update a subject", description = "Update an existing subject")
     public ResponseEntity<?> updateSubject(@PathVariable("id") int id, @RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
@@ -104,6 +108,7 @@ public class SubjectController {
         }
     }
 
+    //STAFF
     @GetMapping("/{id}")
     @Operation(summary = "Get a subject by id", description = "Retrieve a subject by id")
     public ResponseEntity<SubjectResponseDTO> findBySubjectCode(@PathVariable("id") int id) {
@@ -115,6 +120,7 @@ public class SubjectController {
         return ResponseEntity.ok(subjectResponseDTO);
     }
 
+    //STAFF
     @GetMapping("/by-semester/{semesterId}")
     @Operation(summary = "Get subjects by semester id", description = "Retrieve a list of subjects by semester id")
     public ResponseEntity<List<SubjectResponseDTO>> getSubjectBySemesterId(@PathVariable("semesterId") int semesterId) {
@@ -133,6 +139,7 @@ public class SubjectController {
         return ResponseEntity.ok(subjectResponseDTOList);
     }
 
+    //STAFF
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a subject by id", description = "Delete a subject by id")
     public ResponseEntity<?> deleteSubject(@PathVariable("id") int id) {

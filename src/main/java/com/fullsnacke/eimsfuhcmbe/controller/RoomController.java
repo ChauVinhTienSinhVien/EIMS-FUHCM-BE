@@ -28,6 +28,7 @@ public class RoomController {
         this.modelMapper = modelMapper;
     }
 
+    //STAFF
     @GetMapping
     @Operation(summary = "Get all rooms", description = "Retrieve a list of all rooms")
     public ResponseEntity<List<Room>> getAllRooms() {
@@ -39,6 +40,7 @@ public class RoomController {
         }
     }
 
+    //STAFF
     @PostMapping
     @Operation(summary = "Add a room", description = "Add a new room")
     public ResponseEntity<RoomResponseDTO> createRoom(@RequestBody @Valid RoomRequestDTO roomRequestDTO) {
@@ -49,6 +51,7 @@ public class RoomController {
         return ResponseEntity.created(uri).body(roomResponseDTO);
     }
 
+    //STAFF
     @PutMapping("/{id}")
     @Operation(summary = "Update a room", description = "Update a room by ID")
     public ResponseEntity<RoomResponseDTO> updateRoom(@PathVariable("id") int id, @RequestBody @Valid RoomRequestDTO roomRequestDTO) {
@@ -62,6 +65,7 @@ public class RoomController {
         }
     }
 
+    //STAFF
     @GetMapping("/{name}")
     @Operation(summary = "Get room by name", description = "Retrieve a room by name")
     public ResponseEntity<List<RoomResponseDTO>> findByRoomName(@PathVariable("name") String name) {

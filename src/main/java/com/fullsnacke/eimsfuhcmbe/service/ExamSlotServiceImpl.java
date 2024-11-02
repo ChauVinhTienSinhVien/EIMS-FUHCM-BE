@@ -38,6 +38,8 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     private ExamSlotRoomRepository examSlotRoomRepository;
     @Autowired
     private InvigilatorRegistrationRepository invigilatorRegistrationRepository;
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     @Override
     public List<ExamSlot> getAllExamSlot() {
@@ -199,6 +201,23 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         List<ExamSlot> existingExamSlots = examSlotRepository.findBySubjectAndTime(
                 examSlot.getSubjectExam().getId(), examSlot.getStartAt(), examSlot.getEndAt());
         return !existingExamSlots.isEmpty();
+    }
+
+    @Override
+    public List<ExamSlot> getExamSlotsBySubjectId(int subjectId) {
+        List<ExamSlot> examSlotList = examSlotRepository.findBySubjectExam_SubjectId_Id(subjectId);
+        if (examSlotList == null) {
+            throw new SubjectNotFoundException("Subject not found with ID: " + subjectId);
+        }
+        for (ExamSlot examSlot : examSlotList) {
+            System.out.println(
+                    "Exam Slot ID: " + examSlot.getId() +
+                            " Subject ID: " + examSlot.getSubjectExam().getSubjectId().getId() +
+                            " Semester ID: " + examSlot.getSubjectExam().getSubjectId().getSemesterId().getId() +
+                            " Status: " + examSlot.getStatus()
+            );
+        }
+        return examSlotList;
     }
 
 }

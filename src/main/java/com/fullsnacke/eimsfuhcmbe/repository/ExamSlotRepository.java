@@ -2,6 +2,7 @@ package com.fullsnacke.eimsfuhcmbe.repository;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
+import com.fullsnacke.eimsfuhcmbe.entity.Subject;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import lombok.Data;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -79,6 +80,8 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
 
     @Query("SELECT e FROM ExamSlot e WHERE e.subjectExam.subjectId.semesterId = :semester ORDER BY e.startAt ASC")
     ExamSlot findOldestExamSlotBySemester(@Param("semester") Semester semester);
+
+    List<ExamSlot> findBySubjectExam_SubjectId_Id(int subjectExamId);
 
 }
 

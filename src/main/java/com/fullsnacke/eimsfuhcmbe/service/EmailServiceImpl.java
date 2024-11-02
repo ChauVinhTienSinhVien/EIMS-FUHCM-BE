@@ -5,7 +5,6 @@ import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
-import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAssignmentRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
@@ -16,12 +15,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -40,7 +37,6 @@ public class EmailServiceImpl implements EmailService {
     public static final String ATTENDANCE_AND_TOTAL_AMOUNT_REPORT = "Attendance and Total Amount Report";
     public static final String ATTENDANCE_AND_TOTAL_HOURS_XLSX = "AttendanceAndTotalHours.xlsx";
     public static final String EMAIL_TEMPLATE = "AttendenceAndTotalAmountReportTemplate";
-    private final InvigilatorAssignmentRepository invigilatorAssignmentRepository;
 
     @NonFinal
     String fromEmail;

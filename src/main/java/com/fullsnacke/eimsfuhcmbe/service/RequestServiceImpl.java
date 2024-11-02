@@ -49,6 +49,7 @@ public class RequestServiceImpl implements RequestService {
     InvigilatorRegistrationService invigilatorRegistrationService;
     InvigilatorRegistrationRepository invigilatorRegistrationRepository;
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO createRequest(RequestRequestDTO request) {
         if (request == null) {
@@ -77,6 +78,7 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
+    @Override
     public Request createAttendanceUpdateRequest(Request request) {
         if (request == null) {
             throw new CustomException(ErrorCode.REQUEST_EMPTY);
@@ -120,6 +122,7 @@ public class RequestServiceImpl implements RequestService {
         return responseDTO;
     }
 
+    @Override
     public List<RequestResponseDTO> getAllRequestOfCurrentInvigilator() {
         User currentUser = getCurrentUser();
         List<Request> entity = requestRepository.findByCreatedBy(currentUser);
@@ -127,6 +130,7 @@ public class RequestServiceImpl implements RequestService {
         return getAllRequestsByInvigilator(currentUser);
     }
 
+    @Override
     public List<RequestResponseDTO> getAllRequestByInvigilatorId(String invigilatorId) {
         User invigilator = userRepository.findByFuId(invigilatorId);
         if (invigilator == null) {
@@ -136,18 +140,7 @@ public class RequestServiceImpl implements RequestService {
         return getAllRequestsByInvigilator(invigilator);
     }
 
-    private List<RequestResponseDTO> getAllRequestsByInvigilator(User invigilator) {
-        List<Request> entity = requestRepository.findByCreatedBy(invigilator);
-
-        return entity.stream()
-                .map(request -> {
-                    RequestResponseDTO responseDTO = requestMapper.toResponseDTO(request);
-                    responseDTO.setStatus(RequestStatusEnum.fromValue(request.getStatus()).name());
-                    return responseDTO;
-                })
-                .toList();
-    }
-
+    @Override
     public RequestResponseDTO getRequestById(int requestId) {
         Request entity = requestRepository.findById(requestId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
@@ -157,6 +150,7 @@ public class RequestServiceImpl implements RequestService {
         return responseDTO;
     }
 
+    @Override
     public List<ManagerRequestResponseDTO> getAllRequestBySemester(int semesterId) {
         List<Request> entity = requestRepository.findByExamSlot_SubjectExam_SubjectId_SemesterId_Id(semesterId);
         return entity.stream()
@@ -168,6 +162,7 @@ public class RequestServiceImpl implements RequestService {
                 .toList();
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO updateRequestStatus(ExchangeInvigilatorsRequestDTO request) {
         //find request by id
@@ -248,6 +243,18 @@ public class RequestServiceImpl implements RequestService {
 
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private List<RequestResponseDTO> getAllRequestsByInvigilator(User invigilator) {
+        List<Request> entity = requestRepository.findByCreatedBy(invigilator);
+
+        return entity.stream()
+                .map(request -> {
+                    RequestResponseDTO responseDTO = requestMapper.toResponseDTO(request);
+                    responseDTO.setStatus(RequestStatusEnum.fromValue(request.getStatus()).name());
+                    return responseDTO;
+                })
+                .toList();
     }
 
 

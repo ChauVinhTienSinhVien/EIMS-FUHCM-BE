@@ -46,51 +46,14 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
     ConfigurationHolder configurationHolder;
     InvigilatorRegistrationMapper invigilatorRegistrationMapper;
 
-    @Transactional(rollbackFor = Exception.class)
-    public boolean deleteRegisteredSlotsBySemester(RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
-        Semester semester = getSemesterById(request.getSemesterId());
-        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
-                .findByInvigilatorAndSemesterWithDetails(
-                        findInvigilatorByFuId(request.getFuId()), semester);
-        invigilatorRegistrationRepository.deleteAll(registrations);
-        return true;
-    }
-
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Set<ExamSlotDetail> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(Set<Integer> request) {
         User currentInvigilator = getCurrentUser();
         return deleteSelectedRegisteredSlots(currentInvigilator, request);
     }
 
-//    @Transactional(rollbackFor = Exception.class)
-//    public Set<ExamSlotDetail> deleteRegisteredSlotByExamSlotId(InvigilatorRegistrationRequestDTO request) {
-//        User invigilator = findInvigilatorByFuId(request.getFuId());
-//        return deleteSelectedRegisteredSlots(invigilator, request);
-//    }
-
-    @Transactional(rollbackFor = Exception.class)
-    protected Set<ExamSlotDetail> deleteSelectedRegisteredSlots(User invigilator, Set<Integer> request) {
-        log.info("request: {}", request.stream().map(String::valueOf).collect(Collectors.joining(", ")));
-        log.info("invigilator: {}", invigilator.getFuId());
-        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
-                .findByInvigilatorFuIdAndExamSlotIdsWithDetails(invigilator.getFuId(), request);
-        log.info("registrations: {}", registrations);
-        if (registrations.isEmpty()) {
-            throw new CustomException(ErrorCode.NO_REGISTRATION_FOUND);
-        }
-
-        try {
-            invigilatorRegistrationRepository.deleteAll(registrations);
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.DELETE_REGISTRATIONS_FAILED);
-        }
-
-        return invigilatorRegistrationMapper
-                .mapExamSlotDetails(registrations
-                        .stream().map(InvigilatorRegistration::getExamSlot)
-                        .collect(Collectors.toSet()));
-    }
-
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public InvigilatorRegistrationResponseDTO registerExamSlotWithoutFuId(InvigilatorRegistrationRequestDTO request) {
         User invigilator = getCurrentUser();
@@ -98,93 +61,21 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         return registerExamSlot(invigilator, request);
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public InvigilatorRegistrationResponseDTO registerExamSlotWithFuId(InvigilatorRegistrationRequestDTO request) {
         User invigilator = findInvigilatorByFuId(request.getFuId());
         return registerExamSlot(invigilator, request);
     }
 
-    //dashboard
     @Override
-    public List<InvigilatorRegistration> getAllRegistrationsInTimeRange(Instant startTime, Instant endTime) {
-        return invigilatorRegistrationRepository.findAllByTimeRange(startTime, endTime);
-    }
-
-    private InvigilatorRegistrationResponseDTO registerExamSlot(User invigilator, InvigilatorRegistrationRequestDTO request) {
-
-        Set<Integer> requestExamSlotId = request.getExamSlotId();
-
-        validateExamSlotId(requestExamSlotId);
-
-        ExamSlot representativeExamSlot = findRepresentativeExamSlot(requestExamSlotId);
-
-        Semester semester = representativeExamSlot.getSubjectExam().getSubjectId().getSemesterId();
-
-        //int allowedSlot = Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue());
-        int allowedSlot = configurationHolder.getAllowedSlot();
-        if (requestExamSlotId.size() > allowedSlot) {
-            throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);
-        }
-
-        Set<ExamSlotDetail> slotDetails = validateAndGetNonOverlappingExamSlotsDetail(invigilator, semester, requestExamSlotId);
-
-        Set<InvigilatorRegistration> registrations = createRegistrations(invigilator, requestExamSlotId);
-
-        invigilatorRegistrationRepository.saveAll(registrations);
-
-        return createResponseDTO(invigilator, semester, slotDetails);
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlots() {
-        User currentUser = getCurrentUser();
-        return getAllRegisteredSlotsByInvigilator(currentUser.getFuId());
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    public RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsByInvigilator(String fuId) {
-        User invigilator = findInvigilatorByFuId(fuId);
-
-        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository.findByInvigilatorWithDetails(invigilator);
-
-        List<SemesterInvigilatorRegistrationResponseDTO> semesterInvigilatorRegistrationList = new ArrayList<>();
-
-        Map<Integer, Map<String, Set<ExamSlotDetail>>> groupedRegistrations = new HashMap<>();
-
-        for (InvigilatorRegistration registration : registrations) {
-            Semester semester = registration.getExamSlot().getSubjectExam().getSubjectId().getSemesterId();
-
-            ExamSlotDetail detail = invigilatorRegistrationMapper.toExamSlotDetailInvigilator(registration.getExamSlot());
-
-            groupedRegistrations
-                    .computeIfAbsent(semester.getId(), k -> new HashMap<>())
-                    .computeIfAbsent(semester.getName(), k -> new HashSet<>())
-                    .add(detail);
-        }
-
-        for (Map.Entry<Integer, Map<String, Set<ExamSlotDetail>>> semesterIdEntry : groupedRegistrations.entrySet()) {
-            for (Map.Entry<String, Set<ExamSlotDetail>> semesterNameEntry : semesterIdEntry.getValue().entrySet()) {
-                SemesterInvigilatorRegistrationResponseDTO semesterInvigilatorRegistrationResponseDTO = SemesterInvigilatorRegistrationResponseDTO.builder()
-                        .semesterId(semesterIdEntry.getKey())
-                        .semesterName(semesterNameEntry.getKey())
-                        .examSlotDetailSet(semesterNameEntry.getValue())
-                        .build();
-                semesterInvigilatorRegistrationList.add(semesterInvigilatorRegistrationResponseDTO);
-            }
-        }
-
-        return RegisteredExamInvigilationResponseDTO.builder()
-                .fuId(fuId)
-                .semesterInvigilatorRegistration(semesterInvigilatorRegistrationList)
-                .build();
-    }
-
     @Transactional(rollbackFor = Exception.class)
     public RegisteredExamInvigilationResponseDTO getAllCurrentInvigilatorRegisteredSlotsInSemester(int semesterId) {
         User currentUser = getCurrentUser();
         return getAllRegisteredSlotsInSemesterByInvigilator(semesterId, currentUser.getFuId());
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public RegisteredExamInvigilationResponseDTO getAllRegisteredSlotsInSemesterByInvigilator(int semesterId, String fuId) {
         User invigilator = findInvigilatorByFuId(fuId);
@@ -209,66 +100,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
                 .build();
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public InvigilatorRegistrationResponseDTO updateRegisterExamSlot(InvigilatorRegistrationRequestDTO request) {
-        User invigilator = findInvigilatorByFuId(request.getFuId());
-
-        Set<Integer> requestExamSlotId = request.getExamSlotId();
-
-        validateExamSlotId(request.getExamSlotId());
-
-        ExamSlot representativeExamSlot = findRepresentativeExamSlot(requestExamSlotId);
-
-        Semester semester = representativeExamSlot.getSubjectExam().getSubjectId().getSemesterId();
-
-        deleteExistingRegistration(invigilator, semester);
-
-        Set<ExamSlotDetail> slotDetails = validateAndGetNonOverlappingExamSlotsDetail(invigilator, semester, requestExamSlotId);
-
-        Set<InvigilatorRegistration> registrations = createRegistrations(invigilator, requestExamSlotId);
-
-        invigilatorRegistrationRepository.saveAll(registrations);
-
-        return createResponseDTO(invigilator, semester, slotDetails);
-    }
-
-    public Set<RegisteredExamBySemesterResponseDTO> getRegisteredExamBySemester(int semesterId) {
-
-        Semester semester = getSemesterById(semesterId);
-
-        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
-                .findBySemesterWithDetails(semester);
-
-        Map<String, RegisteredExamBySemesterResponseDTO> registeredExamBySemesterMap = new HashMap<>();
-
-        for (InvigilatorRegistration registration : registrations) {
-            String fuId = registration.getInvigilator().getFuId();
-            RegisteredExamBySemesterResponseDTO registeredExamBySemester = registeredExamBySemesterMap.get(fuId);
-            if (registeredExamBySemester == null) {
-                registeredExamBySemester = RegisteredExamBySemesterResponseDTO.builder()
-                        .fuId(fuId)
-                        .examSlotDetails(new HashSet<>())
-                        .build();
-                registeredExamBySemesterMap.put(fuId, registeredExamBySemester);
-            }
-            registeredExamBySemester
-                    .getExamSlotDetails()
-                    .add(invigilatorRegistrationMapper.toExamSlotDetailInvigilator(registration.getExamSlot()));
-        }
-
-        return new HashSet<>(registeredExamBySemesterMap.values());
-    }
-
-    public ListInvigilatorsByExamSlotResponseDTO listInvigilatorsByExamSlot(int examSlotId) {
-        ExamSlot examSlot = examSlotRepository.findById(examSlotId)
-                .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found."));
-        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository.findByExamSlot(examSlot);
-
-        ListInvigilatorsByExamSlotResponseDTO response = invigilatorRegistrationMapper.toListInvigilatorsByExamSlotResponseDTO(examSlot);
-        response.setUserRegistrationResponseDTOSet(invigilatorRegistrationMapper.mapInvigilatorRegistrations(registrations));
-        return response;
-    }
-
+    @Override
     public RegisteredExamBySemesterResponseDTO getAllExamSlotsInSemesterWithStatus(int semesterId) {
         User currentUser = getCurrentUser();
         Semester semester = getSemesterById(semesterId);
@@ -308,6 +140,22 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
                 .examSlotDetails(examSlotDetails)
                 .build();
     }
+
+    @Override
+    public Set<ExamSlotDetail> getCancellableExamSlots(int semesterId) {
+        User currentUser = getCurrentUser();
+        Semester semester = getSemesterById(semesterId);
+
+        Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
+                .findCancellableExamSlotsBySemesterId(semester, currentUser);
+
+        return invigilatorRegistrationMapper.mapCancelExamSlotDetails(registrations
+                .stream()
+                .map(InvigilatorRegistration::getExamSlot)
+                .collect(Collectors.toSet()));
+    }
+
+    //-------------PRIVATE METHODS----------------
 
     private Semester getSemesterById(int semesterId) {
         return semesterRepository.findById(semesterId)
@@ -351,12 +199,6 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
                 .semester(semester)
                 .examSlots(slotDetails)
                 .build();
-    }
-
-    private void deleteExistingRegistration(User invigilator, Semester semester) {
-        Set<InvigilatorRegistration> existingRegistrations = invigilatorRegistrationRepository
-                .findByInvigilatorAndSemesterWithDetails(invigilator, semester);
-        invigilatorRegistrationRepository.deleteAll(existingRegistrations);
     }
 
     private User getCurrentUser() {
@@ -441,16 +283,50 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         return Integer.parseInt(configService.getConfigBySemesterIdAndConfigType(semester.getId(), ALLOWED_SLOT.getValue()).getValue());
     }
 
-    public Set<ExamSlotDetail> getCancellableExamSlots(int semesterId) {
-        User currentUser = getCurrentUser();
-        Semester semester = getSemesterById(semesterId);
+    private InvigilatorRegistrationResponseDTO registerExamSlot(User invigilator, InvigilatorRegistrationRequestDTO request) {
 
+        Set<Integer> requestExamSlotId = request.getExamSlotId();
+
+        validateExamSlotId(requestExamSlotId);
+
+        ExamSlot representativeExamSlot = findRepresentativeExamSlot(requestExamSlotId);
+
+        Semester semester = representativeExamSlot.getSubjectExam().getSubjectId().getSemesterId();
+
+        int allowedSlot = configurationHolder.getAllowedSlot();
+        if (requestExamSlotId.size() > allowedSlot) {
+            throw new CustomException(ErrorCode.EXCEEDED_ALLOWED_SLOT);
+        }
+
+        Set<ExamSlotDetail> slotDetails = validateAndGetNonOverlappingExamSlotsDetail(invigilator, semester, requestExamSlotId);
+
+        Set<InvigilatorRegistration> registrations = createRegistrations(invigilator, requestExamSlotId);
+
+        invigilatorRegistrationRepository.saveAll(registrations);
+
+        return createResponseDTO(invigilator, semester, slotDetails);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    protected Set<ExamSlotDetail> deleteSelectedRegisteredSlots(User invigilator, Set<Integer> request) {
+        log.info("request: {}", request.stream().map(String::valueOf).collect(Collectors.joining(", ")));
+        log.info("invigilator: {}", invigilator.getFuId());
         Set<InvigilatorRegistration> registrations = invigilatorRegistrationRepository
-                .findCancellableExamSlotsBySemesterId(semester, currentUser);
+                .findByInvigilatorFuIdAndExamSlotIdsWithDetails(invigilator.getFuId(), request);
+        log.info("registrations: {}", registrations);
+        if (registrations.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_REGISTRATION_FOUND);
+        }
 
-        return invigilatorRegistrationMapper.mapCancelExamSlotDetails(registrations
-                .stream()
-                .map(InvigilatorRegistration::getExamSlot)
-                .collect(Collectors.toSet()));
+        try {
+            invigilatorRegistrationRepository.deleteAll(registrations);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.DELETE_REGISTRATIONS_FAILED);
+        }
+
+        return invigilatorRegistrationMapper
+                .mapExamSlotDetails(registrations
+                        .stream().map(InvigilatorRegistration::getExamSlot)
+                        .collect(Collectors.toSet()));
     }
 }

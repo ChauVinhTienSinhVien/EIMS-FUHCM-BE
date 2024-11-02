@@ -10,7 +10,5 @@ public interface ExamSlotHallService {
     List<ExamSlotHall> getAllExamSlotHall();
     List<ExamSlotHall> addExamSlotHalls(ExamSlotHallRequestDTO examSlotHallRequestDTO);
     List<ExamSlotHall> updateExamSlotHall(ExamSlotHallRequestDTO examSlotHallRequestDTO);
-    ExamSlotHall deleteExamSlotHall(int examSlotHallId);
-    ExamSlotHall getExamSlotHallById(int examSlotHallId);
 
 }

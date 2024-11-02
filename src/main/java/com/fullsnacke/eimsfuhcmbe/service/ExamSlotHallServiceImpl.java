@@ -106,13 +106,4 @@ public class ExamSlotHallServiceImpl implements ExamSlotHallService {
         return newExamSlotHallList;
     }
 
-    @Override
-    public ExamSlotHall deleteExamSlotHall(int examSlotHallId) {
-        return null;
-    }
-
-    @Override
-    public ExamSlotHall getExamSlotHallById(int examSlotHallId) {
-        return null;
-    }
 }

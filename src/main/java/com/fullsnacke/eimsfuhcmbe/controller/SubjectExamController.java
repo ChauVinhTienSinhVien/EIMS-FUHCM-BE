@@ -42,6 +42,7 @@ public class SubjectExamController {
     @Autowired
     private SemesterRepository semesterRepository;
 
+    //STAFF
     @GetMapping
     @Operation(summary = "Get all subject exams", description = "Retrieve a list of all subject exams")
     public ResponseEntity<List<SubjectExamResponseDTO>> getAllSubjectExams() {
@@ -58,6 +59,7 @@ public class SubjectExamController {
         }
     }
 
+    //STAFF
     @PostMapping
     @Operation(summary = "Add a subject exam", description = "Add a new subject exam")
     public ResponseEntity<?> createSubjectExam(@RequestBody @Valid SubjectExamRequestDTO subjectExamRequestDTO) {
@@ -78,6 +80,8 @@ public class SubjectExamController {
         return ResponseEntity.created(uri).body(subjectExamResponseDTO);
     }
 
+
+    //STAFF
     @PutMapping("/{id}")
     @Operation(summary = "Update a subject exam", description = "Update a subject exam")
     public ResponseEntity<SubjectExamResponseDTO> updateSubjectExam(@PathVariable("id") int id, @RequestBody @Valid SubjectExamRequestDTO subjectExamRequestDTO) {
@@ -98,6 +102,7 @@ public class SubjectExamController {
 
     }
 
+    //STAFF
     @GetMapping("/{id}")
     @Operation(summary = "Get a subject exam by id", description = "Retrieve a subject exam by id")
     public ResponseEntity<SubjectExamResponseDTO> findSubjectExamById(@PathVariable("id") int id) {
@@ -109,6 +114,7 @@ public class SubjectExamController {
         return ResponseEntity.ok(subjectExamResponseDTO);
     }
 
+    //STAFF
     @GetMapping("/by-semester/{semesterId}")
     @Operation(summary = "Get subject exams by semester id", description = "Retrieve a list of subject exams by semester id")
     public ResponseEntity<List<SubjectExamResponseDTO>> findSubjectExamBySemesterId(@PathVariable("semesterId") int semesterId) {
@@ -126,6 +132,7 @@ public class SubjectExamController {
         return ResponseEntity.ok(subjectExamResponseDTOList);
     }
 
+    //STAFF
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a subject exam", description = "Delete a subject exam")
     public ResponseEntity<?> deleteSubjectExam(@PathVariable("id") int id) {

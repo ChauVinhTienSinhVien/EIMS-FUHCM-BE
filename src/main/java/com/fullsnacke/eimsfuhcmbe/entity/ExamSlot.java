@@ -44,6 +44,9 @@ public class ExamSlot {
     @Convert(converter = ZonedDateTimeCoverter.class)
     ZonedDateTime endAt;
 
+    @Column(name = "number_of_students", nullable = false)
+    Integer numberOfStudents;
+
     @Column(name = "required_invigilators")
     Integer requiredInvigilators;
 

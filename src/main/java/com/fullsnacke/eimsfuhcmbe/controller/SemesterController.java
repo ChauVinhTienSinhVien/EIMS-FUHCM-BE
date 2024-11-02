@@ -27,11 +27,10 @@ public class SemesterController {
     @Autowired
     private SemesterServiceImpl semesterServiceImpl;
     @Autowired
-    private ConfigServiceImpl configServiceImpl;
-    @Autowired
     private ModelMapper modelMapper;
 
-
+    //Invigilator
+    //Manager
     @GetMapping
     @Operation(summary = "Get all semesters", description = "Retrieve a list of all semesters")
     public ResponseEntity<List<SemesterResponseDTO>> getAllSemesters() {
@@ -56,6 +55,7 @@ public class SemesterController {
 
     }
 
+    //Manager
     @PostMapping
     @Operation(summary = "Add a semester", description = "Add a new semester")
     public ResponseEntity<SemesterResponseDTO> createSemester(@RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
@@ -66,6 +66,7 @@ public class SemesterController {
         return ResponseEntity.created(uri).body(semesterResponseDTO);
     }
 
+    //Manager
     @PutMapping("/{id}")
     @Operation(summary = "Update a semester", description = "Update a semester")
     public ResponseEntity<SemesterResponseDTO> updateSemester(@PathVariable("id") int id, @RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
@@ -87,6 +88,10 @@ public class SemesterController {
         return ResponseEntity.ok(semesterResponseDTO);
     }
 
+
+    //Manager
+    //Staff
+    //Invigilator
     @GetMapping("/{name}")
     @Operation(summary = "Get a semester by name", description = "Retrieve a semester by name")
     public ResponseEntity<SemesterResponseDTO> findSemesterByName(@PathVariable("name") String name){

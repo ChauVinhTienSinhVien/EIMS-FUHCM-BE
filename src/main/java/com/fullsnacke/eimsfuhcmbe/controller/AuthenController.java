@@ -71,7 +71,6 @@ public class AuthenController {
         return ResponseEntity.ok().build();
     }
 
-
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         final ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", "")

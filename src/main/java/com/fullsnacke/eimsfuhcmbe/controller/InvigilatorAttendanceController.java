@@ -61,6 +61,8 @@ public class InvigilatorAttendanceController {
             return ResponseEntity.ok(examSlotResponseDTOList);
         }
 
+        //Manager
+        //Staff
         @GetMapping
         @Operation(summary = "Get all invigilator attendance", description = "Retrieve a list of all invigilator attendance records")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getAllInvigilatorAttendance() {
@@ -76,6 +78,7 @@ public class InvigilatorAttendanceController {
             }
         }
 
+        //Staff
         @GetMapping("/staff/today")
         @Operation(summary = "Get today invigilator attendance", description = "Retrieve a list of all today's invigilator attendance records")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getTodayInvigilatorAttendance() {
@@ -92,6 +95,7 @@ public class InvigilatorAttendanceController {
             }
         }
 
+        //Staff
         @GetMapping("/staff/day")
         @Operation(summary = "Get all invigilator attendance by day", description = "Retrieve a list of all invigilator attendance records by day")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getTodayInvigilatorAttendance(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
@@ -126,6 +130,7 @@ public class InvigilatorAttendanceController {
             }
         }
 
+        //Staff
         @PutMapping("/staff/checkin/{id}")
         @Operation(summary = "Staff Check in invigilator by InvigilatorAttendanceId", description = "Check in an invigilator by InvigilatorAttendanceId")
         public ResponseEntity<InvigilatorAttendanceResponseDTO> checkIn(@PathVariable("id") Integer id) {
@@ -134,6 +139,7 @@ public class InvigilatorAttendanceController {
             return ResponseEntity.ok(invigilatorAttendanceResponseDTO);
         }
 
+        //Staff
         @PutMapping("/staff/checkout/{id}")
         @Operation(summary = "Staff Check out invigilator", description = "Check out an invigilator by InvigilatorAttendanceId")
         public ResponseEntity<InvigilatorAttendanceResponseDTO> checkOut(@PathVariable("id") Integer id) {

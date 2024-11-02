@@ -6,24 +6,23 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.ConfigRequestDto;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ConfigResponseDto;
 import com.fullsnacke.eimsfuhcmbe.entity.Config;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
-import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
-import com.fullsnacke.eimsfuhcmbe.enums.ConfigUnit;
 import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.service.ConfigServiceImpl;
-import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
+
 import com.fullsnacke.eimsfuhcmbe.util.DateValidationUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
+
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/configs")
@@ -46,6 +45,7 @@ public class ConfigController {
 
     //Manager
     @GetMapping
+    @PreAuthorize("hasAuthority('config:read')")
     @Operation(summary = "Get all configs", description = "Retrieve a list of all configuarations")
     public ResponseEntity<List<ConfigResponseDto>> getAllConfigs() {
         List<Config> configList = configServiceImpl.getAllConfig();
@@ -61,9 +61,10 @@ public class ConfigController {
             return ResponseEntity.ok(configResponseDtoList);
         }
     }
-    
+
     //Manager
     @PutMapping("{id}")
+    @PreAuthorize("hasAuthority('config:write')")
     @Operation(summary = "Update a config", description = "Update a configuration")
     public ResponseEntity<ConfigResponseDto> updateConfig(@PathVariable Integer id, @RequestBody ConfigRequestDto configRequestDto){
         Config config = configMapper.toEntity(configRequestDto);
@@ -87,6 +88,7 @@ public class ConfigController {
     //Invigilator
     //Manager
     @GetMapping("/semester/{semesterId}")
+    @PreAuthorize("hasAuthority('config:read')")
     @Operation(summary = "Get all configs by semester", description = "Retrieve a list of all configuarations by semester")
     public ResponseEntity<List<ConfigResponseDto>> getConfigBySemesterId(@PathVariable Integer semesterId){
         List<Config> configList = configServiceImpl.getConfigBySemesterId(semesterId);
@@ -104,6 +106,7 @@ public class ConfigController {
 
     //Manager
     @GetMapping("/latest-semester")
+    @PreAuthorize("hasAuthority('config:read')")
     @Operation(summary = "Get all configs of latest-semester", description = "Retrieve a list of all configuarations of the latest-semester")
     public ResponseEntity<List<ConfigResponseDto>> getConfigOfLatestSemester(){
         List<Config> configList = configServiceImpl.getConfigOfLatestSemester();

@@ -43,4 +43,6 @@ public class ExamSlotResponseDTO {
 
     Instant updatedAt;
 
+    // approved By ?
+
 }

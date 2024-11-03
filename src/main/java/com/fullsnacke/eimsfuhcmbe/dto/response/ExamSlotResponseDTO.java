@@ -29,6 +29,8 @@ public class ExamSlotResponseDTO {
 
     Integer requiredInvigilators;
 
+    Integer numberOfStudents;
+
     Instant createdAt;
 
     String createdByLastName;

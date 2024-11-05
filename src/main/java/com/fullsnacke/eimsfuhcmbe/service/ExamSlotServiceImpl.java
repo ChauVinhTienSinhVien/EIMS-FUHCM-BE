@@ -92,6 +92,10 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
         User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
 
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with ID: " + examSlotInRequest.getApprovedBy().getId());
+        }
+
         if (examSlotInDB == null)
             throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
 

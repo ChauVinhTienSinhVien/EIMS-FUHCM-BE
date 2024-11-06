@@ -39,7 +39,12 @@ public enum Role {
 
                     SEMESTER_READ,
                     SEMESTER_WRITE,
-                    SEMESTER_CREATE
+                    SEMESTER_CREATE,
+
+                    USER_CREATE,
+                    USER_READ,
+                    USER_WRITE,
+                    USER_DELETE
             )
     ),
 

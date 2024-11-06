@@ -59,11 +59,6 @@ server:
   port: ${SERVER_PORT}
   servlet:
     context-path: ${CONTEXT_PATH}
-  ssl:
-    key-store: keystore.p12
-    key-store-password: 231104
-    keyStoreType: PKCS12
-    keyAlias: tomcat
 
   #logging:
 #  level:

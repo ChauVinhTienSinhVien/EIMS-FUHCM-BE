@@ -1,0 +1,49 @@
+//1. Build Docker File
+
+-> docker buildx build --platform linux/amd64 -t chauvinhtiensinhvien/eims-test:1.0 .
+
+-chauvinhtiensinhvien: repo/username
+-eims-test: image name
+-1.0: tag name
+
+//2. Push image to repository
+docker push chauvinhtiensinhvien/eims-test:1.0 
+
+//3. Connect to ec2
+-> ssh -i eims-aws-kp.pem ec2-user@3.80.128.168
+
+- eims-aws-kp.pem: key file
+- 3.80.128.168: public ip4 address
+
+//4. Check docker images
+-> sudo docker images
+
+//5. Check docker process
+-> sudo docker ps
+
+//6. Run the docker image
+-> sudo docker run -d -p 80:8080 chauvinhtiensinhvien/eims=test:1.0
+
+//7. Check the docker ps 
+-> sudo docker ps
+
+TED          STATUS          PORTS                                   NAMES
+f5142c320a28   chauvinhtiensinhvien/eims:1.0   "java --enable-previ…"   56 seconds ago   Up 54 seconds   0.0.0.0:80->8080/tcp, :::80->8080/tcp   peaceful_bouman
+
+//7. Open the docker log
+-> sudo docker logs -f f5142c320a28
+
+//8. Stop the docker ps
+-> sudo docker stop f5142c320a28
+
+//////////
+1. Cau Hinh Config nginx 
+-> sudo nano /etc/nginx/conf.d/eims-fuhcm.id.vn.conf
+2. Test Config nginx 
+-> sudo nginx -t
+3. Reload nginx
+-> sudo nginx -s reload
+
+/////////
+https://viblo.asia/p/cai-dat-sslhttps-free-certbot-tren-aws-ec2-RQqKL9pOZ7z -> 1 so cai khong dung voi Linux 2023 cua aws
+

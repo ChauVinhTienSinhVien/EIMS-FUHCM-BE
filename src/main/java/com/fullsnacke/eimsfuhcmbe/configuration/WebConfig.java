@@ -28,7 +28,8 @@ public class WebConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:5174");
-        config.addAllowedOrigin("https://backup-dev-6.d1d4enmhw57bq.amplifyapp.com");
+        config.addAllowedOrigin("https://production.d1d4enmhw57bq.amplifyapp.com");
+        config.addAllowedOrigin("https://eims-fuhcm-fe-2-p8plggchr-chauvinhtiensinhviens-projects.vercel.app");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);

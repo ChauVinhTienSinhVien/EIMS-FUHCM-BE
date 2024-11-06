@@ -50,13 +50,14 @@ public enum Role {
 
     STAFF(
             Set.of(
+                    CONFIG_READ,
+
                     EXAM_SLOT_READ,
                     EXAM_SLOT_CREATE,
                     EXAM_SLOT_WRITE,
                     EXAM_SLOT_DELETE,
 
                     EXAM_SLOT_ROOM_READ,
-
 
                     EXAM_SLOT_HALL_READ,
                     EXAM_SLOT_HALL_CREATE,

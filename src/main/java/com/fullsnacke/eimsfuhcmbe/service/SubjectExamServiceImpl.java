@@ -117,4 +117,12 @@ public class SubjectExamServiceImpl implements SubjectExamService{
         }
     }
 
+    @Override
+    public List<SubjectExam> getSubjectExamsBySubjectId(int subjectId) {
+        Subject subject = subjectRepository.findSubjectsById(subjectId);
+        if (subject == null)
+            throw new EntityNotFoundException("Subject not found with ID: " + subjectId);
+        return subjectExamRepository.findSubjectExamsBySubjectId(subject);
+    }
+
 }

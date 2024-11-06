@@ -144,4 +144,20 @@ public class SubjectExamController {
         }
     }
 
+    @GetMapping("/by-subject/{subjectId}")
+    @Operation(summary = "Get subject exams by subject id", description = "Retrieve a list of subject exams by subject id")
+    public ResponseEntity<List<SubjectExamResponseDTO>> getSubjectExamsBySubjectId(@PathVariable("subjectId") int subjectId) {
+        List<SubjectExam> subjectExamList = subjectExamServiceImpl.getSubjectExamsBySubjectId(subjectId);
+        if (subjectExamList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<SubjectExamResponseDTO> subjectExamResponseDTOList = new ArrayList<>();
+            for (SubjectExam subjectExam : subjectExamList) {
+                SubjectExamResponseDTO subjectExamResponseDTO = subjectExamMapper.toDto(subjectExam);
+                subjectExamResponseDTOList.add(subjectExamResponseDTO);
+            }
+            return ResponseEntity.ok(subjectExamResponseDTOList);
+        }
+    }
+
 }

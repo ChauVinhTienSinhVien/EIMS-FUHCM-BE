@@ -17,6 +17,7 @@ import com.fullsnacke.eimsfuhcmbe.repository.SubjectExamRepository;
 import com.fullsnacke.eimsfuhcmbe.service.ExamSlotServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorAssignmentServiceImpl;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
+import com.fullsnacke.eimsfuhcmbe.util.SecurityUntil;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,11 +127,7 @@ public class ExamSlotController {
     public ResponseEntity<ExamSlotResponseDTO> createExamSlot(@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
 
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        User currentUser = userServiceImpl.getUserByEmail(email);
+        User currentUser = SecurityUntil.getLoggedInUser().get();
 
         examSlot.setCreatedAt(Instant.now());
         examSlot.setCreatedBy(currentUser);
@@ -153,9 +150,7 @@ public class ExamSlotController {
 
         List<ExamSlot> createdExamSlots = new ArrayList<>();
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User currentUser = userServiceImpl.getUserByEmail(email);
+        User currentUser = SecurityUntil.getLoggedInUser().get();
 
         for (ExamSlotRequestDTO examSlotRequestDTO : examSlotRequestDTOList) {
             ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
@@ -190,21 +185,16 @@ public class ExamSlotController {
             }
 
 
-            ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
+            User currentUser = SecurityUntil.getLoggedInUser().get();
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = authentication.getName();
+            existingExamSlot.setNumberOfStudents(examSlotRequestDTO.getNumberOfStudents());
+            existingExamSlot.setStartAt(examSlotRequestDTO.getStartAt());
+            existingExamSlot.setEndAt(examSlotRequestDTO.getEndAt());
+            existingExamSlot.setUpdatedAt(Instant.now());
+            existingExamSlot.setUpdatedBy(currentUser);
 
-            User currentUser = userServiceImpl.getUserByEmail(email);
 
-            examSlot.setCreatedAt(existingExamSlot.getCreatedAt());
-            examSlot.setCreatedBy(existingExamSlot.getCreatedBy());
-            examSlot.setUpdatedBy(currentUser);
-            examSlot.setUpdatedAt(Instant.now());
-            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
-            examSlot.setSubjectExam(subjectExam);
-
-            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlot(examSlot, id);
+            ExamSlot updateExamSlot =  examSlotServiceImpl.updateExamSlot(existingExamSlot, id);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
             return ResponseEntity.ok(examSlotResponseDTO);
         } catch (ExamSlotNotFoundException e) {
@@ -227,25 +217,15 @@ public class ExamSlotController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
+            User currentUser = SecurityUntil.getLoggedInUser().get();
 
-            ExamSlot examSlot = examSlotMapper.toEntity(examSlotRequestDTO);
+//            ExamSlot examSlot = new ExamSlot();
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String email = authentication.getName();
+            existingExamSlot.setApprovedBy(currentUser);
+            existingExamSlot.setApprovedAt(Instant.now());
+            existingExamSlot.setStatus(examSlotRequestDTO.getStatus().getValue());
 
-            User currentUser = userServiceImpl.getUserByEmail(email);
-
-            examSlot.setCreatedAt(existingExamSlot.getCreatedAt());
-            examSlot.setCreatedBy(existingExamSlot.getCreatedBy());
-            examSlot.setUpdatedBy(existingExamSlot.getUpdatedBy());
-            examSlot.setUpdatedAt(existingExamSlot.getUpdatedAt());
-            examSlot.setApprovedBy(currentUser);
-            examSlot.setApprovedAt(Instant.now());
-
-            SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
-            examSlot.setSubjectExam(subjectExam);
-
-            ExamSlot updateExamSlot =  examSlotServiceImpl.managerUpdateExamSlot(examSlot, id);
+            ExamSlot updateExamSlot =  examSlotServiceImpl.managerUpdateExamSlot(existingExamSlot, id);
             ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(updateExamSlot);
 
             if (updateExamSlot.getStatus() == ExamSlotStatus.REJECTED.getValue()) {

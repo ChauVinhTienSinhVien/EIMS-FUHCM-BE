@@ -22,8 +22,10 @@ public class ExamSlotRequestDTO {
 
     ZonedDateTime endAt;
 
-    Integer requiredInvigilators;
+//    Integer requiredInvigilators;
 
     ExamSlotStatus status;
+
+    Integer numberOfStudents;
 
 }

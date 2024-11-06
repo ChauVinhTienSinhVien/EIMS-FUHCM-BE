@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,6 +64,13 @@ public class ExamSlotServiceImpl implements ExamSlotService {
             throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
         }
 
+//        examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
+//        examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
+//        examSlotInDB.setUpdatedAt(examSlotInRequest.getUpdatedAt());
+//        examSlotInDB.setUpdatedBy(examSlotInRequest.getUpdatedBy());
+//        examSlotInDB.setNumberOfStudents(examSlotInRequest.getNumberOfStudents());
+
+        examSlotInDB.setNumberOfStudents(examSlotInRequest.getNumberOfStudents());
         examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
         examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
         examSlotInDB.setUpdatedAt(examSlotInRequest.getUpdatedAt());
@@ -88,12 +92,14 @@ public class ExamSlotServiceImpl implements ExamSlotService {
 
         User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
 
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with ID: " + examSlotInRequest.getApprovedBy().getId());
+        }
+
         if (examSlotInDB == null)
             throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
 
-
         examSlotInDB.setStatus(examSlotInRequest.getStatus());
-        examSlotInDB.setUpdatedBy(examSlotInRequest.getUpdatedBy());
         examSlotInDB.setApprovedAt(examSlotInRequest.getApprovedAt());
         examSlotInDB.setApprovedBy(examSlotInRequest.getApprovedBy());
 

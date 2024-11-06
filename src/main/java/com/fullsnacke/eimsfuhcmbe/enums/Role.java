@@ -55,6 +55,9 @@ public enum Role {
                     EXAM_SLOT_WRITE,
                     EXAM_SLOT_DELETE,
 
+                    EXAM_SLOT_ROOM_READ,
+
+
                     EXAM_SLOT_HALL_READ,
                     EXAM_SLOT_HALL_CREATE,
                     EXAM_SLOT_HALL_WRITE,

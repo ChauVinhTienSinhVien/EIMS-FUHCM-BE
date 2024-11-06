@@ -32,6 +32,7 @@ public class SemesterController {
     //Invigilator
     //Manager
     @GetMapping
+    @PreAuthorize("hasAuthority('semester:read')")
     @Operation(summary = "Get all semesters", description = "Retrieve a list of all semesters")
     public ResponseEntity<List<SemesterResponseDTO>> getAllSemesters() {
         List<Semester> semesterList = semesterServiceImpl.getAllSemesters();
@@ -57,6 +58,7 @@ public class SemesterController {
 
     //Manager
     @PostMapping
+    @PreAuthorize("hasAuthority('semester:create')")
     @Operation(summary = "Add a semester", description = "Add a new semester")
     public ResponseEntity<SemesterResponseDTO> createSemester(@RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
         Semester semester = modelMapper.map(semesterRequestDTO, Semester.class);
@@ -68,6 +70,7 @@ public class SemesterController {
 
     //Manager
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('semester:write')")
     @Operation(summary = "Update a semester", description = "Update a semester")
     public ResponseEntity<SemesterResponseDTO> updateSemester(@PathVariable("id") int id, @RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
         //Semester semesterUpdate = modelMapper.map(semesterRequestDTO, Semester.class);
@@ -93,6 +96,7 @@ public class SemesterController {
     //Staff
     //Invigilator
     @GetMapping("/{name}")
+    @PreAuthorize("hasAuthority('semester:read')")
     @Operation(summary = "Get a semester by name", description = "Retrieve a semester by name")
     public ResponseEntity<SemesterResponseDTO> findSemesterByName(@PathVariable("name") String name){
         Semester semester = semesterServiceImpl.findSemesterByName(name);

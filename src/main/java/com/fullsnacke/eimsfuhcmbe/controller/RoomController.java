@@ -30,6 +30,7 @@ public class RoomController {
 
     //STAFF
     @GetMapping
+    @PreAuthorize("hasAuthority('room:read')")
     @Operation(summary = "Get all rooms", description = "Retrieve a list of all rooms")
     public ResponseEntity<List<Room>> getAllRooms() {
         List<Room> roomList = roomServiceImpl.getAllRoom();
@@ -42,6 +43,7 @@ public class RoomController {
 
     //STAFF
     @PostMapping
+    @PreAuthorize("hasAuthority('room:create')")
     @Operation(summary = "Add a room", description = "Add a new room")
     public ResponseEntity<RoomResponseDTO> createRoom(@RequestBody @Valid RoomRequestDTO roomRequestDTO) {
         Room room = modelMapper.map(roomRequestDTO, Room.class);
@@ -53,6 +55,7 @@ public class RoomController {
 
     //STAFF
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('room:write')")
     @Operation(summary = "Update a room", description = "Update a room by ID")
     public ResponseEntity<RoomResponseDTO> updateRoom(@PathVariable("id") int id, @RequestBody @Valid RoomRequestDTO roomRequestDTO) {
         Room room = modelMapper.map(roomRequestDTO, Room.class);
@@ -67,6 +70,7 @@ public class RoomController {
 
     //STAFF
     @GetMapping("/{name}")
+    @PreAuthorize("hasAuthority('room:read')")
     @Operation(summary = "Get room by name", description = "Retrieve a room by name")
     public ResponseEntity<List<RoomResponseDTO>> findByRoomName(@PathVariable("name") String name) {
         List<Room> roomList = roomServiceImpl.findByRoomName(name);

@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonTypeResolver;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.SubjectExamMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.SubjectExamRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.SubjectExamResponseDTO;
@@ -44,6 +45,7 @@ public class SubjectExamController {
 
     //STAFF
     @GetMapping
+    @PreAuthorize("hasAuthority('subject_exam:read')")
     @Operation(summary = "Get all subject exams", description = "Retrieve a list of all subject exams")
     public ResponseEntity<List<SubjectExamResponseDTO>> getAllSubjectExams() {
         List<SubjectExam> subjectExamList = subjectExamServiceImpl.getAllSubjectExam();
@@ -61,6 +63,7 @@ public class SubjectExamController {
 
     //STAFF
     @PostMapping
+    @PreAuthorize("hasAuthority('subject_exam:create')")
     @Operation(summary = "Add a subject exam", description = "Add a new subject exam")
     public ResponseEntity<?> createSubjectExam(@RequestBody @Valid SubjectExamRequestDTO subjectExamRequestDTO) {
         SubjectExam subjectExam = subjectExamMapper.toEntity(subjectExamRequestDTO);
@@ -83,6 +86,7 @@ public class SubjectExamController {
 
     //STAFF
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject_exam:write')")
     @Operation(summary = "Update a subject exam", description = "Update a subject exam")
     public ResponseEntity<SubjectExamResponseDTO> updateSubjectExam(@PathVariable("id") int id, @RequestBody @Valid SubjectExamRequestDTO subjectExamRequestDTO) {
         SubjectExam subjectExam = subjectExamMapper.toEntity(subjectExamRequestDTO);
@@ -104,6 +108,7 @@ public class SubjectExamController {
 
     //STAFF
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject_exam:read')")
     @Operation(summary = "Get a subject exam by id", description = "Retrieve a subject exam by id")
     public ResponseEntity<SubjectExamResponseDTO> findSubjectExamById(@PathVariable("id") int id) {
         SubjectExam subjectExam = subjectExamServiceImpl.findSubjectExamById(id);
@@ -116,6 +121,7 @@ public class SubjectExamController {
 
     //STAFF
     @GetMapping("/by-semester/{semesterId}")
+    @PreAuthorize("hasAuthority('subject_exam:read')")
     @Operation(summary = "Get subject exams by semester id", description = "Retrieve a list of subject exams by semester id")
     public ResponseEntity<List<SubjectExamResponseDTO>> findSubjectExamBySemesterId(@PathVariable("semesterId") int semesterId) {
         List<SubjectExam> subjectExamList = subjectExamServiceImpl.getSubjectExamsBySemesterId(semesterId);
@@ -134,6 +140,7 @@ public class SubjectExamController {
 
     //STAFF
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject_exam:delete')")
     @Operation(summary = "Delete a subject exam", description = "Delete a subject exam")
     public ResponseEntity<?> deleteSubjectExam(@PathVariable("id") int id) {
         try {

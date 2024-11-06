@@ -43,6 +43,7 @@ public class ExamSlotHallController {
 
     //STAFF
     @GetMapping
+    @PreAuthorize("hasAuthority('exam_slot_hall:read')")
     @Operation(summary = "Retrieve all exam slot halls", description = "Fetches a list of all exam slot halls from the system. If no exam slot halls are found, it will return a 204 No Content response.")
     public List<ExamSlotHallResponseDTO> getAllExamSlotHall() {
         List<ExamSlotHallResponseDTO> examSlotHallResponseDTOList = new ArrayList<>();
@@ -58,6 +59,7 @@ public class ExamSlotHallController {
 
     //STAFF
     @PostMapping
+    @PreAuthorize("hasAuthority('exam_slot_hall:create')")
     @Operation(summary = "Create a new exam slot hall", description = "Creates a new exam slot hall in the system.")
     public List<ExamSlotHallResponseDTO> addExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {
         List<ExamSlotHall> examSlotHallList = examSlotHallService.addExamSlotHalls(requestDTO);
@@ -89,6 +91,7 @@ public class ExamSlotHallController {
 
     //STAFF
     @PutMapping
+    @PreAuthorize("hasAuthority('exam_slot_hall:write')")
     @Operation(summary = "Update an exam slot hall", description = "Updates an exam slot hall in the system.")
     public List<ExamSlotHallResponseDTO> updateExamSlotHall(@RequestBody ExamSlotHallRequestDTO requestDTO) {
         List<ExamSlotHall> examSlotHallList = examSlotHallService.updateExamSlotHall(requestDTO);

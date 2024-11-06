@@ -28,8 +28,6 @@ public class AuthenController {
     @Autowired
     AuthenticationService authenticationService;
     @Autowired
-    private UserServiceImpl userServiceImpl;
-    @Autowired
     private UserMapper userMapper;
 
     @PostMapping("/google/login")
@@ -40,12 +38,14 @@ public class AuthenController {
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
                 .path("/")
-                .secure(true)
+        //        .secure(true)
+                .secure(false)
                 .build();
 
         // Manually append SameSite=None to the cookie header
-        String cookieHeader = cookie + "; SameSite=None";
-        response.addHeader(HttpHeaders.SET_COOKIE, cookieHeader);
+//        String cookieHeader = cookie + "; SameSite=None";
+//        response.addHeader(HttpHeaders.SET_COOKIE, cookieHeader);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.ok().body(authResponse);
     }
 
@@ -58,12 +58,14 @@ public class AuthenController {
                 .httpOnly(true)
                 .maxAge(7 * 24 * 3600)
                 .path("/")
-                .secure(true)
+        //        .secure(true)
+                .secure(false)
                 .build();
 
         // Manually append SameSite=None to the cookie header
-        String cookieHeader = cookie + "; SameSite=None";
-        response.addHeader(HttpHeaders.SET_COOKIE, cookieHeader);
+//        String cookieHeader = cookie + "; SameSite=None";
+//        response.addHeader(HttpHeaders.SET_COOKIE, cookieHeader);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.ok(authResponse);
     }
 
@@ -86,10 +88,12 @@ public class AuthenController {
                 .maxAge(0)
                 .path("/")
                 .sameSite("Strict")
-                .secure(true)
+        //        .secure(true)
+                .secure(false)
                 .build();
-        String cookieHeader = cookie + "; SameSite=None";
-        response.addHeader(HttpHeaders.SET_COOKIE, cookieHeader);
+//        String cookieHeader = cookie + "; SameSite=None";
+//        response.addHeader(HttpHeaders.SET_COOKIE, cookieHeader);
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.ok().build();
     }
 

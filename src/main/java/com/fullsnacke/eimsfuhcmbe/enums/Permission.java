@@ -40,6 +40,11 @@ public enum Permission {
     INVIGILATOR_ASSIGNMENT_CREATE("invigilator_assignment:create"),
     INVIGILATOR_ASSIGNMENT_DELETE("invigilator_assignment:delete"),
 
+    INVIGILATOR_ATTENDANCE_READ("invigilator_attendance:read"),
+    INVIGILATOR_ATTENDANCE_WRITE("invigilator_attendance:write"),
+    INVIGILATOR_ATTENDANCE_CREATE("invigilator_attendance:create"),
+    INVIGILATOR_ATTENDANCE_DELETE("invigilator_attendance:delete"),
+
     REQUEST_READ("request:read"),
     REQUEST_WRITE("request:write"),
     REQUEST_CREATE("request:create"),
@@ -64,6 +69,11 @@ public enum Permission {
     EXAM_WRITE("exam:write"),
     EXAM_CREATE("exam:create"),
     EXAM_DELETE("exam:delete"),
+
+    SUBJECT_EXAM_READ("subject_exam:read"),
+    SUBJECT_EXAM_WRITE("subject_exam:write"),
+    SUBJECT_EXAM_CREATE("subject_exam:create"),
+    SUBJECT_EXAM_DELETE("subject_exam:delete"),
 
     ;
 

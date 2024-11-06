@@ -29,6 +29,7 @@ public class ExamSlotRoomController {
 
     //STAFF
     @GetMapping
+    @PreAuthorize("hasAuthority('exam_slot_room:read')")
     @Operation(summary = "Retrieve all exam slot rooms", description = "Fetches a list of all exam slot rooms from the system. If no exam slot rooms are found, it will return a 204 No Content response.")
     public List<ExamSlotRoomResponseDTO> getAllExamSlotRooms() {
 
@@ -56,6 +57,7 @@ public class ExamSlotRoomController {
 
     //STAFF
     @GetMapping("/unavailable-rooms")
+    @PreAuthorize("hasAuthority('exam_slot_room:read')")
     @Operation(summary = "Find available rooms within a time range", description = "Returns a list of rooms that are available for booking within a given time range.")
     public List<String> getAllAvailableRooms(@RequestParam ZonedDateTime startAt, @RequestParam ZonedDateTime endAt) {
         return examSlotRoomService.getAllUnavailableRooms(startAt, endAt);
@@ -63,6 +65,7 @@ public class ExamSlotRoomController {
 
     //STAFF
     @GetMapping("/dashboard/exam-slot/{examSlotId}")
+    @PreAuthorize("hasAuthority('exam_slot_room:read')")
     @Operation(summary = "Retrieve all exam slot rooms by exam slot ID", description = "Fetches a list of all exam slot rooms by exam slot ID from the system. If no exam slot rooms are found, it will return a 204 No Content response.")
     public List<String> getExamSlotRoomsByExamSlotId(@PathVariable int examSlotId) {
         List<String> examSlotRoomResponseDTOList = new ArrayList<>();

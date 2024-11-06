@@ -17,6 +17,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreFilter;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class RequestController {
 
     //INVIGILATOR
     @PostMapping
+    @PreAuthorize("hasAuthority('request:create')")
     @Operation(summary = "Create request", description = "Create request for invigilator")
     public ResponseEntity<?> createRequest(@RequestBody RequestRequestDTO request) {
         String requestType = request.getRequestType().toLowerCase();
@@ -56,6 +59,7 @@ public class RequestController {
 
     //INVIGILATOR
     @GetMapping("/myinfo")
+    @PreAuthorize("hasAuthority('request:read')")
     @Operation(summary = "Get all requests of current invigilator")
     public ResponseEntity<?> getAllRequest() {
         return ResponseEntity
@@ -65,6 +69,7 @@ public class RequestController {
 
     //INVIGILATOR / MANAGER
     @GetMapping("/request-types")
+    @PreAuthorize("hasAuthority('request:read')")
     @Operation(summary = "Get all request types")
     public ResponseEntity<RequestTypeResponseDTO> getAllRequestTypes() {
         List<String> requestTypes = new ArrayList<>();
@@ -76,6 +81,7 @@ public class RequestController {
 
     //MANAGER
     @GetMapping("requestid={requestId}")
+    @PreAuthorize("hasAuthority('request:read')")
     @Operation(summary = "Get request detail by request id")
     public ResponseEntity<?> getRequestById(@PathVariable int requestId) {
         return ResponseEntity
@@ -85,6 +91,7 @@ public class RequestController {
 
     //MANAGER
     @GetMapping("invigilatorid={invigilatorId}")
+    @PreAuthorize("hasAuthority('request:read')")
     @Operation(summary = "Get all requests by invigilator id")
     public ResponseEntity<?> getAllRequestByInvigilatorId(@PathVariable String invigilatorId) {
         return ResponseEntity
@@ -94,6 +101,7 @@ public class RequestController {
 
     //MANAGER
     @GetMapping("semesterid={semesterId}")
+    @PreAuthorize("hasAuthority('request:read')")
     @Operation(summary = "Get all requests by semester id for manager view request page")
     public ResponseEntity<?> getAllRequestBySemester(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
@@ -103,6 +111,7 @@ public class RequestController {
 
     //MANAGER
     @PutMapping
+    @PreAuthorize("hasAuthority('request:write')")
     @Operation(summary = "Update request status", description = "Update request status by request id")
     public ResponseEntity<?> updateRequestStatus(@RequestBody ExchangeInvigilatorsRequestDTO request) {
         log.info("Request ID: {}", request.getRequestId());
@@ -115,6 +124,7 @@ public class RequestController {
 
     //MANAGER
     @PutMapping("/update-attendance/status")
+    @PreAuthorize("hasAuthority('request:write')")
     public ResponseEntity<?> updateAttendanceStatus(@RequestBody UpdateStatusRequestDTO request) {
         return ResponseEntity
                 .status(HttpStatus.OK)

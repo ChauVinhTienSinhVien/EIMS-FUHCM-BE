@@ -30,6 +30,7 @@ public class InvigilatorRegistrationController {
 
     //INVIGILATOR
     @PostMapping
+    @PreAuthorize("hasAuthority('invigilator_registration:create')")
     @Operation(summary = "Register Exam Slots", description = "Save the invigilator customEx for the exam slot")
     public ResponseEntity<InvigilatorRegistrationResponseDTO> registerExamSlotWithoutFuId(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
@@ -39,6 +40,7 @@ public class InvigilatorRegistrationController {
 
     //INVIGILATOR
     @GetMapping("/myinfo/semesterid={semesterId}")
+    @PreAuthorize("hasAuthority('invigilator_registration:read')")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of current invigilator")
     public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
@@ -48,8 +50,8 @@ public class InvigilatorRegistrationController {
 
     //INVIGILATOR
     @DeleteMapping("/myinfo/register")
+    @PreAuthorize("hasAuthority('invigilator_registration:delete')")
     @Operation(summary = "Delete Registered Slot by ExamSlot Id")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestParam Set<Integer> id) {
         Logger log = LogManager.getLogger(InvigilatorRegistrationController.class);
         log.info("Received a request to delete the registered slot with ID: {}", id);
@@ -66,6 +68,8 @@ public class InvigilatorRegistrationController {
 
     //INVIGILATOR
     @GetMapping("/register/semesterid={semesterId}")
+    @PreAuthorize("hasAuthority('invigilator_registration:read')")
+    @Operation(summary = "Get All Exam Slots in Semester with Status", description = "If invigilators was assigned to the exam slot then status will be ASSIGNED otherwise UNASSIGNED")
     public ResponseEntity<RegisteredExamBySemesterResponseDTO> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -74,6 +78,8 @@ public class InvigilatorRegistrationController {
 
     //INVIGILATOR
     @GetMapping("cancel")
+    @PreAuthorize("hasAuthority('invigilator_registration:read')")
+    @Operation(summary = "Get all exam slots that can be cancelled in a semester")
     public ResponseEntity<Set<ExamSlotDetail>> getListCancelInSemester(@RequestParam int semesterId) {
         return ResponseEntity.ok(invigilatorRegistrationService.getCancellableExamSlots(semesterId));
     }

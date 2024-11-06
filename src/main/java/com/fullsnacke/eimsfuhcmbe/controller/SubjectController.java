@@ -31,6 +31,7 @@ public class SubjectController {
 
     //STAFF
     @GetMapping
+    @PreAuthorize("hasAuthority('subject:read')")
     @Operation(summary = "Get all subjects", description = "Retrieve a list of all subjects")
     public ResponseEntity<List<SubjectResponseDTO>> getAllSubjects() {
         List<Subject> subjectList = subjectServiceImpl.getAllSubjects();
@@ -48,6 +49,7 @@ public class SubjectController {
 
     //STAFF
     @PostMapping
+    @PreAuthorize("hasAuthority('subject:create')")
     @Operation(summary = "Add a subject", description = "Add a new subject")
     public ResponseEntity<?> createSubject(@RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
         Subject subject = subjectMapper.toEntity(subjectRequestDTO);
@@ -69,6 +71,7 @@ public class SubjectController {
 
     //STAFF
     @PostMapping("/bulk")
+    @PreAuthorize("hasAuthority('subject:create')")
     @Operation(summary = "Add multiple subjects", description = "Add multiple subjects")
     public ResponseEntity<List<SubjectResponseDTO>> importSubjects(@RequestBody @Valid List<SubjectRequestDTO> subjectRequestDTOList) {
         List<Subject> subjectList = subjectRequestDTOList.stream()
@@ -88,6 +91,7 @@ public class SubjectController {
 
     //STAFF
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject:write')")
     @Operation(summary = "Update a subject", description = "Update an existing subject")
     public ResponseEntity<?> updateSubject(@PathVariable("id") int id, @RequestBody @Valid SubjectRequestDTO subjectRequestDTO) {
         try {
@@ -110,6 +114,7 @@ public class SubjectController {
 
     //STAFF
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject:read')")
     @Operation(summary = "Get a subject by id", description = "Retrieve a subject by id")
     public ResponseEntity<SubjectResponseDTO> findBySubjectCode(@PathVariable("id") int id) {
         Subject subject = subjectServiceImpl.findSubjectById(id);
@@ -122,6 +127,7 @@ public class SubjectController {
 
     //STAFF
     @GetMapping("/by-semester/{semesterId}")
+    @PreAuthorize("hasAuthority('subject:read')")
     @Operation(summary = "Get subjects by semester id", description = "Retrieve a list of subjects by semester id")
     public ResponseEntity<List<SubjectResponseDTO>> getSubjectBySemesterId(@PathVariable("semesterId") int semesterId) {
         List<Subject> subjectList = subjectServiceImpl.findSubjectBySemesterId(semesterId);
@@ -141,6 +147,7 @@ public class SubjectController {
 
     //STAFF
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject:delete')")
     @Operation(summary = "Delete a subject by id", description = "Delete a subject by id")
     public ResponseEntity<?> deleteSubject(@PathVariable("id") int id) {
         try {

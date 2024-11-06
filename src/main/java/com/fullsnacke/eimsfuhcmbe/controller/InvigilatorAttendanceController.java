@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -50,6 +51,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @GetMapping("/staff/exam-slots-by-day")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get all exam slots by day", description = "Retrieve a list of all exam slots by day")
         public ResponseEntity<List<ExamSlotResponseDTO>> getExamSlotsByDay(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
             LocalDate localDate = day.toInstant().atZone(ZoneOffset.systemDefault()).toLocalDate();
@@ -64,6 +66,7 @@ public class InvigilatorAttendanceController {
         //Manager
         //Staff
         @GetMapping
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get all invigilator attendance", description = "Retrieve a list of all invigilator attendance records")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getAllInvigilatorAttendance() {
             List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getInvigilatorAttendances();
@@ -80,6 +83,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @GetMapping("/staff/today")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get today invigilator attendance", description = "Retrieve a list of all today's invigilator attendance records")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getTodayInvigilatorAttendance() {
             Instant day = Instant.now();
@@ -97,6 +101,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @GetMapping("/staff/day")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get all invigilator attendance by day", description = "Retrieve a list of all invigilator attendance records by day")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getTodayInvigilatorAttendance(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
 
@@ -116,6 +121,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @GetMapping("/staff/exam-slot/{id}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get all invigilator attendance by exam slot", description = "Retrieve a list of all invigilator attendance records by exam slot")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorAttendanceByExamSlot(@PathVariable("id") Integer examSlotId) {
             List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getInvigilatorAttendancesByExamSlotId(examSlotId);
@@ -131,6 +137,7 @@ public class InvigilatorAttendanceController {
         }
 
         @GetMapping("/manager/by-status/{status}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get all invigilator attendance by status", description = "Retrieve a list of all invigilator attendance records by status")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorAttendanceByStatus(@PathVariable("status") int status) {
             List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getInvigilatorAttendancesByStatus(status);
@@ -147,6 +154,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @PutMapping("/staff/checkin/{id}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Staff Check in invigilator by InvigilatorAttendanceId", description = "Check in an invigilator by InvigilatorAttendanceId")
         public ResponseEntity<InvigilatorAttendanceResponseDTO> checkIn(@PathVariable("id") Integer id) {
             InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceService.checkIn(id);
@@ -156,6 +164,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @PutMapping("/staff/checkout/{id}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Staff Check out invigilator", description = "Check out an invigilator by InvigilatorAttendanceId")
         public ResponseEntity<InvigilatorAttendanceResponseDTO> checkOut(@PathVariable("id") Integer id) {
             InvigilatorAttendance invigilatorAttendance = invigilatorAttendanceService.checkOut(id);
@@ -165,6 +174,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @PutMapping("/staff/checkin-all")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Staff Check in a list of InvigilatorAttendance", description = "Staff Check in a list of InvigilatorAttendance by list of InvigilatorAttendanceIds")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkInAll(@RequestBody List<Integer> invigilatorAttendanceIds) {
 
@@ -178,6 +188,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @PutMapping("/staff/checkout-all")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Staff Check out a list of InvigilatorAttendance", description = "Check out a list of InvigilatorAttendances by list of InvigilatorAttendanceIds")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkOutAll(@RequestBody List<Integer> invigilatorAttendanceIds) {
 
@@ -191,6 +202,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @PutMapping("/staff/checkin-all/{examSlotId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Staff check in all invigilators by examSlotId", description = "Check in all invigilators for an exam slot")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkInAllByExamSlot(@PathVariable("examSlotId") Integer examSlotId) {
 
@@ -204,6 +216,7 @@ public class InvigilatorAttendanceController {
 
         //Staff
         @PutMapping("/staff/checkout-all/{examSlotId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Staff check out all invigilators by examSlotId", description = "Check out all invigilators for an exam slot")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> checkoutAllByExamSlot(@PathVariable("examSlotId") Integer examSlotId) {
 
@@ -217,6 +230,7 @@ public class InvigilatorAttendanceController {
 
         //Manager
         @GetMapping("/manager/exam-slots-by-day")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Manager get all of attendance examSlot", description = "Retrieve a list of all attendance examSlot")
         public ResponseEntity<List<ExamSlotResponseDTO>> managerGetAttendanceExamSlotsByDay(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date day) {
             LocalDate localDate = day.toInstant().atZone(ZoneOffset.systemDefault()).toLocalDate();
@@ -230,6 +244,7 @@ public class InvigilatorAttendanceController {
 
         //Manager
         @GetMapping("/manager/exam-slot-by-semester/{semesterId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Manager get all exam slots by semesterId", description = "Retrieve a list of all exam slots by semesterId")
         public ResponseEntity<List<ExamSlotResponseDTO>> managerGetExamSlotsBySemesterId(@PathVariable Integer semesterId) {
             List<ExamSlot> examSlotList = invigilatorAttendanceService.getExamSlotsBySemester(semesterId);
@@ -241,6 +256,7 @@ public class InvigilatorAttendanceController {
 
         //Manager
         @GetMapping("/manager/exam-slot/{examSlotId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Manager get all invigilator attendance by exam slot", description = "Retrieve a list of all invigilator attendance records by exam slot")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorCheckedAttendanceByExamSlot(@PathVariable("examSlotId") Integer examSlotId) {
             List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getInvigilatorAttendancesByExamSlotId(examSlotId);
@@ -257,6 +273,7 @@ public class InvigilatorAttendanceController {
 
         //Manager
         @PutMapping("manager/approve/{examSlotId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Manager approve invigilator attendance", description = "Manager approve invigilator attendance for an exam slot")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> managerApprove(@PathVariable("examSlotId") Integer examSlotId) {
 
@@ -270,6 +287,7 @@ public class InvigilatorAttendanceController {
 
         //Manager
         @PutMapping("manager/reject/{examSlotId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Manager reject invigilator attendance", description = "Manager reject invigilator attendance for an exam slot")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> managerReject(@PathVariable("examSlotId") Integer examSlotId) {
 
@@ -283,6 +301,7 @@ public class InvigilatorAttendanceController {
 
         //Manager
         @PutMapping("manager/update/{attendanceId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:write')")
         @Operation(summary = "Manager update invigilator attendance", description = "Manager update invigilator attendance")
         public ResponseEntity<InvigilatorAttendanceResponseDTO> managerUpdate(@PathVariable("attendanceId") Integer id, @RequestBody InvigilatorAttendanceRequestDTO invigilatorAttendanceRequestDTO) {
             boolean isCheckIn = invigilatorAttendanceRequestDTO.isCheckIn();
@@ -294,6 +313,7 @@ public class InvigilatorAttendanceController {
 
         //Manager
         @GetMapping("manager/report/invigilator/{semesterId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get all checked invigilator attendance by semesterId", description = "Retrieve a list of all checked invigilator attendance records by SemesterId")
         public ResponseEntity<List<InvigilatorAttendanceListResponseDTO>> getApprovedInvigilatorAttendanceBySemesterId(@PathVariable Integer semesterId) {
             List<User> invigilatorList = invigilatorAttendanceService.getInvigilatorBySemesterId(semesterId);
@@ -330,6 +350,7 @@ public class InvigilatorAttendanceController {
 
         //Invigilator
         @GetMapping("/invigilator/report/{semesterId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get all checked invigilator attendance by semesterId", description = "Retrieve a list of all checked invigilator attendance records of the current invigilator by SemesterId")
         public ResponseEntity<InvigilatorAttendanceListResponseDTO> getApprovedInvigilatorAttendanceBSemesterId(@PathVariable Integer semesterId) {
             List<InvigilatorAttendance> attendanceList = invigilatorAttendanceService.getCurrentUserInvigilatorAttendanceBySemesterIdAndApproved(semesterId);
@@ -354,6 +375,7 @@ public class InvigilatorAttendanceController {
 
         //Invigilator
         @GetMapping("/invigilator/{semesterId}")
+        @PreAuthorize("hasAuthority('invigilator_attendance:read')")
         @Operation(summary = "Get invigilator attendance by semesterId", description = "Retrieve a list of invigilator attendances by semesterId")
         public ResponseEntity<List<InvigilatorAttendanceResponseDTO>> getInvigilatorAttendanceBySemesterId( @PathVariable Integer semesterId) {
 

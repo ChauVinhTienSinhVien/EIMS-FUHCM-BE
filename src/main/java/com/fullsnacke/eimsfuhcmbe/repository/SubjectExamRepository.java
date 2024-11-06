@@ -12,4 +12,5 @@ public interface SubjectExamRepository extends JpaRepository<SubjectExam, Intege
     SubjectExam findSubjectExamById(int id);
     List<SubjectExam> findSubjectExamsBySubjectId(Subject subjectId);
 
+
 }

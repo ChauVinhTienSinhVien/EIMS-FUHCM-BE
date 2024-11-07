@@ -6,6 +6,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotHallResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlotHall;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.enums.ConfigType;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import com.fullsnacke.eimsfuhcmbe.repository.ConfigRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
@@ -79,7 +80,7 @@ public class ExamSlotHallController {
                 Integer.parseInt(configRepository.
                         findBySemesterIdAndConfigType(examSlot.getSubjectExam()
                                         .getSubjectId().getSemesterId().getId(),
-                        "INVIGILATOR").getValue());
+                                ConfigType.EXTRA_INVIGILATOR.getValue()).getValue());
         examSlot.setRequiredInvigilators(requiredInvigilators);
         examSlot.setStatus(ExamSlotStatus.PENDING.getValue());
         examSlotService.updateExamSlotStatus(examSlot, examSlot.getId());

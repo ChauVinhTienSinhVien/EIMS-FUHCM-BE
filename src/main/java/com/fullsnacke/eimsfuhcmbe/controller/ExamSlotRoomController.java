@@ -44,21 +44,11 @@ public class ExamSlotRoomController {
         return examSlotRoomResponseDTOList;
     }
 
-//    @GetMapping("/{id}")
-//    @Operation(summary = "Retrieve an exam slot room by ID", description = "Fetches an exam slot room from the system by its ID.")
-//    public ResponseEntity<ExamSlotRoomResponseDTO> getExamSlotRoomById(@PathVariable int id) {
-//        ExamSlotRoom examSlotRoom = examSlotRoomService.getExamSlotRoomById(id);
-//
-//
-//
-//        return null;
-//    }
-
     //STAFF
     @GetMapping("/unavailable-rooms")
     @Operation(summary = "Find available rooms within a time range", description = "Returns a list of rooms that are available for booking within a given time range.")
     public List<String> getAllAvailableRooms(@RequestParam ZonedDateTime startAt, @RequestParam ZonedDateTime endAt) {
-        return examSlotRoomService.getAllUnavailableRooms(startAt, endAt);
+        return examSlotRoomService.getAllAvailableRooms(startAt, endAt);
     }
 
     //STAFF

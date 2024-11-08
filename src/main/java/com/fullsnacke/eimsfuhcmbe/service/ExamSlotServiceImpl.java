@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.util.ArrayList;
@@ -51,6 +52,19 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         }
 
         return examSlotRepository.save(examSlot);
+    }
+
+    @Override
+    @Transactional
+    public List<ExamSlot> createExamSlotList(List<ExamSlot> examSlots) {
+        List<ExamSlot> result = new ArrayList<>();
+        for (ExamSlot examSlot : examSlots) {
+            if (isDuplicateExamSlot(examSlot)) {
+                throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
+            }
+            result.add(examSlotRepository.save(examSlot));
+        }
+        return result;
     }
 
     @Override

@@ -159,13 +159,16 @@ public class ExamSlotController {
             SubjectExam subjectExam = subjectExamRepository.findSubjectExamById(examSlot.getSubjectExam().getId());
             examSlot.setSubjectExam(subjectExam);
             examSlot.setStatus(ExamSlotStatus.NEEDS_ROOM_ASSIGNMENT.getValue());
-
-            createdExamSlots.add(examSlotServiceImpl.createExamSlot(examSlot));
+            createdExamSlots.add(examSlot);
         }
 
-        List<ExamSlotResponseDTO> examSlotResponseDTOList = createdExamSlots.stream()
-                .map(examSlotMapper::toDto)
-                .collect(Collectors.toList());
+        createdExamSlots = examSlotServiceImpl.createExamSlotList(createdExamSlots);
+
+        List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
+        for (ExamSlot e:createdExamSlots) {
+            ExamSlotResponseDTO examSlotResponseDTO = examSlotMapper.toDto(e);
+            examSlotResponseDTOList.add(examSlotResponseDTO);
+        }
         return ResponseEntity.ok(examSlotResponseDTOList);
     }
 

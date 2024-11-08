@@ -21,5 +21,5 @@ public interface ExamSlotService {
     void removeExamSlotHall(int examSlotId);
     List<ExamSlot> getExamSlotsByStatus(int status);
     List<ExamSlot> getExamSlotsBySubjectId(int subjectId);
-
+    List<ExamSlot> createExamSlotList(List<ExamSlot> examSlots);
 }

@@ -46,9 +46,6 @@ public class ExamSlotController {
     private ExamSlotServiceImpl examSlotServiceImpl;
 
     @Autowired
-    private UserServiceImpl userServiceImpl;
-
-    @Autowired
     private ExamSlotMapper examSlotMapper;
 
     @Autowired
@@ -222,7 +219,6 @@ public class ExamSlotController {
 
             User currentUser = SecurityUntil.getLoggedInUser().get();
 
-//            ExamSlot examSlot = new ExamSlot();
 
             existingExamSlot.setApprovedBy(currentUser);
             existingExamSlot.setApprovedAt(Instant.now());
@@ -312,9 +308,10 @@ public class ExamSlotController {
         if (examSlotList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
-                    .map(examSlotMapper::toDto)
-                    .collect(Collectors.toList());
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
+            for (ExamSlot e:examSlotList) {
+                examSlotResponseDTOList.add(examSlotMapper.toDto(e));
+            }
             return ResponseEntity.ok(examSlotResponseDTOList);
         }
     }
@@ -328,9 +325,10 @@ public class ExamSlotController {
         if (examSlotList.isEmpty()) {
             return ResponseEntity.noContent().build();
         } else {
-            List<ExamSlotResponseDTO> examSlotResponseDTOList = examSlotList.stream()
-                    .map(examSlotMapper::toDto)
-                    .collect(Collectors.toList());
+            List<ExamSlotResponseDTO> examSlotResponseDTOList = new ArrayList<>();
+            for (ExamSlot e:examSlotList) {
+                examSlotResponseDTOList.add(examSlotMapper.toDto(e));
+            }
             return ResponseEntity.ok(examSlotResponseDTOList);
         }
 

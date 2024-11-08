@@ -22,9 +22,9 @@ public class ExamSlotRoomServiceImpl implements ExamSlotRoomService {
     }
 
     @Override
-    public List<String> getAllUnavailableRooms(ZonedDateTime startAt, ZonedDateTime endAt) {
-        ZonedDateTime adjustedEndAt = endAt.plusMinutes(30);
-        return examSlotRoomRepository.findAvailableRooms(startAt, endAt);
+    public List<String> getAllAvailableRooms(ZonedDateTime startAt, ZonedDateTime endAt) {
+        ZonedDateTime adjustedStartAt = startAt.minusMinutes(30);
+        return examSlotRoomRepository.findAvailableRooms(adjustedStartAt, endAt);
     }
 
     @Override

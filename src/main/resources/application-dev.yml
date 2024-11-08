@@ -27,7 +27,6 @@ JWT_SECRET_KEY: 5erQjS4X69A0qO3cOzXlOuVNhZX4g9YZZ0rNj9AUxOC653uWYnbjYHoRBLBz8WfL
 
 #Email Configuration
 EMAIL_HOST: smtp.gmail.com
-EMAIL_PORT: 587
+EMAIL_PORT: 465
 EMAIL_ID: nganvhhse183096@fpt.edu.vn
 EMAIL_PASSWORD: etembzflesofpbxe
-VERIFY_EMAIL_HOST: http://localhost:${SERVER_PORT}

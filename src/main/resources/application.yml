@@ -45,6 +45,9 @@ spring:
           starttls:
             enable: true
             required: true
+          ssl:
+              enable: true
+              trust: smtp.gmail.com
     verify:
       host: ${VERIFY_EMAIL_HOST}
 

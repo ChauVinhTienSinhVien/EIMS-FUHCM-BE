@@ -9,8 +9,10 @@ RUN mvn clean install
 FROM openjdk:17-alpine
 WORKDIR /app
 
-# Install necessary libraries
-RUN apk update && apk add --no-cache freetype
+# Install necessary libraries for font rendering
+RUN apk update && \
+    apk add --no-cache fontconfig ttf-dejavu
+
 
 
 COPY --from=build /app/target/EIMS-FUHCM-BE-0.0.1-SNAPSHOT.jar ./eims-aws.jar

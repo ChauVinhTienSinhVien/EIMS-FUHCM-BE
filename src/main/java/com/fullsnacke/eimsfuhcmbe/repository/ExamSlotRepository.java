@@ -50,11 +50,13 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
     @Query("SELECT e FROM ExamSlot e " +
             "WHERE e.subjectExam.subjectId.semesterId = :semester " +
             "AND e.startAt <= :endDate " +
-            "ORDER BY e.startAt ASC")
+            "AND e.status = :status " +
+            "ORDER BY e.startAt ASC"
+    )
     List<ExamSlot> findExamSlotsBySemesterAndBeforeEndDate(
             @Param("semester") Semester semester,
-            @Param("endDate") ZonedDateTime endDate);
-
+            @Param("endDate") ZonedDateTime endDate,
+            @Param("status") int status);
     List<ExamSlot> findByIdIn(List<Integer> examSlotIds);
 
     @Query("SELECT e FROM ExamSlot e " +

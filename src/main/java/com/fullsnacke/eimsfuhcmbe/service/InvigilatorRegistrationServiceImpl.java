@@ -9,7 +9,9 @@ import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorRegistration;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotInvigilatorStatus;
 import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotRegisterStatusEnum;
+import com.fullsnacke.eimsfuhcmbe.enums.ExamSlotStatus;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
@@ -110,7 +112,7 @@ public class InvigilatorRegistrationServiceImpl implements InvigilatorRegistrati
         ZonedDateTime endDay = ZonedDateTime.now().plusDays(openRegistration);
 
         // Chuyển đổi allExamSlots từ List sang Set
-        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotsBySemesterAndBeforeEndDate(semester, endDay));
+        Set<ExamSlot> allExamSlots = new HashSet<>(examSlotRepository.findExamSlotsBySemesterAndBeforeEndDate(semester, endDay, ExamSlotStatus.APPROVED.getValue()));
 
         Set<InvigilatorRegistration> registeredSlots = invigilatorRegistrationRepository.findByInvigilatorAndSemesterWithDetails(currentUser, semester);
 

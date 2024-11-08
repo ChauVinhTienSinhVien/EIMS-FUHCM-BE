@@ -37,32 +37,6 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
     ConfigurationHolder configurationHolder;
 
     @Transactional
-    public List<InvigilatorAttendance> addInvigilatorAttendancesByDay() {
-        System.out.println("InvigilatorAttendanceServiceImpl.addInvigilatorAttendancesByDay");
-        Instant day = Instant.parse("2024-10-25T00:00:00Z");
-        //List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByExamSlotStartAtInDay(day);
-        List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findAll();
-        if(!invigilatorAttendances.isEmpty()){
-            return invigilatorAttendances;
-        }
-
-        //List<InvigilatorAssignment> invigilatorAssignments = invigilatorAssignmentRepository.findByExamSlotStartAtInDay(day);
-        List<InvigilatorAssignment> invigilatorAssignments = invigilatorAssignmentRepository.findAll();
-        for (InvigilatorAssignment invigilatorRegistration : invigilatorAssignments) {
-            System.out.println(invigilatorRegistration.getId());
-            InvigilatorAttendance invigilatorAttendance = InvigilatorAttendance
-                    .builder()
-                    .invigilatorAssignment(invigilatorRegistration)
-                    .status(1)
-                    .build();
-            invigilatorAttendances.add(invigilatorAttendance);
-        }
-
-        invigilatorAttendanceRepository.saveAll(invigilatorAttendances);
-        return invigilatorAttendances;
-    }
-
-    @Transactional
     public List<InvigilatorAttendance> addInvigilatorAttendances(List<InvigilatorAssignment> invigilatorRegistrationList){
         List<InvigilatorAttendance> invigilatorAttendances = invigilatorAttendanceRepository.findByInvigilatorAssignmentIn(invigilatorRegistrationList);
         if(!invigilatorAttendances.isEmpty()){
@@ -151,6 +125,8 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
             if(DateValidationUtil.isAfterTimeLimit(startAt)){
                 invigilatorAttendanceInDb.setCheckIn(now);
+                invigilatorAttendanceInDb.setUpdatedAt(now);
+                invigilatorAttendanceInDb.setUpdatedBy(SecurityUntil.getLoggedInUser().get());
                 invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
             }else{
                 throw new CustomException(ErrorCode.CHECKIN_TIME_IS_NOT_VALID);
@@ -169,6 +145,8 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
             Instant endAt = invigilatorAttendanceInDb.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().toInstant();
             if (DateValidationUtil.isAfterTimeLimit(endAt)) {
                 invigilatorAttendanceInDb.setCheckOut(now);
+                invigilatorAttendanceInDb.setUpdatedAt(now);
+                invigilatorAttendanceInDb.setUpdatedBy(SecurityUntil.getLoggedInUser().get());
                 invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
             } else {
                 throw new CustomException(ErrorCode.CHECKOUT_TIME_IS_NOT_VALID);
@@ -234,7 +212,10 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
 
                 if(DateValidationUtil.isWithinTimeRange(startAt, endAt)){
                     invigilatorAttendance.setCheckIn(Instant.now());
+                    invigilatorAttendance.setUpdatedAt(Instant.now());
+                    invigilatorAttendance.setUpdatedBy(SecurityUntil.getLoggedInUser().get());
                     invigilatorAttendances.add(invigilatorAttendance);
+
                 }else {
                     throw new CustomException(ErrorCode.CHECKIN_TIME_IS_NOT_VALID);
                 }
@@ -255,6 +236,8 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
                 Instant endAt = invigilatorAttendance.getInvigilatorAssignment().getInvigilatorRegistration().getExamSlot().getEndAt().toInstant();
                 if(DateValidationUtil.isWithinTimeRange(endAt, endAt.plus(configurationHolder.getCheckOutTimeAfterExamSlot(), ChronoUnit.MINUTES))){
                     invigilatorAttendance.setCheckOut(Instant.now());
+                    invigilatorAttendance.setUpdatedAt(Instant.now());
+                    invigilatorAttendance.setUpdatedBy(SecurityUntil.getLoggedInUser().get());
                     invigilatorAttendances.add(invigilatorAttendance);
                 }else {
                     throw new CustomException(ErrorCode.CHECKOUT_TIME_IS_NOT_VALID);
@@ -407,6 +390,8 @@ public class InvigilatorAttendanceServiceImpl implements InvigilatorAttendanceSe
                 invigilatorAttendanceInDb.setCheckIn(null);
                 invigilatorAttendanceInDb.setCheckOut(null);
             }
+            invigilatorAttendanceInDb.setUpdatedAt(Instant.now());
+            invigilatorAttendanceInDb.setUpdatedBy(SecurityUntil.getLoggedInUser().get());
             invigilatorAttendanceRepository.save(invigilatorAttendanceInDb);
         }
         return invigilatorAttendanceInDb;

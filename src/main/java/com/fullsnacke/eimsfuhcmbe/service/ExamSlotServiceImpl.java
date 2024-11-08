@@ -74,10 +74,6 @@ public class ExamSlotServiceImpl implements ExamSlotService {
         if (examSlotInDB == null)
             throw new EntityNotFoundException("ExamSlot not found with ID: " + id);
 
-        if (isDuplicateExamSlot(examSlotInRequest)) {
-            throw new IllegalArgumentException("Duplicate ExamSlot with the same subject and time");
-        }
-
 //        examSlotInDB.setStartAt(examSlotInRequest.getStartAt());
 //        examSlotInDB.setEndAt(examSlotInRequest.getEndAt());
 //        examSlotInDB.setUpdatedAt(examSlotInRequest.getUpdatedAt());
@@ -104,7 +100,7 @@ public class ExamSlotServiceImpl implements ExamSlotService {
     public ExamSlot managerUpdateExamSlot(ExamSlot examSlotInRequest, int id) {
         ExamSlot examSlotInDB =examSlotRepository.findExamSlotById(id);
 
-        User user = userRepository.findUserById(examSlotInRequest.getUpdatedBy().getId());
+        User user = userRepository.findUserById(examSlotInRequest.getApprovedBy().getId());
 
         if (user == null) {
             throw new EntityNotFoundException("User not found with ID: " + examSlotInRequest.getApprovedBy().getId());

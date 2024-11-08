@@ -101,6 +101,8 @@ public enum Role {
                     INVIGILATOR_REGISTRATION_WRITE,
                     INVIGILATOR_REGISTRATION_DELETE,
 
+                    INVIGILATOR_ASSIGNMENT_READ,
+
                     REQUEST_CREATE,
                     REQUEST_READ,
                     REQUEST_WRITE,

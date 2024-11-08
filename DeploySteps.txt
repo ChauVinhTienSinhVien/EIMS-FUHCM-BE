@@ -30,11 +30,20 @@ docker push chauvinhtiensinhvien/eims-test:1.0
 TED          STATUS          PORTS                                   NAMES
 f5142c320a28   chauvinhtiensinhvien/eims:1.0   "java --enable-previ…"   56 seconds ago   Up 54 seconds   0.0.0.0:80->8080/tcp, :::80->8080/tcp   peaceful_bouman
 
-//7. Open the docker log
+//8. Open the docker log
 -> sudo docker logs -f f5142c320a28
 
-//8. Stop the docker ps
+//9. Stop the docker ps
 -> sudo docker stop f5142c320a28
+
+//10. List docker container
+-> sudo docker ps -a
+
+//11. Remove the docker container
+-> sudo docker rm f5142c320a28
+
+//12. Remove the docker image
+-> sudo docker rmi imageId
 
 //////////
 1. Cau Hinh Config nginx 
@@ -43,7 +52,10 @@ f5142c320a28   chauvinhtiensinhvien/eims:1.0   "java --enable-previ…"   56 sec
 -> sudo nginx -t
 3. Reload nginx
 -> sudo nginx -s reload
-
+4. Check status nginx
+-> sudo service nginx status
 /////////
+
+
 https://viblo.asia/p/cai-dat-sslhttps-free-certbot-tren-aws-ec2-RQqKL9pOZ7z -> 1 so cai khong dung voi Linux 2023 cua aws
 

@@ -209,6 +209,7 @@ public class ExamSlotController {
     public ResponseEntity<ExamSlotResponseDTO> managerUpdateExamSlot(@PathVariable("id") int id,@RequestBody @Valid ExamSlotRequestDTO examSlotRequestDTO) {
         try{
             ExamSlot existingExamSlot = examSlotServiceImpl.findById(id);
+
             if (existingExamSlot == null) {
                 return ResponseEntity.notFound().build();
             }

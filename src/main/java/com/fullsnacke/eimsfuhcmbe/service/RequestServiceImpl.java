@@ -198,10 +198,8 @@ public class RequestServiceImpl implements RequestService {
                         invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
                         return null;
                     });
-            if (registration != null && registration.getExamSlot() == entity.getExamSlot()) {
-                throw new CustomException(ErrorCode.INVIGILATOR_ALREADY_ASSIGNED);
-            }
 
+            //EXCHANGE INVIGILATORS
             invigilatorAssignmentService.exchangeInvigilators(entity, request);
         }
         //update request

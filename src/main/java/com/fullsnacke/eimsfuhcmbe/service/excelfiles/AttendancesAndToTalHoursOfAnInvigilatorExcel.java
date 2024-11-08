@@ -5,20 +5,14 @@ import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.InvigilatorAttendance;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
-import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
-import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
-import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorAttendanceRepository;
-import com.fullsnacke.eimsfuhcmbe.repository.SemesterRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
-import org.springframework.http.HttpStatus;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -70,7 +64,7 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
 
     //Common Configurations
     private final int FONT_SIZE = 10;
-    private final String FONT_FAMILY = "Tahoma";
+    //private final String FONT_FAMILY = "freetype";
     private final java.awt.Color HEADER_COLOR = new java.awt.Color(219, 229, 241);
     private final java.awt.Color SUMMARY_ROW_COLOR = new java.awt.Color(189, 215, 238);
     private final java.awt.Color DARK_BLUE = new Color(28, 69, 135);
@@ -424,7 +418,7 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
 
     private XSSFFont getFont(XSSFWorkbook workbook) {
         XSSFFont font = workbook.createFont();
-        font.setFontName(FONT_FAMILY);
+        //font.setFontName(FONT_FAMILY);
         font.setColor(IndexedColors.BLACK.getIndex());
         font.setFontHeightInPoints((short) FONT_SIZE);
         return font;

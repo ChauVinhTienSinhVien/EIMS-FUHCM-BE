@@ -10,7 +10,7 @@
 docker push chauvinhtiensinhvien/eims-test:1.0 
 
 //3. Connect to ec2
--> ssh -i eims-aws-kp.pem ec2-user@3.80.128.168
+-> ssh -i eims-aws-kp.pem ec2-user@34.228.22.103
 
 - eims-aws-kp.pem: key file
 - 3.80.128.168: public ip4 address
@@ -58,4 +58,24 @@ f5142c320a28   chauvinhtiensinhvien/eims:1.0   "java --enable-previ…"   56 sec
 
 
 https://viblo.asia/p/cai-dat-sslhttps-free-certbot-tren-aws-ec2-RQqKL9pOZ7z -> 1 so cai khong dung voi Linux 2023 cua aws
+
+
+
+///Change Time
+-> sudo date MMDDhhmmYYYY.ss
+
+//Verify Time
+-> date
+
+//Restart Time
+-> sudo systemctl restart chronyd
+
+//Check Time
+-> sudo timedatectl
+
+//List timeZone
+timedatectl list-timezones
+
+//Set TimeZone
+sudo timedatectl set-timezone Asia/Bangkok
 

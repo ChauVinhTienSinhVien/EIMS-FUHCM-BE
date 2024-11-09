@@ -352,7 +352,7 @@ public class ExamSlotController {
     public ResponseEntity<List<ExamSlotSummaryDTO>> getExamSlotsSummary(@RequestParam("startTime") ZonedDateTime startTime,@RequestParam("endTime") ZonedDateTime endTime) {
         List<ExamSlot> examSlotList = examSlotServiceImpl.getExamSlotsInTimeRange(startTime, endTime);
         if (examSlotList.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }
 
         List<ExamSlotSummaryDTO> examSlotSummaryDTOList = new ArrayList<>();

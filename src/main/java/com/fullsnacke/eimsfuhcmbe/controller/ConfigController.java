@@ -75,6 +75,12 @@ public class ConfigController {
         ExamSlot examSlot = examSlotRepository.findOldestExamSlotBySemester(updatedConfig.getSemester());
         int day =  configurationHolder.getTimeBeforeOpenRegistration();
 
+        if (examSlot == null) {
+            updatedConfig = configServiceImpl.updateConfig(config);
+            ConfigResponseDto configResponseDto = configMapper.toDto(updatedConfig);
+            return ResponseEntity.ok(configResponseDto);
+        }
+
         if(!DateValidationUtil.isBeforeDeadline(examSlot.getStartAt().toInstant().minus(Duration.ofDays(day)))){
             return ResponseEntity.badRequest().build();
         }

@@ -117,4 +117,10 @@ public class SubjectExamServiceImpl implements SubjectExamService{
         }
     }
 
+    @Override
+    public List<SubjectExam> getSubjectExamsBySubjectId(int subjectId) {
+        Subject subject = subjectRepository.findSubjectsById(subjectId);
+        return subjectExamRepository.findSubjectExamsBySubjectId(subject);
+    }
+
 }

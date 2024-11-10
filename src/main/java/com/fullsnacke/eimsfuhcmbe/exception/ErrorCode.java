@@ -28,7 +28,7 @@ public enum ErrorCode{
     OVERLAP_SLOT("Exam slot overlaps with existing assignments in the same semester", HttpStatus.CONFLICT),
     OVERLAP_SLOT_IN_LIST("The exam slot overlaps with another existing slot in the registration list.", HttpStatus.CONFLICT),
     EXCEEDED_ALLOWED_SLOT("Exceeded allowed slot.", HttpStatus.CONFLICT),
-
+    INVIGILATOR_ALREADY_ASSIGNED("Invigilator already assigned.", HttpStatus.CONFLICT),
     // Semester Management
     SEMESTER_NOT_FOUND("Semester not found.", HttpStatus.BAD_REQUEST),
 
@@ -69,7 +69,10 @@ public enum ErrorCode{
 
 
     CHECKIN_TIME_IS_NOT_VALID("Check in time is not valid", HttpStatus.BAD_REQUEST),
-    CHECKOUT_TIME_IS_NOT_VALID("Check out time is not valid", HttpStatus.BAD_REQUEST),;
+    CHECKOUT_TIME_IS_NOT_VALID("Check out time is not valid", HttpStatus.BAD_REQUEST),
+    FAIL_TO_APPROVE_ASSIGNMENT("Fail to approve invigilator assignments", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVIGILATOR_ATTENDANCE_NOT_FOUND("Invigilator Attendance not found", HttpStatus.NOT_FOUND),
+    INVIGILATOR_ATTENDANCE_ARE_ALREADY_EXIST("Invigilator Attendance is already exist", HttpStatus.CONFLICT);
 
     private String message;
     private HttpStatusCode statusCode;

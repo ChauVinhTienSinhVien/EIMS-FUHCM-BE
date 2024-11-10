@@ -1,9 +1,7 @@
 package com.fullsnacke.eimsfuhcmbe.service;
 
-import java.io.IOException;
-import java.util.List;
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 
 public interface ExcelFileService {
-    byte[] generateAttendanceAndTotalHoursExcelFileForSemester(int semesterId);
-    byte[] generateAttendanceAndTotalHoursExcelFileForSemester(int semesterId, String fuId);
+    byte[] generateAttendanceAndTotalHoursExcelFileForSemester(Semester semester, String email);
 }

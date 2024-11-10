@@ -23,4 +23,5 @@ public interface ExamSlotRoomRepository extends JpaRepository<ExamSlotRoom, Inte
     List<String> findAvailableRooms(@Param("startAt") ZonedDateTime startAt, @Param("endAt") ZonedDateTime endAt);
 
     Set<ExamSlotRoom> findByIdIn(Set<Integer> ids);
+    List<ExamSlotRoom> findByExamSlotHall_ExamSlot_Id(Integer examSlotId);
 }

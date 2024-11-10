@@ -29,6 +29,8 @@ public class ExamSlotResponseDTO {
 
     Integer requiredInvigilators;
 
+    Integer numberOfStudents;
+
     Instant createdAt;
 
     String createdByLastName;
@@ -40,5 +42,7 @@ public class ExamSlotResponseDTO {
     String updatedByFirstName;
 
     Instant updatedAt;
+
+    // approved By ?
 
 }

@@ -2,6 +2,8 @@ package com.fullsnacke.eimsfuhcmbe.repository;
 
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
 import com.fullsnacke.eimsfuhcmbe.entity.Semester;
+import com.fullsnacke.eimsfuhcmbe.entity.Subject;
+import com.fullsnacke.eimsfuhcmbe.entity.User;
 import lombok.Data;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +13,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
 
@@ -47,11 +50,13 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
     @Query("SELECT e FROM ExamSlot e " +
             "WHERE e.subjectExam.subjectId.semesterId = :semester " +
             "AND e.startAt <= :endDate " +
-            "ORDER BY e.startAt ASC")
+            "AND e.status = :status " +
+            "ORDER BY e.startAt ASC"
+    )
     List<ExamSlot> findExamSlotsBySemesterAndBeforeEndDate(
             @Param("semester") Semester semester,
-            @Param("endDate") ZonedDateTime endDate);
-
+            @Param("endDate") ZonedDateTime endDate,
+            @Param("status") int status);
     List<ExamSlot> findByIdIn(List<Integer> examSlotIds);
 
     @Query("SELECT e FROM ExamSlot e " +
@@ -73,6 +78,12 @@ public interface ExamSlotRepository extends JpaRepository<ExamSlot, Integer> {
                                         @Param("endAt") ZonedDateTime endAt);
 
     List<ExamSlot> findExamSlotByStatus(int status);
+
+
+    @Query("SELECT e FROM ExamSlot e WHERE e.subjectExam.subjectId.semesterId = :semester ORDER BY e.startAt ASC")
+    ExamSlot findOldestExamSlotBySemester(@Param("semester") Semester semester);
+
+    List<ExamSlot> findBySubjectExam_SubjectId_Id(int subjectExamId);
 
 }
 

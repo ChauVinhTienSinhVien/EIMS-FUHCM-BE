@@ -14,5 +14,6 @@ public interface InvigilatorAttendanceService {
 
     List<InvigilatorAttendance> checkInAll(List<Integer> invigilatorAttendanceIds);
     List<InvigilatorAttendance> checkOutAll(List<Integer> invigilatorAttendanceIds);
+
 }
 

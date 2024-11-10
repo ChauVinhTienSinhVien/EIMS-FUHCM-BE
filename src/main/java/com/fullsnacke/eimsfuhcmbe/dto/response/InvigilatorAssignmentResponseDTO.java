@@ -1,27 +1,46 @@
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
-@Getter
 @Setter
+@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ExamSlotDetail{
+public class InvigilatorAssignmentResponseDTO {
+
+    int assignmentId;
+
     int examSlotId;
-    String subjectCode;
-    String examType;
     ZonedDateTime startAt;
     ZonedDateTime endAt;
+
     String status;
-    Integer requiredInvigilators;
-    Integer numberOfRegistered;
+
+    String fuId;
+
+    String firstName;
+
+    String lastName;
+
+    @Email
+    String email;
+
+    String phoneNumber;
+
+    String department;
+
+    Boolean gender;
+
+    Instant createdAt;
 }
+

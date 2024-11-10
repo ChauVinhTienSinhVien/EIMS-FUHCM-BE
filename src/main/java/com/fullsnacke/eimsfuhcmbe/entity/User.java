@@ -17,7 +17,6 @@ import java.util.Collection;
 
 
 @Entity
-@Table(name = "users")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -25,6 +24,7 @@ import java.util.Collection;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EntityListeners(AuditingEntityListener.class)
+@Table(name = "users")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,7 +60,8 @@ public class User implements UserDetails {
     @CreatedDate
     Instant createdAt;
 
-    @Column(name = "is_deleted", columnDefinition = "boolean default false")
+    @Column(name = "is_deleted")
+    @ColumnDefault("b'0'")
     Boolean isDeleted;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -1,5 +1,6 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
+import com.fasterxml.jackson.databind.annotation.JsonTypeResolver;
 import com.fullsnacke.eimsfuhcmbe.dto.mapper.SubjectExamMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.SubjectExamRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.SubjectExamResponseDTO;
@@ -42,7 +43,9 @@ public class SubjectExamController {
     @Autowired
     private SemesterRepository semesterRepository;
 
+    //STAFF
     @GetMapping
+    @PreAuthorize("hasAuthority('subject_exam:read')")
     @Operation(summary = "Get all subject exams", description = "Retrieve a list of all subject exams")
     public ResponseEntity<List<SubjectExamResponseDTO>> getAllSubjectExams() {
         List<SubjectExam> subjectExamList = subjectExamServiceImpl.getAllSubjectExam();
@@ -58,7 +61,9 @@ public class SubjectExamController {
         }
     }
 
+    //STAFF
     @PostMapping
+    @PreAuthorize("hasAuthority('subject_exam:create')")
     @Operation(summary = "Add a subject exam", description = "Add a new subject exam")
     public ResponseEntity<?> createSubjectExam(@RequestBody @Valid SubjectExamRequestDTO subjectExamRequestDTO) {
         SubjectExam subjectExam = subjectExamMapper.toEntity(subjectExamRequestDTO);
@@ -78,7 +83,10 @@ public class SubjectExamController {
         return ResponseEntity.created(uri).body(subjectExamResponseDTO);
     }
 
+
+    //STAFF
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject_exam:write')")
     @Operation(summary = "Update a subject exam", description = "Update a subject exam")
     public ResponseEntity<SubjectExamResponseDTO> updateSubjectExam(@PathVariable("id") int id, @RequestBody @Valid SubjectExamRequestDTO subjectExamRequestDTO) {
         SubjectExam subjectExam = subjectExamMapper.toEntity(subjectExamRequestDTO);
@@ -98,7 +106,9 @@ public class SubjectExamController {
 
     }
 
+    //STAFF
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject_exam:read')")
     @Operation(summary = "Get a subject exam by id", description = "Retrieve a subject exam by id")
     public ResponseEntity<SubjectExamResponseDTO> findSubjectExamById(@PathVariable("id") int id) {
         SubjectExam subjectExam = subjectExamServiceImpl.findSubjectExamById(id);
@@ -109,7 +119,9 @@ public class SubjectExamController {
         return ResponseEntity.ok(subjectExamResponseDTO);
     }
 
+    //STAFF
     @GetMapping("/by-semester/{semesterId}")
+    @PreAuthorize("hasAuthority('subject_exam:read')")
     @Operation(summary = "Get subject exams by semester id", description = "Retrieve a list of subject exams by semester id")
     public ResponseEntity<List<SubjectExamResponseDTO>> findSubjectExamBySemesterId(@PathVariable("semesterId") int semesterId) {
         List<SubjectExam> subjectExamList = subjectExamServiceImpl.getSubjectExamsBySemesterId(semesterId);
@@ -126,7 +138,9 @@ public class SubjectExamController {
         return ResponseEntity.ok(subjectExamResponseDTOList);
     }
 
+    //STAFF
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('subject_exam:delete')")
     @Operation(summary = "Delete a subject exam", description = "Delete a subject exam")
     public ResponseEntity<?> deleteSubjectExam(@PathVariable("id") int id) {
         try {
@@ -134,6 +148,22 @@ public class SubjectExamController {
             return ResponseEntity.noContent().build();
         } catch (SubjectExamNotFoundException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/by-subject/{subjectId}")
+    @Operation(summary = "Get subject exams by subject id", description = "Retrieve a list of subject exams by subject id")
+    public ResponseEntity<List<SubjectExamResponseDTO>> getSubjectExamsBySubjectId(@PathVariable("subjectId") int subjectId) {
+        List<SubjectExam> subjectExamList = subjectExamServiceImpl.getSubjectExamsBySubjectId(subjectId);
+        if (subjectExamList.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            List<SubjectExamResponseDTO> subjectExamResponseDTOList = new ArrayList<>();
+            for (SubjectExam subjectExam : subjectExamList) {
+                SubjectExamResponseDTO subjectExamResponseDTO = subjectExamMapper.toDto(subjectExam);
+                subjectExamResponseDTOList.add(subjectExamResponseDTO);
+            }
+            return ResponseEntity.ok(subjectExamResponseDTOList);
         }
     }
 

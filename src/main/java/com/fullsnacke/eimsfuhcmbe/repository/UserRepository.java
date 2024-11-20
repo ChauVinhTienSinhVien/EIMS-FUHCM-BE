@@ -1,7 +1,9 @@
 package com.fullsnacke.eimsfuhcmbe.repository;
 
+import com.fullsnacke.eimsfuhcmbe.entity.Semester;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,4 +26,5 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     User findUserById(int id);
 
     List<User> findAllByIsDeleted(boolean isDeleted);
+
 }

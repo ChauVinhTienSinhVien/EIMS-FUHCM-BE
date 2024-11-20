@@ -19,8 +19,10 @@ public interface ExamSlotMapper {
     ExamSlot toEntity(ExamSlotRequestDTO dto);
 
     @Mapping(target = "subjectExamDTO", source = "subjectExam", qualifiedByName = "mapToSubjectExamDTO")
-    @Mapping(target = "createdBy", source = "createdBy.id")
-    @Mapping(target = "updatedBy", source = "updatedBy.id")
+    @Mapping(target = "createdByLastName", source = "createdBy.lastName")
+    @Mapping(target = "createdByFirstName", source = "createdBy.firstName")
+    @Mapping(target = "updatedByLastName", source = "updatedBy.lastName")
+    @Mapping(target = "updatedByFirstName", source = "updatedBy.firstName")
     @Mapping(target = "status", source = "status", qualifiedByName = "intToStatus")
     ExamSlotResponseDTO toDto(ExamSlot entity);
 

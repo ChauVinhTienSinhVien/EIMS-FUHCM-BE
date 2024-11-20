@@ -44,6 +44,9 @@ public class ExamSlot {
     @Convert(converter = ZonedDateTimeCoverter.class)
     ZonedDateTime endAt;
 
+    @Column(name = "number_of_students", nullable = false)
+    Integer numberOfStudents;
+
     @Column(name = "required_invigilators")
     Integer requiredInvigilators;
 
@@ -56,7 +59,8 @@ public class ExamSlot {
     @CreatedBy
     User createdBy;
 
-    @Column(name = "status", nullable = false, columnDefinition = "int default 1")
+    @Column(name = "status", nullable = false)
+    @ColumnDefault("1")
     Integer status;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -66,5 +70,13 @@ public class ExamSlot {
     @Column(name = "updated_at")
     @LastModifiedDate
     Instant updatedAt;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "approved_by")
+    User approvedBy;
+
+    @Column(name = "approved_at")
+    @LastModifiedDate
+    Instant approvedAt;
 
 }

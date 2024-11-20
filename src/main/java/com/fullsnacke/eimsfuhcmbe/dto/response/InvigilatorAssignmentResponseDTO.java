@@ -1,17 +1,46 @@
 package com.fullsnacke.eimsfuhcmbe.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Getter
+import java.time.Instant;
+import java.time.ZonedDateTime;
+
 @Setter
+@Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class InvigilatorAssignmentResponseDTO {
-    ExamSlotDetail examSlotDetail;
-//    Map<Integer, InvigilatorDetail> invigilatorDetails;
+
+    int assignmentId;
+
+    int examSlotId;
+    ZonedDateTime startAt;
+    ZonedDateTime endAt;
+
+    String status;
+
+    String fuId;
+
+    String firstName;
+
+    String lastName;
+
+    @Email
+    String email;
+
+    String phoneNumber;
+
+    String department;
+
+    Boolean gender;
+
+    Instant createdAt;
 }
+

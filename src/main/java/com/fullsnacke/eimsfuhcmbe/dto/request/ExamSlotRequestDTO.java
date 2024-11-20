@@ -16,40 +16,16 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ExamSlotRequestDTO {
 
-//    int subjectExamId;
-//
-//    int status;
-//
-//    int createdBy;
-//
-//    int updatedBy;
-//
-//    Instant createdAt;
-//
-//    Instant updatedAt;
-//
-//    Instant startAt;
-//
-//    Instant endAt;
-
-//    Integer id;
-
     Integer subjectExamId;
 
     ZonedDateTime startAt;
 
     ZonedDateTime endAt;
 
-    Integer requiredInvigilators;
-
-//    Instant createdAt;
-//
-//    Integer createdBy;
+//    Integer requiredInvigilators;
 
     ExamSlotStatus status;
 
-//    Integer updatedBy;
-//
-//    Instant updatedAt;
+    Integer numberOfStudents;
 
 }

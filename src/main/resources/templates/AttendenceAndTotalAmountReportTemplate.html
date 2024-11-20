@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Invigilation Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #ff6600; /* FPT primary orange color */
+        }
+        .content {
+            padding: 0px 20px;
+        }
+        h3 {
+            color: #333;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        ul {
+            padding-left: 20px;
+            color: #555;
+        }
+        ul li {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 14px;
+            color: #888;
+        }
+        .highlight {
+            color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <p><strong>Dear <span th:text="${fullName}"></span>,</strong></p>
+        <p>We are pleased to send you the report regarding your <strong> invigilation activities and corresponding remuneration </strong>for the <strong th:text="${semesterName}"></strong> exam period. The detailed information is attached in the Excel file, which includes:</p>
+        <ul>
+            <li>Lecturer ID</li>
+            <li>Exam date</li>
+            <li>Total working hours</li>
+            <li>Actual invigilation hours</li>
+            <li>Estimated remuneration</li>
+        </ul>
+
+        <p>Please carefully review the attached information. If you have any questions or require any adjustments, feel free to contact our support team via the email address provided below.</p>
+
+        <p>We sincerely appreciate your valuable contribution in ensuring the smooth and successful conduct of the exams.</p>
+
+        <p>Best regards,</p>
+        <p><strong>Exam Invigilation Management Team</strong><br>
+            FPT University HCMC</p>
+    </div>
+
+    <div class="footer">
+        <p>This is an automated email. Please do not reply. For any assistance, contact us at <span class="highlight"><span th:text="${emailSupport}"></span></span>.</p>
+    </div>
+</div>
+</body>
+</html>

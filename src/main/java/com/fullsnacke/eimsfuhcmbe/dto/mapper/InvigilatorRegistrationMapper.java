@@ -34,14 +34,30 @@ public interface InvigilatorRegistrationMapper {
     @Mapping(target = "examSlotId", source = "id")
     @Mapping(target = "startAt", source = "startAt")
     @Mapping(target = "endAt", source = "endAt")
-    @Mapping(target = "status", ignore = true)
     @Mapping(target = "requiredInvigilators", source = "requiredInvigilators")
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "numberOfRegistered", ignore = true)
+    @Mapping(target = "examType", ignore = true)
+    ExamSlotDetail toExamSlotDetailInvigilator(ExamSlot examSlot);
+
+    @Mapping(target = "examSlotId", source = "id")
+    @Mapping(target = "subjectCode", source = "subjectExam.subjectId.code")
+    @Mapping(target = "examType", source = "subjectExam.examType")
+    @Mapping(target = "startAt", source = "startAt")
+    @Mapping(target = "endAt", source = "endAt")
+    @Mapping(target = "requiredInvigilators", source = "requiredInvigilators")
+    @Mapping(target = "status", ignore = true)
     @Mapping(target = "numberOfRegistered", ignore = true)
     ExamSlotDetail toExamSlotDetail(ExamSlot examSlot);
 
     @Mapping(target = "examSlotId", source = "id")
     @Mapping(target = "startAt", source = "startAt")
     @Mapping(target = "endAt", source = "endAt")
+    @Mapping(target = "requiredInvigilators", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "numberOfRegistered", ignore = true)
+    @Mapping(target = "examType", ignore = true)
+    @Mapping(target = "subjectCode", ignore = true)
     ExamSlotDetail toExamSlotDetailBasic(ExamSlot examSlot);
 
     @Named("mapInvigilatorRegistrations")
@@ -63,12 +79,22 @@ public interface InvigilatorRegistrationMapper {
                 .toList();
     }
 
+    @Named("mapCancelExamSlotDetails")
+    default Set<ExamSlotDetail> mapCancelExamSlotDetails(Set<ExamSlot> examSlots) {
+        return examSlots.stream()
+                .map(this::toExamSlotDetailBasic)
+                .collect(Collectors.toSet());
+    }
+
+
 
     default Set<ExamSlotDetail> mapExamSlotDetails(Set<ExamSlot> examSlots) {
         return examSlots.stream()
-                .map(this::toExamSlotDetail)
+                .map(this::toExamSlotDetailInvigilator)
                 .collect(Collectors.toSet());
     }
+
+
 
 }
 

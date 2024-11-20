@@ -4,6 +4,7 @@ import com.fullsnacke.eimsfuhcmbe.dto.mapper.RequestMapper;
 import com.fullsnacke.eimsfuhcmbe.dto.request.ExchangeInvigilatorsRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.request.RequestRequestDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.request.UpdateStatusRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.ManagerRequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.RequestResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.ExamSlot;
@@ -14,6 +15,7 @@ import com.fullsnacke.eimsfuhcmbe.enums.RequestStatusEnum;
 import com.fullsnacke.eimsfuhcmbe.enums.RequestTypeEnum;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import com.fullsnacke.eimsfuhcmbe.repository.ExamSlotRepository;
 import com.fullsnacke.eimsfuhcmbe.repository.InvigilatorRegistrationRepository;
@@ -23,6 +25,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -46,6 +49,7 @@ public class RequestServiceImpl implements RequestService {
     InvigilatorRegistrationService invigilatorRegistrationService;
     InvigilatorRegistrationRepository invigilatorRegistrationRepository;
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO createRequest(RequestRequestDTO request) {
         if (request == null) {
@@ -55,9 +59,6 @@ public class RequestServiceImpl implements RequestService {
         } else if (request.getReason() == null || request.getReason().isEmpty()) {
             throw new CustomException(ErrorCode.REASON_EMPTY);
         }
-//        else if(request.getRequestType() == null) {
-//            throw new CustomException(ErrorCode.REQUEST_TYPE_EMPTY);
-//        }
         try {
             var currentUser = getCurrentUser();
             log.info("Current User: {}", currentUser.getFuId());
@@ -77,6 +78,51 @@ public class RequestServiceImpl implements RequestService {
         }
     }
 
+    @Override
+    public Request createAttendanceUpdateRequest(Request request) {
+        if (request == null) {
+            throw new CustomException(ErrorCode.REQUEST_EMPTY);
+        }
+
+        Request attendanceChangeRequest = new Request();
+        User currentUser = getCurrentUser();
+        attendanceChangeRequest.setCreatedBy(currentUser);
+        attendanceChangeRequest.setExamSlot(request.getExamSlot());
+        attendanceChangeRequest.setReason(request.getReason());
+        attendanceChangeRequest.setRequestType(RequestTypeEnum.UPDATE_ATTENDANCE.name());
+        attendanceChangeRequest.setStatus(RequestStatusEnum.PENDING.getValue());
+
+        return requestRepository.save(attendanceChangeRequest);
+    }
+
+    @Override
+    public RequestResponseDTO updateAttendanceStatus(UpdateStatusRequestDTO request) {
+        Request entity = requestRepository.findById(request.getRequestId())
+                .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
+
+        RequestStatusEnum status;
+        try {
+            status = RequestStatusEnum.valueOf(request.getStatus().toUpperCase());
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
+        }
+        if(status != RequestStatusEnum.APPROVED && status != RequestStatusEnum.REJECTED) {
+            throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
+        }
+        if (entity.getStatus() != RequestStatusEnum.PENDING.getValue()) {
+            throw new CustomException(ErrorCode.REQUEST_ALREADY_PROCESSED);
+        }
+
+        entity.setStatus(status.getValue());
+        entity.setComment(request.getNote());
+        requestRepository.save(entity);
+
+        RequestResponseDTO responseDTO = requestMapper.toResponseDTO(entity);
+        responseDTO.setStatus(status.name());
+        return responseDTO;
+    }
+
+    @Override
     public List<RequestResponseDTO> getAllRequestOfCurrentInvigilator() {
         User currentUser = getCurrentUser();
         List<Request> entity = requestRepository.findByCreatedBy(currentUser);
@@ -84,6 +130,7 @@ public class RequestServiceImpl implements RequestService {
         return getAllRequestsByInvigilator(currentUser);
     }
 
+    @Override
     public List<RequestResponseDTO> getAllRequestByInvigilatorId(String invigilatorId) {
         User invigilator = userRepository.findByFuId(invigilatorId);
         if (invigilator == null) {
@@ -93,18 +140,7 @@ public class RequestServiceImpl implements RequestService {
         return getAllRequestsByInvigilator(invigilator);
     }
 
-    private List<RequestResponseDTO> getAllRequestsByInvigilator(User invigilator) {
-        List<Request> entity = requestRepository.findByCreatedBy(invigilator);
-
-        return entity.stream()
-                .map(request -> {
-                    RequestResponseDTO responseDTO = requestMapper.toResponseDTO(request);
-                    responseDTO.setStatus(RequestStatusEnum.fromValue(request.getStatus()).name());
-                    return responseDTO;
-                })
-                .toList();
-    }
-
+    @Override
     public RequestResponseDTO getRequestById(int requestId) {
         Request entity = requestRepository.findById(requestId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REQUEST_EMPTY));
@@ -114,6 +150,7 @@ public class RequestServiceImpl implements RequestService {
         return responseDTO;
     }
 
+    @Override
     public List<ManagerRequestResponseDTO> getAllRequestBySemester(int semesterId) {
         List<Request> entity = requestRepository.findByExamSlot_SubjectExam_SubjectId_SemesterId_Id(semesterId);
         return entity.stream()
@@ -125,6 +162,7 @@ public class RequestServiceImpl implements RequestService {
                 .toList();
     }
 
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public RequestResponseDTO updateRequestStatus(ExchangeInvigilatorsRequestDTO request) {
         //find request by id
@@ -137,7 +175,7 @@ public class RequestServiceImpl implements RequestService {
         RequestStatusEnum entityStatus = RequestStatusEnum.fromValue(entity.getStatus());
         RequestStatusEnum status;
         try {
-            status = RequestStatusEnum.valueOf(request.getStatus());
+            status = RequestStatusEnum.valueOf(request.getStatus().toUpperCase());
             log.info("Status: {}", status);
         } catch (Exception e) {
             throw new CustomException(ErrorCode.REQUEST_STATUS_INVALID);
@@ -157,16 +195,17 @@ public class RequestServiceImpl implements RequestService {
                                 .fuId(request.getNewInvigilatorFuId())
                                 .examSlotId(Set.of(entity.getExamSlot().getId()))
                                 .build();
-
                         invigilatorRegistrationService.registerExamSlotWithFuId(registrationRequest);
                         return null;
                     });
 
+            //EXCHANGE INVIGILATORS
             invigilatorAssignmentService.exchangeInvigilators(entity, request);
         }
         //update request
         entity.setStatus(status.getValue());
-//        entity.setUpdatedAt(Instant.now());
+        entity.setUpdatedAt(java.time.Instant.now());
+        entity.setUpdatedBy(getCurrentUser());
         entity.setComment(request.getNote());
 
         //save update request
@@ -182,11 +221,9 @@ public class RequestServiceImpl implements RequestService {
     //-----------------------------PRIVATE METHOD--------------------------------
 
     private void setExamSlot(ExamSlot examSlot) {
-        if (examSlot == null) {
-            throw new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND);
-        }
-        examSlot = examSlotRepository.findById(examSlot.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.EXAM_SLOT_NOT_FOUND));
+        int examSlotId = examSlot.getId();
+        examSlot = examSlotRepository.findById(examSlotId)
+                .orElseThrow(() -> new CustomMessageException(HttpStatus.BAD_REQUEST, "Exam slot ID " + examSlotId + " not found."));
     }
 
     private User getCurrentUser() {
@@ -204,6 +241,18 @@ public class RequestServiceImpl implements RequestService {
 
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private List<RequestResponseDTO> getAllRequestsByInvigilator(User invigilator) {
+        List<Request> entity = requestRepository.findByCreatedBy(invigilator);
+
+        return entity.stream()
+                .map(request -> {
+                    RequestResponseDTO responseDTO = requestMapper.toResponseDTO(request);
+                    responseDTO.setStatus(RequestStatusEnum.fromValue(request.getStatus()).name());
+                    return responseDTO;
+                })
+                .toList();
     }
 
 

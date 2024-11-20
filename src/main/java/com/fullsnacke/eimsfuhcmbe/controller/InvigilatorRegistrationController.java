@@ -1,9 +1,11 @@
 package com.fullsnacke.eimsfuhcmbe.controller;
 
 import com.fullsnacke.eimsfuhcmbe.dto.request.InvigilatorRegistrationRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.request.RegisterdSlotWithSemesterAndInvigilatorRequestDTO;
-import com.fullsnacke.eimsfuhcmbe.dto.response.*;
-import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomException;
+import com.fullsnacke.eimsfuhcmbe.dto.response.ExamSlotDetail;
+import com.fullsnacke.eimsfuhcmbe.dto.response.InvigilatorRegistrationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamBySemesterResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.dto.response.RegisteredExamInvigilationResponseDTO;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.service.InvigilatorRegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
@@ -28,6 +30,7 @@ public class InvigilatorRegistrationController {
 
     //INVIGILATOR
     @PostMapping
+    @PreAuthorize("hasAuthority('invigilator_registration:create')")
     @Operation(summary = "Register Exam Slots", description = "Save the invigilator customEx for the exam slot")
     public ResponseEntity<InvigilatorRegistrationResponseDTO> registerExamSlotWithoutFuId(@RequestBody InvigilatorRegistrationRequestDTO request) {
         return ResponseEntity
@@ -35,100 +38,20 @@ public class InvigilatorRegistrationController {
                 .body(invigilatorRegistrationService.registerExamSlotWithoutFuId(request));
     }
 
-    //MANAGER
-    @PostMapping("/register")
-    @Operation(summary = "Register Exam Slots", description = "Save the invigilator customEx for the exam slot")
-    public ResponseEntity<InvigilatorRegistrationResponseDTO> registerExamSlotWithFuId(@RequestBody InvigilatorRegistrationRequestDTO request) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(invigilatorRegistrationService.registerExamSlotWithFuId(request));
-    }
-
-    //INVIGILATOR
-    @GetMapping("/myinfo")
-    @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots for the current invigilator")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.getAllCurrentInvigilatorRegisteredSlots());
-    }
-
-    //MANAGER/STAFF
-    @GetMapping("/{fuId}")
-    @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by fuID")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlot(@PathVariable("fuId") String fuId){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.getAllRegisteredSlotsByInvigilator(fuId));
-    }
-
-    //MANAGER/STAFF
-    @GetMapping("/semesterid={semesterId}/invigilator={fuId}")
-    @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester and fuId")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllRegisteredSlotsInSemesterByInvigilator(@PathVariable("semesterId") int semesterId, @PathVariable("fuId") String fuId){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.getAllRegisteredSlotsInSemesterByInvigilator(semesterId, fuId));
-    }
-
     //INVIGILATOR
     @GetMapping("/myinfo/semesterid={semesterId}")
+    @PreAuthorize("hasAuthority('invigilator_registration:read')")
     @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of current invigilator")
-    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@PathVariable("semesterId") int semesterId){
+    public ResponseEntity<RegisteredExamInvigilationResponseDTO> getAllCurrentInvigilatorRegisteredSlotsInSemester(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.getAllCurrentInvigilatorRegisteredSlotsInSemester(semesterId));
     }
 
-    //MANAGER/STAFF
-    @GetMapping("/semesterid={semesterId}")
-    @Operation(summary = "Get All Registered Slots", description = "Get all the registered slots by semester of all invigilators")
-    public ResponseEntity<Set<RegisteredExamBySemesterResponseDTO>> getAllRegisteredSlotsInSemester(@PathVariable("semesterId") @RequestBody int semesterId){
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.getRegisteredExamBySemester(semesterId));
-    }
-
-    //MANAGER/STAFF
-    @GetMapping("/examslotid={examSlotId}")
-    @Operation(summary = "Get All Invigilators", description = "Get all the invigilators by exam slot")
-    public ResponseEntity<ListInvigilatorsByExamSlotResponseDTO> listInvigilatorsByExamSlot(@PathVariable("examSlotId") int examSlotId) {
-        System.out.println("examSlotId = " + examSlotId);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.listInvigilatorsByExamSlot(examSlotId));
-    }
-
-    //INVIGILATOR
-    @PutMapping
-    @Operation(summary = "Update Registered Slot", description = "Update the registered slot by fuId")
-    public ResponseEntity<InvigilatorRegistrationResponseDTO> updateRegisteredSlot(@RequestBody InvigilatorRegistrationRequestDTO request) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.updateRegisterExamSlot(request));
-    }
-
-    //TOI DUNG DE TEST
-    @DeleteMapping
-    @Operation(summary = "Delete Registered Slot", description = "Delete the registered slot by fuId and semester")
-    public ResponseEntity<Boolean> deleteRegisteredSlotsBySemester(@RequestBody RegisterdSlotWithSemesterAndInvigilatorRequestDTO request) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(invigilatorRegistrationService.deleteRegisteredSlotsBySemester(request));
-    }
-//
-//    @DeleteMapping("/register")
-//    @Operation(summary = "Delete Registered Slot by ExamSlot Id")
-//    public ResponseEntity<Set<ExamSlotDetail>> deleteRegisteredSlotByExamSlotId(@RequestBody InvigilatorRegistrationRequestDTO request) {
-//        return ResponseEntity
-//                .status(HttpStatus.OK)
-//                .body(invigilatorRegistrationService.deleteRegisteredSlotByExamSlotId(request));
-//    }
-
     //INVIGILATOR
     @DeleteMapping("/myinfo/register")
+    @PreAuthorize("hasAuthority('invigilator_registration:delete')")
     @Operation(summary = "Delete Registered Slot by ExamSlot Id")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> deleteCurrentInvigilatorRegisteredSlotByExamSlotId(@RequestParam Set<Integer> id) {
         Logger log = LogManager.getLogger(InvigilatorRegistrationController.class);
         log.info("Received a request to delete the registered slot with ID: {}", id);
@@ -137,7 +60,7 @@ public class InvigilatorRegistrationController {
             Set<ExamSlotDetail> result = invigilatorRegistrationService.deleteCurrentInvigilatorRegisteredSlotByExamSlotId(id);
             log.info("Already delete {} slot(s)", result.size());
             return ResponseEntity.ok(result);
-        } catch (CustomException e) {
+        } catch (CustomMessageException e) {
             log.error("Error occurred while deleting a registered slot: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -145,15 +68,19 @@ public class InvigilatorRegistrationController {
 
     //INVIGILATOR
     @GetMapping("/register/semesterid={semesterId}")
-    public ResponseEntity<RegisteredExamBySemesterResponseDTO> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId){
+    @PreAuthorize("hasAuthority('invigilator_registration:read')")
+    @Operation(summary = "Get All Exam Slots in Semester with Status", description = "If invigilators was assigned to the exam slot then status will be ASSIGNED otherwise UNASSIGNED")
+    public ResponseEntity<RegisteredExamBySemesterResponseDTO> getAllExamSlotsInSemesterWithStatus(@PathVariable("semesterId") int semesterId) {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(invigilatorRegistrationService.getAllExamSlotsInSemesterWithStatus(semesterId));
     }
 
-
-
-
-
-
+    //INVIGILATOR
+    @GetMapping("cancel")
+    @PreAuthorize("hasAuthority('invigilator_registration:read')")
+    @Operation(summary = "Get all exam slots that can be cancelled in a semester")
+    public ResponseEntity<Set<ExamSlotDetail>> getListCancelInSemester(@RequestParam int semesterId) {
+        return ResponseEntity.ok(invigilatorRegistrationService.getCancellableExamSlots(semesterId));
+    }
 }

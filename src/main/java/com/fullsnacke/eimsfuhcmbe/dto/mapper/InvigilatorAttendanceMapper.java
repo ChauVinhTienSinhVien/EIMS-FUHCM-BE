@@ -15,9 +15,6 @@ import java.time.ZonedDateTime;
 
 @Mapper(componentModel = "spring")
 public interface InvigilatorAttendanceMapper {
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "status", source = "status", qualifiedByName = "statusToInt")
-    InvigilatorAttendance toEntity(InvigilatorAttendanceRequestDTO dto);
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "checkIn", source = "checkIn")
@@ -28,6 +25,13 @@ public interface InvigilatorAttendanceMapper {
     @Mapping(target = "startAt", source = "invigilatorAssignment.invigilatorRegistration.examSlot.startAt", qualifiedByName = "zonedDateTimeToInstant")
     @Mapping(target = "endAt", source = "invigilatorAssignment.invigilatorRegistration.examSlot.endAt", qualifiedByName = "zonedDateTimeToInstant")
     @Mapping(target = "examSlotId", source = "invigilatorAssignment.invigilatorRegistration.examSlot.id")
+    @Mapping(target = "invigilatorId", source = "invigilatorAssignment.invigilatorRegistration.invigilator.id")
+    @Mapping(target = "invigilatorFuId", source = "invigilatorAssignment.invigilatorRegistration.invigilator.fuId")
+    @Mapping(target = "invigilatorFirstName", source = "invigilatorAssignment.invigilatorRegistration.invigilator.firstName")
+    @Mapping(target = "invigilatorLastName", source = "invigilatorAssignment.invigilatorRegistration.invigilator.lastName")
+    @Mapping(target = "invigilatorEmail", source = "invigilatorAssignment.invigilatorRegistration.invigilator.email")
+    @Mapping(target = "invigilatorPhone", source = "invigilatorAssignment.invigilatorRegistration.invigilator.phoneNumber")
+    @Mapping(target = "examSlot", source = "invigilatorAssignment.invigilatorRegistration.examSlot")
     InvigilatorAttendanceResponseDTO toResponseDTO(InvigilatorAttendance entity);
 
     @Named("intToStatus")
@@ -43,25 +47,6 @@ public interface InvigilatorAttendanceMapper {
         };
     }
 
-    @Named("statusToInt")
-    default Integer statusToInt(InvigilatorAttendanceStatus status) {
-        if (status == null) {
-            return null;
-        }
-        return switch (status) {
-            case PENDING -> 1;
-            case APPROVED -> 2;
-            case REJECTED -> 3;
-            default -> throw new IllegalArgumentException("Unknown ExamSlotStatus: " + status);
-        };
-    }
-
-    @Named("intToUser")
-    default User intToUser(Integer userId) {
-        User user = new User();
-        user.setId(userId);
-        return user;
-    }
 
     @Named("userToInt")
     default Integer userToInt(User user) {

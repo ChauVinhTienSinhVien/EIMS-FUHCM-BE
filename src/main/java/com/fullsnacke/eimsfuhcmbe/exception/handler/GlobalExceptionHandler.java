@@ -6,6 +6,7 @@ import com.fullsnacke.eimsfuhcmbe.exception.EntityNotFoundException;
 import com.fullsnacke.eimsfuhcmbe.exception.ErrorCode;
 import com.fullsnacke.eimsfuhcmbe.exception.AuthenticationProcessException;
 import com.fullsnacke.eimsfuhcmbe.exception.apierror.ApiError;
+import com.fullsnacke.eimsfuhcmbe.exception.repository.assignment.CustomMessageException;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.customEx.CustomException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -158,6 +160,22 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         .build());
     }
 
+    //NGAN
+    @ExceptionHandler(value = CustomMessageException.class)
+    ResponseEntity<ApiResponse> handlingCustomMessageException(CustomMessageException exception, HttpServletRequest request){
+        if (exception.getPath() == null){
+            exception.setPath(request.getRequestURI());
+        }
+
+        return ResponseEntity
+                .status(exception.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(exception.getStatusCode().value())
+                        .message(exception.getMessage())
+                        .path(exception.getPath())
+                        .build());
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<Object> handleEntityNotFound(
             EntityNotFoundException ex) {
@@ -166,4 +184,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(apiError);
     }
 
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    protected ResponseEntity<Object> handleAuthorizationDenied(
+            AuthorizationDeniedException ex) {
+        ApiError apiError = new ApiError(HttpStatus.FORBIDDEN);
+        apiError.setMessage("The user is not authorized to access the resource");
+        return buildResponseEntity(apiError);
+    }
 }

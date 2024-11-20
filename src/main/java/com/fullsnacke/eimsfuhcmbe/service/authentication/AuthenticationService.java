@@ -136,7 +136,7 @@ public class AuthenticationService {
 
         String currentUserEmail = userOptional.map(User::getEmail).orElse(null);
         User user = userRepository.findByEmail(currentUserEmail).orElse(null);
-
+        
         if (user == null) {
             throw new EntityNotFoundException(User.class, "email", requestBody.getEmail());
         }

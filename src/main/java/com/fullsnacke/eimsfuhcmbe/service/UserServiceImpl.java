@@ -32,6 +32,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+
     @Override
     public User add(User user) {
         User userInDb = userRepository.findUserByEmail(user.getEmail());
@@ -47,7 +48,6 @@ public class UserServiceImpl implements UserService {
 
         Role role = roleRepository.findById(user.getRole().getId()).orElseThrow(() -> new EntityNotFoundException(Role.class, "id", user.getRole().getId().toString()));
         user.setRole(role);
-
         return userRepository.save(user);
     }
 

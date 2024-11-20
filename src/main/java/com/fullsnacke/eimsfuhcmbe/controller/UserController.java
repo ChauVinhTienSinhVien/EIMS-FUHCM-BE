@@ -6,19 +6,17 @@ import com.fullsnacke.eimsfuhcmbe.dto.request.UserRequestDTO;
 import com.fullsnacke.eimsfuhcmbe.dto.response.UserResponseDTO;
 import com.fullsnacke.eimsfuhcmbe.entity.User;
 import com.fullsnacke.eimsfuhcmbe.exception.repository.user.UserNotFoundException;
+import com.fullsnacke.eimsfuhcmbe.repository.UserRepository;
 import com.fullsnacke.eimsfuhcmbe.service.UserServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -35,8 +33,6 @@ public class UserController {
 
     @Autowired
     private UserMapper userMapper;
-
-
 
     @GetMapping
     @PreAuthorize("hasAuthority('user:read')")

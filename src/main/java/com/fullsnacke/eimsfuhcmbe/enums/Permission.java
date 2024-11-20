@@ -3,48 +3,20 @@ package com.fullsnacke.eimsfuhcmbe.enums;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Getter
 @RequiredArgsConstructor
 public enum Permission {
+
+    CONFIG_READ("config:read"),
+    CONFIG_WRITE("config:write"),
+    CONFIG_DELETE("config:delete"),
 
     USER_READ("user:read"),
     USER_WRITE("user:write"),
     USER_CREATE("user:create"),
     USER_DELETE("user:delete"),
 
-    MANAGER_READ("manager:read"),
-    MANAGER_WRITE("manager:write"),
-    MANAGER_CREATE("manager:create"),
-    MANAGER_DELETE("manager:delete"),
-
-    STAFF_READ("staff:read"),
-    STAFF_WRITE("staff:write"),
-    STAFF_CREATE("staff:create"),
-    STAFF_DELETE("staff:delete"),
-
-    INVIGILATOR_READ("invigilator:read"),
-    INVIGILATOR_WRITE("invigilator:write"),
-    INVIGILATOR_CREATE("invigilator:create"),
-    INVIGILATOR_DELETE("invigilator:delete"),
-
-    SEMESTER_READ("semester:read"),
-    SEMESTER_WRITE("semester:write"),
-    SEMESTER_CREATE("semester:create"),
-    SEMESTER_DELETE("semester:delete"),
-
-    CONFIG_READ("config:read"),
-    CONFIG_WRITE("config:write"),
-    CONFIG_CREATE("config:create"),
-    CONFIG_DELETE("config:delete"),
-
-    SUBJECT_READ("subject:read"),
-    SUBJECT_WRITE("subject:write"),
-    SUBJECT_CREATE("subject:create"),
-    SUBJECT_DELETE("subject:delete"),
-
-    EXAM_READ("exam:read"),
-    EXAM_WRITE("exam:write"),
-    EXAM_CREATE("exam:create"),
-    EXAM_DELETE("exam:delete"),
+    EMAIL_CREATE("email:create"),
 
     EXAM_SLOT_READ("exam_slot:read"),
     EXAM_SLOT_WRITE("exam_slot:write"),
@@ -56,19 +28,56 @@ public enum Permission {
     EXAM_SLOT_HALL_CREATE("exam_slot_hall:create"),
     EXAM_SLOT_HALL_DELETE("exam_slot_hall:delete"),
 
+    EXAM_SLOT_ROOM_READ("exam_slot_room:read"),
+
+    INVIGILATOR_REGISTRATION_READ("invigilator_registration:read"),
+    INVIGILATOR_REGISTRATION_WRITE("invigilator_registration:write"),
+    INVIGILATOR_REGISTRATION_CREATE("invigilator_registration:create"),
+    INVIGILATOR_REGISTRATION_DELETE("invigilator_registration:delete"),
+
     INVIGILATOR_ASSIGNMENT_READ("invigilator_assignment:read"),
     INVIGILATOR_ASSIGNMENT_WRITE("invigilator_assignment:write"),
     INVIGILATOR_ASSIGNMENT_CREATE("invigilator_assignment:create"),
     INVIGILATOR_ASSIGNMENT_DELETE("invigilator_assignment:delete"),
 
-    EXAM_SLOT_ROOM_READ("exam_slot_room:read"),
-    EXAM_SLOT_ROOM_WRITE("exam_slot_room:write"),
-    EXAM_SLOT_ROOM_CREATE("exam_slot_room:create"),
-    EXAM_SLOT_ROOM_DELETE("exam_slot_room:delete"),
+    INVIGILATOR_ATTENDANCE_READ("invigilator_attendance:read"),
+    INVIGILATOR_ATTENDANCE_WRITE("invigilator_attendance:write"),
+    INVIGILATOR_ATTENDANCE_CREATE("invigilator_attendance:create"),
+    INVIGILATOR_ATTENDANCE_DELETE("invigilator_attendance:delete"),
+
+    REQUEST_READ("request:read"),
+    REQUEST_WRITE("request:write"),
+    REQUEST_CREATE("request:create"),
+    REQUEST_DELETE("request:delete"),
+
+    ROOM_READ("room:read"),
+    ROOM_WRITE("room:write"),
+    ROOM_CREATE("room:create"),
+    ROOM_DELETE("room:delete"),
+
+    SEMESTER_READ("semester:read"),
+    SEMESTER_WRITE("semester:write"),
+    SEMESTER_CREATE("semester:create"),
+    SEMESTER_DELETE("semester:delete"),
+
+    SUBJECT_READ("subject:read"),
+    SUBJECT_WRITE("subject:write"),
+    SUBJECT_CREATE("subject:create"),
+    SUBJECT_DELETE("subject:delete"),
+
+    EXAM_READ("exam:read"),
+    EXAM_WRITE("exam:write"),
+    EXAM_CREATE("exam:create"),
+    EXAM_DELETE("exam:delete"),
+
+    SUBJECT_EXAM_READ("subject_exam:read"),
+    SUBJECT_EXAM_WRITE("subject_exam:write"),
+    SUBJECT_EXAM_CREATE("subject_exam:create"),
+    SUBJECT_EXAM_DELETE("subject_exam:delete"),
+
     ;
 
 
-    @Getter
     private final String permission;
 
 }

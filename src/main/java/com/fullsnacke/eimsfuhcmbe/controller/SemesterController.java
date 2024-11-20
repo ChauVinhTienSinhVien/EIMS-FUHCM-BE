@@ -27,12 +27,12 @@ public class SemesterController {
     @Autowired
     private SemesterServiceImpl semesterServiceImpl;
     @Autowired
-    private ConfigServiceImpl configServiceImpl;
-    @Autowired
     private ModelMapper modelMapper;
 
-
+    //Invigilator
+    //Manager
     @GetMapping
+    @PreAuthorize("hasAuthority('semester:read')")
     @Operation(summary = "Get all semesters", description = "Retrieve a list of all semesters")
     public ResponseEntity<List<SemesterResponseDTO>> getAllSemesters() {
         List<Semester> semesterList = semesterServiceImpl.getAllSemesters();
@@ -44,13 +44,6 @@ public class SemesterController {
             semesterResponseDTO.setName(semester.getName());
             semesterResponseDTO.setStartAt(semester.getStartAt());
             semesterResponseDTO.setEndAt(semester.getEndAt());
-
-            Config hourlyRateConfig = configServiceImpl.getConfigBySemesterIdAndConfigType(semester.getId(), ConfigType.HOURLY_RATE.getValue());
-            Config allowedSlotConfig = configServiceImpl.getConfigBySemesterIdAndConfigType(semester.getId(), ConfigType.ALLOWED_SLOT.getValue());
-
-            semesterResponseDTO.setHourlyConfig(hourlyRateConfig.getValue());
-            semesterResponseDTO.setAllowedSlotConfig(Integer.parseInt(allowedSlotConfig.getValue()));
-
             semesterResponseDTOS.add(semesterResponseDTO);
         }
 
@@ -63,7 +56,9 @@ public class SemesterController {
 
     }
 
+    //Manager
     @PostMapping
+    @PreAuthorize("hasAuthority('semester:create')")
     @Operation(summary = "Add a semester", description = "Add a new semester")
     public ResponseEntity<SemesterResponseDTO> createSemester(@RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
         Semester semester = modelMapper.map(semesterRequestDTO, Semester.class);
@@ -73,7 +68,9 @@ public class SemesterController {
         return ResponseEntity.created(uri).body(semesterResponseDTO);
     }
 
+    //Manager
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('semester:write')")
     @Operation(summary = "Update a semester", description = "Update a semester")
     public ResponseEntity<SemesterResponseDTO> updateSemester(@PathVariable("id") int id, @RequestBody @Valid SemesterRequestDTO semesterRequestDTO) {
         //Semester semesterUpdate = modelMapper.map(semesterRequestDTO, Semester.class);
@@ -94,7 +91,12 @@ public class SemesterController {
         return ResponseEntity.ok(semesterResponseDTO);
     }
 
+
+    //Manager
+    //Staff
+    //Invigilator
     @GetMapping("/{name}")
+    @PreAuthorize("hasAuthority('semester:read')")
     @Operation(summary = "Get a semester by name", description = "Retrieve a semester by name")
     public ResponseEntity<SemesterResponseDTO> findSemesterByName(@PathVariable("name") String name){
         Semester semester = semesterServiceImpl.findSemesterByName(name);

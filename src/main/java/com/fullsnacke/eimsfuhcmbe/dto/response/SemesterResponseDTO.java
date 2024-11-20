@@ -21,7 +21,4 @@ public class SemesterResponseDTO {
     Date startAt;
     Date endAt;
 
-    String hourlyConfig;
-    int allowedSlotConfig;
-
 }

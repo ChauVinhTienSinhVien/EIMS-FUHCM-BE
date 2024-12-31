@@ -32,6 +32,9 @@ public class InvigilatorAttendanceListResponseDTO {
                 if(invigilatorAttendanceResponseDTO.getCheckIn() != null && invigilatorAttendanceResponseDTO.getCheckOut() != null){
                     double second = invigilatorAttendanceResponseDTO.getEndAt().getEpochSecond() - invigilatorAttendanceResponseDTO.getStartAt().getEpochSecond();
                     double hours = second / 3600;
+                    hours = hours*100;
+                    hours = Math.round(hours);
+                    hours = hours /100;
                     System.out.println("Start at: " + invigilatorAttendanceResponseDTO.getStartAt());
                     System.out.println("Start at: " + invigilatorAttendanceResponseDTO.getEndAt());
                     System.out.println("hours: " + hours);

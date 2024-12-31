@@ -77,8 +77,7 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
     public byte[] generateAttendanceAndTotalHoursExcelFileBySemesterIdAndFuId(Semester semester, String toEmail) {
         try {
 
-            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail, Instant.now().atZone(ZoneId.systemDefault()));
-//            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findAttendancesBySemesterIdAndEmail(semester, toEmail);
+            List<InvigilatorAttendance> completedAttendances = invigilatorAttendanceRepository.findApprovedSlotAttendancesBySemesterIdAndEmail(semester, toEmail, Instant.now().atZone(ZoneId.systemDefault()));
 
             System.out.println("Completed attendances: " + completedAttendances.size());
             completedAttendances.stream().forEach(invigilatorAttendance -> {
@@ -315,6 +314,11 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
         for (int i = NO_COLUMN; i <= TOTAL_REMUNERATION_COLUMN; i++) {
             totalRow.getCell(i).setCellStyle(style);
         }
+
+        XSSFCellStyle numberStyle = style.copy();
+        numberStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("0.00"));
+        totalRow.getCell(HOURS_COLUMN).setCellStyle(numberStyle);
+        totalRow.getCell(TOTAL_HOURS_COLUMN).setCellStyle(numberStyle);
     }
 
     private void createARowAttendance(XSSFSheet sheet, int rowNum, InvigilatorAttendance attendance) {
@@ -327,23 +331,37 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
         XSSFRow row = sheet.createRow(rowNum++);
         row.createCell(NO_COLUMN).setCellValue(rowNum - 1 - MAIN_TABLE_START_ROW);
         row.createCell(EXAM_SLOT_ID_COLUMN).setCellValue(examSlot.getId());
-        row.createCell(DATE_COLUMN).setCellValue(examSlot.getStartAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        row.createCell(DATE_COLUMN).setCellValue(examSlot.getStartAt().withZoneSameInstant(ZoneId.of("UTC+7")).format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         row.createCell(START_TIME_COLUMN).setCellValue(formatTime(examSlot.getStartAt()));
         row.createCell(END_TIME_COLUMN).setCellValue(formatTime(examSlot.getEndAt()));
         row.createCell(CHECK_IN_COLUMN).setCellValue(attendance.getCheckIn() != null);
         row.createCell(CHECK_OUT_COLUMN).setCellValue(attendance.getCheckOut() != null);
 
+
         String trueFormula = "HOUR(" + END_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + "-" + START_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + ") + MINUTE(" + END_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + "-" + START_TIME_COLUMN_CHAR + (row.getRowNum() + 1) + ")/60";
-        String hoursFormula = "IF(AND(" + CHECK_IN_COLUMN_CHAR + (row.getRowNum() + 1) + "=TRUE," + CHECK_OUT_COLUMN_CHAR + (row.getRowNum() + 1) + "=TRUE)," + trueFormula + ", 0)";
+
+        double second = examSlot.getEndAt().toEpochSecond() - examSlot.getStartAt().toEpochSecond();
+        double hours = second / 3600;
+        hours = hours * 100;
+        hours = Math.round(hours);
+        hours = hours / 100;
+
+        String hoursFormula = "IF(AND(" + CHECK_IN_COLUMN_CHAR + (row.getRowNum() + 1) + "=TRUE," + CHECK_OUT_COLUMN_CHAR + (row.getRowNum() + 1) + "=TRUE)," + hours + ", 0)";
         row.createCell(HOURS_COLUMN).setCellFormula(hoursFormula);
 
         row.createCell(TOTAL_HOURS_COLUMN);
         row.createCell(HOURLY_RATE_COLUMN);
         row.createCell(TOTAL_REMUNERATION_COLUMN);
 
+
+
         for (int i = NO_COLUMN; i <= TOTAL_REMUNERATION_COLUMN; i++) {
             row.getCell(i).setCellStyle(style);
         }
+
+        XSSFCellStyle numberStyle = style.copy();
+        numberStyle.setDataFormat(workbook.getCreationHelper().createDataFormat().getFormat("0.00"));
+        row.getCell(HOURS_COLUMN).setCellStyle(numberStyle);
 
         totalSlotFormula += EXAM_SLOT_ID_COLUMN_CHAR + "" + (row.getRowNum() + 1) + ",";
     }
@@ -373,7 +391,7 @@ public class AttendancesAndToTalHoursOfAnInvigilatorExcel {
     }
 
     private String formatTime(ZonedDateTime time) {
-        return time.format(DateTimeFormatter.ofPattern("HH:mm"));
+        return time.withZoneSameInstant(ZoneId.of("UTC+7")).format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
     private void formatAutoFitColumn(XSSFSheet sheet) {

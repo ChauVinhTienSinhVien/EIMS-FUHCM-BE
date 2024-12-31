@@ -22,7 +22,7 @@ docker push chauvinhtiensinhvien/eims-test:1.0
 -> sudo docker ps
 
 //6. Run the docker image
--> sudo docker run -d -p 8081:8080 chauvinhtiensinhvien/eims:1.0
+-> sudo docker run -d -p 8081:8080 chauvinhtiensinhvien/eims-product:4.0
 
 //7. Check the docker ps 
 -> sudo docker ps

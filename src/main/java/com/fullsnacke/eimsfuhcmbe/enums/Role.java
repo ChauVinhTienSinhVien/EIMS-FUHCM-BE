@@ -44,7 +44,9 @@ public enum Role {
                     USER_CREATE,
                     USER_READ,
                     USER_WRITE,
-                    USER_DELETE
+                    USER_DELETE,
+
+                    EXAM_SLOT_ROOM_READ
             )
     ),
 
